@@ -6,9 +6,9 @@ node_js:
   - "10.0"
 
 before_install:
- - npm install -g vsce tslint
+ - npm install -g vsce
 
 install:
-  - npm run lint
   - npm install
+  - npm run lint
   - vsce publish
