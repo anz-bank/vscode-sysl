@@ -1,0 +1,27 @@
+{
+	"name": "vscode-sysl",
+	"description": "VS Code extension for SYSL Language.",
+	"version": "0.0.1",
+	"author": "Sahejpreet Singh",
+	"publisher": "ANZ",
+	"license": "Apache-2.0",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/anz-bank/vscode-sysl"
+	},
+	"scripts": {
+        "lint": "tslint -p client && tslint -p server",
+		"postinstall": "cd server && npm install && cd ../client && npm install && cd ..",
+		"compile": "tsc -p client/tsconfig.json && cd server && npm run installServer && cd .. && tsc -p server/tsconfig.json",
+		"compile:client": "tsc -p client/tsconfig.json",
+		"watch:client": "tsc -w -p client/tsconfig.json",
+		"compile:server": "cd server && npm run installServer && cd .. && tsc -p server/tsconfig.json",
+		"watch:server": "cd server && npm run installServer && cd .. && tsc -w -p server/tsconfig.json"
+	},
+	"devDependencies": {
+		"@types/mocha": "^2.2.42",
+		"@types/node": "^6.0.88",
+		"tslint": "^5.11.0",
+		"typescript": "^3.0.1"
+	}
+}

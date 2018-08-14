@@ -1,0 +1,144 @@
+{
+	"name": "Sysl",
+	"scopeName": "source.sysl",
+    "patterns": [
+        { "include": "#importstmt"},
+        { "include": "#application"},
+        { "include": "#operators" },
+        { "include": "#comments" },
+        { "include": "#string_doubleQuote" },
+        { "include": "#annotation" },
+        { "include": "#brackets" },
+        { "include": "#parens" },
+        { "include": "#keywords" },
+        { "include": "#definitions" },
+        { "include": "#http-endpoints" },
+        { "include": "#flowcontrol" },
+        { "include": "#datatype" }
+    ],
+    "repository": {
+		"importstmt": {
+			"match": "^\\b(import)\\b(.*)$",
+            "name": "keyword.control.sysl",
+            "captures": {
+                "2": { "name": "variable.parameter.import.path" }
+            }
+    	},
+		"comments": {
+            "name": "comment.line.hash.sysl",
+            "match": "^[ \t]*(#|\\|).*$"
+		},
+		"application": {
+            "name": "meta.type.application.sysl",
+            "begin": "(?=^\\w[^\\n]+: *)",
+            "end": "$",
+			"patterns":[
+				{ "include": "#appname" },
+				{ "include": "#operators" },
+				{ "include": "#brackets" },                
+				{ "include": "#string_doubleQuote" }
+            ]
+        },
+		"http-endpoints": {
+			"begin": "^([ \t]+)/",
+			"end": "(?=:\\s*$)",
+			"name": "meta.type.http.sysl",
+			"patterns":[
+				{ "include": "#operators" },
+				{ "include": "#brackets" },
+				{ "include": "#datatype" },
+				{ "include": "#string_doubleQuote" }
+            ]
+		},
+        "definitions": {
+            "name": "keyword.other",
+            "match": "!\\b(table|wrap|view|type)\\b"
+        },
+        "datatype": {
+            "name": "support.type",
+            "match": "\\b(int|string|xml|datetime|uuid|date)\\b"
+        },
+        "keywords": {
+            "name": "keyword.other",
+            "match": "\\b(set of|GET|POST|PUT|PATCH|DELETE)\\b"
+        },
+        "flowcontrol": {
+            "name": "keyword.control",
+            "match": "\\b(return|[fF][oO][rR]|[Oo]ne [Oo]f|[Ll]oop|[Uu]ntil|[Ww]hile|alt|[Ii]f|[Ee]lse)\\b"
+        },
+		"appname": {
+			"name": "variable.other.application",
+			"begin": "^\\w",
+            "end": "(?=[\"\n\\[])",
+			"patterns":[
+                { "include": "#doublecolon" }
+            ]            
+        },
+		"doublecolon": {
+			"name" : "keyword.control.package.sep.sysl",
+			"match": "(::)"
+		},                
+		"annotation": {
+			"name" : "entity.name",
+            "match": "(@)(\\S+)"
+        },
+		"operators": {
+			"name" : "keyword.control.sysl",
+			"match": ":|(-\\|>)|(=:)|(<:)|=|\\?|<->|\\.\\.\\.|->|<-"
+        },
+        "string_doubleQuote": {
+            "match": "\"(?:\\\\.|[^\"])*\"?",
+            "name": "string.quoted.double"
+        },
+        "formatted_string_doubleQuote": {
+            "begin": "\"",
+            "end": "\"",
+            "name": "string.quoted.double",
+            "patterns": [
+				{ "include": "#expression" }
+            ]
+        },
+		"expression": {
+			"name" : "keyword.control",
+            "begin": "%\\(",
+            "end": "\\)",
+            "patterns": [
+				{ "include": "#vars" }
+            ]
+        },
+		"vars": {
+			"name" : "entity.name",
+            "match": "@\\w+"
+        },
+        "string_singleQuote": {
+            "match": "'(?:\\\\.|[^'])*'?",
+            "name": "string.quoted.single"
+        },
+        "parens": {
+            "name": "punctuation.section",
+            "begin": "\\(",
+            "end": "\\)",
+            "patterns":[
+				{ "include": "#number_decimal" }
+            ]
+        },
+        "number_decimal": {
+            "match": "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:[eE][+-]?\\d+)?\\b",
+            "name": "constant.numeric.number"
+        },
+        "brackets": {
+            "begin": "\\[",
+            "end": "\\]",
+            "name": "punctuation.section",
+			"patterns":[
+				{ "include": "#operators" },
+				{ "include": "#brackets" },
+                { "include": "#formatted_string_doubleQuote" },
+                {
+                    "match": "\\w+\\s*",
+                    "name": "entity.name"
+                }
+            ]
+        }
+    }
+}

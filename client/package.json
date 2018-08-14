@@ -1,0 +1,93 @@
+{
+    "name": "vscode-sysl",
+    "displayName": "vscode-sysl",
+    "description": "VS Code extension for SYSL Language.",
+    "version": "0.0.1",
+    "author": "Sahejpreet Singh",
+    "publisher": "ANZ",
+    "license": "Apache-2.0",
+    "engines": {
+        "vscode": "^1.17.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "activationEvents": [
+        "onLanguage:sysl"
+    ],
+    "main": "./out/extension",
+    "dependencies": {
+        "vscode": "^1.1.18",
+        "vscode-languageclient": "^4.1.4"
+    },
+    "contributes": {
+        "languages": [
+            {
+                "id": "sysl",
+                "aliases": [
+                    "Sysl",
+                    "sysl"
+                ],
+                "extensions": [
+                    ".sysl"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "sysl",
+                "scopeName": "source.sysl",
+                "path": "./syntaxes/sysl.tmLanguage.json"
+            }
+        ],
+        "configuration": [
+            {
+                "title": "Sysl configuration",
+                "properties": {
+                    "sysl.workspace.root": {
+                        "type": "string",
+                        "default": ".",
+                        "description": "Default root folder for the sysl compiler"
+                    },
+                    "sysl.tool.parser": {
+                        "type": "string",
+                        "default": "",
+                        "description": "Path to Go-Sysl compiler"
+                    },
+                    "sysl.tool.tempOutput": {
+                        "type": "string",
+                        "default": "",
+                        "description": "Relative or Absolute Path where Sysl compiler can generate temporary output"
+                    }
+                }
+            }
+        ],
+        "commands": [
+            {
+                "command": "sysl.selectRoot",
+                "title": "SYSL: Select Root"
+            },
+            {
+                "command": "sysl.selectGoSysl",
+                "title": "SYSL: Select Go-Sysl tool"
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "tsc -p ./",
+        "compile": "tsc -p ./",
+        "watch": "tsc -w -p ./",
+        "update-vscode": "node ./node_modules/vscode/bin/install",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "typescript": "^2.5.2",
+        "vscode": "^1.1.5",
+        "mocha": "^3.5.0",
+        "eslint": "^4.6.1",
+        "@types/node": "^7.0.0",
+        "@types/mocha": "^2.2.42"
+    }
+}

@@ -1,4 +1,4 @@
-# vscode-sysl README
+# vscode-sysl
 
 **The** VS Code extension for Sysl.
 
