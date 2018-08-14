@@ -23,6 +23,8 @@ function getRoot() {
 
 function activate(context: ExtensionContext) {
     const root = getRoot();
+    // tslint:disable-next-line:no-console
+    console.log(root);
 
     context.subscriptions.push(commands.registerCommand("sysl.selectRoot", () => {
         window.showOpenDialog({

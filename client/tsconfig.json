@@ -1,15 +1,16 @@
 {
 	"compilerOptions": {
+        "alwaysStrict": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"noImplicitAny": true,
-		"noImplicitReturns": true,		
+		"noImplicitReturns": true,
 		"target": "es6",
 		"module": "commonjs",
 		"moduleResolution": "node",
 		"rootDir": ".",
 		"outDir": "out",
-		"lib": [ "es2016" ],
+		"lib": [ "es2018" ],
 		"sourceMap": true
 	},
 	"exclude": [
