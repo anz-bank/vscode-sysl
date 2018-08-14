@@ -3,7 +3,7 @@
 	"description": "VS Code extension for SYSL Language.",
 	"version": "0.0.1",
 	"author": "Sahejpreet Singh",
-	"publisher": "ANZ",
+	"publisher": "ANZ-BANK",
 	"license": "Apache-2.0",
 	"engines": {
 		"node": "*",

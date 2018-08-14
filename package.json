@@ -1,10 +1,10 @@
 {
 	"name": "vscode-sysl",
-	"description": "VS Code extension for SYSL Language.",
-	"version": "0.0.1",
+    "description": "VS Code extension for SYSL Language.",
+    "version": "0.0.1",
 	"author": "Sahejpreet Singh",
-	"publisher": "ANZ",
-    "license": "Apache-2.0",
+    "publisher": "ANZ-BANK",
+	"license": "Apache-2.0",
 	"engines": {
 		"vscode": "^1.17.0"
 	},
@@ -13,7 +13,7 @@
 		"url": "https://github.com/anz-bank/vscode-sysl"
 	},
 	"scripts": {
-        "lint": "tslint -p client && tslint -p server",
+		"lint": "tslint -p client && tslint -p server",
 		"postinstall": "cd server && npm install && cd ../client && npm install && cd ..",
 		"compile": "tsc -p client/tsconfig.json && cd server && npm run installServer && cd .. && tsc -p server/tsconfig.json",
 		"compile:client": "tsc -p client/tsconfig.json",
