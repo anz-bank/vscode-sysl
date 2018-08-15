@@ -192,6 +192,8 @@ export class SymbolsProvider implements ISyslConfigChangeListener {
           this.conn.console.error(parserPath + " exited with " + code);
           this.conn.console.error("Check your SYSL root!");
           this.conn.console.error("Use Sysl: Select Root command to set the root path.");
+        } else {
+            this.conn.console.log(parserPath + " exited with " + code);
         }
       });
     }
