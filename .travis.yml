@@ -16,12 +16,11 @@ deploy:
 - provider: releases
   draft: true
   tag_name: "$TRAVIS_TAG"
-  name: Sysl $TRAVIS_TAG
+  name: vscode-sysl $TRAVIS_TAG
   api_key:
     secure: "FhcaaeGtVa6olO5q08kAVwdD4tjGUMMgxXPy8Rhwi9c+Afxo6Wt/rvopi2P5+MTZtSymv3n7sSuQV+AGtgotL5B/axHM4M0an3YWoEMmnnjCm0JbAlxCoEJjHcGei1iLdBSHN+AGu+2E9jhX19rZlfIjK/scdx3vG/2xxEocpzRn7AYilyMs3sobGO+2r9XQS5LPEHqmmK0y6blsH2uIp6anDPmtUx4X0TkgZeXeZA8S3XQ1Fto9/lPdIfBIVCQEfd49TC9RIXT5BgVSgjMaOdwXiM6ZKjxcvOM6Lr4wV2RyyFlqoR+xFkzyXbZTHmDDyYTL3LMnuqheJRHfSQaBkp0c2N/8IQkm2ft/hwgnj+LLEfsnfmGBrpBBDx2BwHYccU/uS524Hm9IH8mROzWBxPSW12HU9vaRSE7y7hdNleTIKWPG9516ITJrvsyijR8spbumu45SRdKeRQq66sYvNALHepvf09ijlh9lYMhwYBsNPRZ8dZRstgl7s/Bgbut06evtUTTkg4+W72irwBJxwO5/Vvt6207YJJCVUW0pAuS3ZFj4CoPc4gW4W5MZLcBkldDOQ+0ZCshFE+EW+O/EOSptGzyOJLsonALcsj6E+/uLwUHSR1ScW7JUz5lhM4KOeFPO4YaOEkWM+0658tfchUUTrmbrOsMoFnijdPgTi2U="
   file_glob: true
-  file:
-  - client/vscode-sysl-0.0.1.vsix
+  file: client/vscode-sysl-0.0.1.vsix
   skip_cleanup: true
   prerelease: true
   on:
