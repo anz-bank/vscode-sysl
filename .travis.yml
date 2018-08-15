@@ -14,6 +14,8 @@ script:
   - cd client && vsce package -o vscode-sysl-$TRAVIS_TAG.vsix
 deploy:
 - provider: releases
+  api_key:
+    secure: "xBE2PQvgtLbYVuz5HDriepZml54XCbXGlJ2Oh2bMh2QwyfNCqJ9cBYojNiaIQwIM62xboBVAieZ4aZlD5m0JZZ0o5hpAWw9TeGMkDn/XbDEPIqGEoV8XJNSQc1kHEa3zOeavGv1SLvDDWVV2vAJwdBuGU7mMOqJHNLXObOl9FL0bOxI57ga6ldawKQI2WYclDAOol2CwA0pl7aP+WUT/dM8BIDhzOHU+oyeMJwFLGOmxsHw7FLOC05PsD+XLQV16nFEyw9m23Pu0gPnvCx0bPF7El2VKO1NW/fFZDPOacK+75aG9d35g6GpqUX9+jXkAYwNHYySv9ZocPGqk2n1PEtzSZg7V8g9EWGsgZ2nbBV6R1YdP7RSo+Y4XmPQIfPXOktJxhPz8HHbpuzXV26pdOAlo9R26jRmuGoV0A5q46SCtxMB0Xwe2JyWgT8n60O7xtakAJSE1DMHvNvvzBfe6ikTuxcwO8iKNv7KQ+qcFXn02eQ0BPgqCvE80KPeO0wzxvgGAnf2pE/y7k3hC+PWei9m+drM5ltwBnB4G2pq9c074euhLGCAvuIQmLbEJP0xCkREXjqjVjdPsRtTmWViDkWTwSkAFt3/u4Ii6wLBL6wbLeadNmYlGCD11/afYaRXpOg+I350q+1CIRYsrQhvmEQDRCafI0oiTSbLUWX+e0po="
   draft: true
   tag_name: "$TRAVIS_TAG"
   name: vscode-sysl $TRAVIS_TAG
