@@ -16,7 +16,7 @@ Needs `go-sysl` binary.
 
 ## Known Issues
 
-None.
+- Windows users will need to manually install the `go-sysl` tool.
 
 ## Release Notes
 
@@ -26,3 +26,4 @@ Initial version.
 - Syntax highlighting.
 - Syntax errors.
 - Go to Definition for Application, Endpoints.
+- `go-sysl` binary added for osx users.
