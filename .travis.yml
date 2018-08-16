@@ -16,7 +16,7 @@ script:
 deploy:
   provider: script
   skip_cleanup: true
-  script: vsce publish -p $PUBLISH_TOKEN --packagePath vscode-sysl-$TRAVIS_TAG.vsix
+  script: vsce publish -p $PUBLISH_TOKEN --packagePath vscode-sysl-$TRAVIS_TAG.vsix $TRAVIS_TAG
   on:
     repo: anz-bank/vscode-sysl
     tags: true
