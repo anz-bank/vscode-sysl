@@ -4,10 +4,14 @@
     "description": "VS Code extension for SYSL Language.",
     "version": "0.0.1",
     "author": "Sahejpreet Singh",
-    "publisher": "ANZ",
+    "publisher": "ANZ-BANK",
     "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/anz-bank/vscode-sysl"
+    },
     "engines": {
-        "vscode": "^1.17.0"
+        "vscode": "^1.18.0"
     },
     "categories": [
         "Programming Languages"
@@ -18,7 +22,7 @@
     "main": "./out/extension",
     "dependencies": {
         "vscode": "^1.1.18",
-        "vscode-languageclient": "^4.1.4"
+        "vscode-languageclient": "4.1.4"
     },
     "contributes": {
         "languages": [
@@ -83,8 +87,8 @@
         "test": "node ./node_modules/vscode/bin/test"
     },
     "devDependencies": {
-        "typescript": "^2.5.2",
-        "vscode": "^1.1.5",
+        "typescript": "^3.0.1",
+        "vscode": "^1.1.18",
         "mocha": "^3.5.0",
         "eslint": "^4.6.1",
         "@types/node": "^7.0.0",

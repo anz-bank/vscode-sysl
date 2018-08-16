@@ -1,3 +1,5 @@
+import fs = require("fs");
+import os = require("os");
 import * as path from "path";
 import { commands, ConfigurationTarget, ExtensionContext, Uri, window, workspace } from "vscode";
 import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } from "vscode-languageclient";
@@ -12,6 +14,10 @@ function setGoSysl(p: string) {
     syslConfig.update("parser", p, false);
 }
 
+function getGoSysl() {
+    return workspace.getConfiguration("sysl.tool").get("parser");
+}
+
 function getRoot() {
     const syslConfig = workspace.getConfiguration("sysl.workspace");
     if (syslConfig.root === ".") {
@@ -23,6 +29,15 @@ function getRoot() {
 
 function activate(context: ExtensionContext) {
     const root = getRoot();
+    // tslint:disable-next-line:no-console
+    console.log(root);
+
+    if (getGoSysl() === "") {
+        const gosysl = context.asAbsolutePath(path.join("server", "bin", os.platform(), os.arch(), "gosysl"));
+        if (fs.existsSync(gosysl)) {
+            setGoSysl(gosysl);
+        }
+    }
 
     context.subscriptions.push(commands.registerCommand("sysl.selectRoot", () => {
         window.showOpenDialog({
@@ -50,7 +65,7 @@ function activate(context: ExtensionContext) {
     }));
 
     const serverModule = context.asAbsolutePath(path.join("server", "server.js"));
-    const debugOptions = { execArgv: ["--nolazy", "--debug=6009"] };
+    const debugOptions = { /*execArgv: ["--nolazy", "--inspect=6009"]*/ };
 
     const scheme = {
         language: "sysl",
