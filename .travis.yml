@@ -1,27 +1,35 @@
 language: node_js
 sudo: false
 node_js:
-  - "stable"
-  - "8.0"
-  - "10.0"
+- '10.0'
+env:
+  global:
+    secure: F+ra1ST18XUihh45NVfUBKHxN3HFS8GpybXTSJreUt9lAwSnXgeNhPlK4EF4WZX0Zkr7BcYgIfpTgpTM8/6bJYiDci+anf/oRevLPnlUbc/tSFJObi9uOZkL2hliNmTpM8LzVY4HLMGuoa8O5nhBmht4QR5VIgNLX02k77Bq3M137mD0dGCih0Xf9GKDUPQ9Tv5+lNvXQyI6SvQPdpsDgNOuAWYoI6s3VHeQ9ZXEWscKpbf1lmMDb619W9SAlj5gl8WqBkQrEAYXSkgUNILSFEVidczg9vUmcmGrtBJE2Xq3iY7rWiBSuAtAnKyRpZsMfC4CndMuAv4scYU7wZqY3NIGHTHfM/LmVIWmZ4qmjqt0VvraPvzAoKyOXepaCmBKHwdjfkZp/miJeKh4cU2/NJcR+fsNj9Tlyx3gXtZQB0doIEbgJV3Cz2OPmBxmT4kGMcvzqzBixCO4yEHrHkjGCK1VmC9cm6mrbnFa2eD6Lt8pV/uCfiUOQYFae9mTiZ2OX3TJlJWTyjMittU24xdqtlaaADFB7i5NdW9eIkruHVS3DWpNgvEsmqfpQxLtCtFgxhWgRGfOP1dt6F0Ec+/LPyRF8KMu8UzoGXKEQ2LtgsmbpB6wWYO8lTs3dhuBVrSedVs2iXZ8VLHdsfLNYVTUy9Z1gaE2nt0B7VWMkP35IDw=
 before_install:
- - npm install -g vsce@latest
+- npm install -g vsce@latest
 install:
-  - npm install
+- npm install
 script:
-  - npm run lint
-  - npm run compile
-  - cd client && vsce package -o vscode-sysl-$TRAVIS_TAG.vsix
+- npm run lint
+- npm run compile
+- cd client && vsce package -o vscode-sysl-$TRAVIS_TAG.vsix
 deploy:
+- provider: script
+  script: vsce publish -p $PUBLISH_TOKEN --packagePath client/vscode-sysl-$TRAVIS_TAG.vsix
+  on:
+    repo: anz-bank/vscode-sysl
+    tags: true
+    condition: "$TRAVIS_NODE_VERSION = 10.0"
 - provider: releases
+  skip_cleanup: true
   api_key:
-    secure: "xBE2PQvgtLbYVuz5HDriepZml54XCbXGlJ2Oh2bMh2QwyfNCqJ9cBYojNiaIQwIM62xboBVAieZ4aZlD5m0JZZ0o5hpAWw9TeGMkDn/XbDEPIqGEoV8XJNSQc1kHEa3zOeavGv1SLvDDWVV2vAJwdBuGU7mMOqJHNLXObOl9FL0bOxI57ga6ldawKQI2WYclDAOol2CwA0pl7aP+WUT/dM8BIDhzOHU+oyeMJwFLGOmxsHw7FLOC05PsD+XLQV16nFEyw9m23Pu0gPnvCx0bPF7El2VKO1NW/fFZDPOacK+75aG9d35g6GpqUX9+jXkAYwNHYySv9ZocPGqk2n1PEtzSZg7V8g9EWGsgZ2nbBV6R1YdP7RSo+Y4XmPQIfPXOktJxhPz8HHbpuzXV26pdOAlo9R26jRmuGoV0A5q46SCtxMB0Xwe2JyWgT8n60O7xtakAJSE1DMHvNvvzBfe6ikTuxcwO8iKNv7KQ+qcFXn02eQ0BPgqCvE80KPeO0wzxvgGAnf2pE/y7k3hC+PWei9m+drM5ltwBnB4G2pq9c074euhLGCAvuIQmLbEJP0xCkREXjqjVjdPsRtTmWViDkWTwSkAFt3/u4Ii6wLBL6wbLeadNmYlGCD11/afYaRXpOg+I350q+1CIRYsrQhvmEQDRCafI0oiTSbLUWX+e0po="
+    secure: xBE2PQvgtLbYVuz5HDriepZml54XCbXGlJ2Oh2bMh2QwyfNCqJ9cBYojNiaIQwIM62xboBVAieZ4aZlD5m0JZZ0o5hpAWw9TeGMkDn/XbDEPIqGEoV8XJNSQc1kHEa3zOeavGv1SLvDDWVV2vAJwdBuGU7mMOqJHNLXObOl9FL0bOxI57ga6ldawKQI2WYclDAOol2CwA0pl7aP+WUT/dM8BIDhzOHU+oyeMJwFLGOmxsHw7FLOC05PsD+XLQV16nFEyw9m23Pu0gPnvCx0bPF7El2VKO1NW/fFZDPOacK+75aG9d35g6GpqUX9+jXkAYwNHYySv9ZocPGqk2n1PEtzSZg7V8g9EWGsgZ2nbBV6R1YdP7RSo+Y4XmPQIfPXOktJxhPz8HHbpuzXV26pdOAlo9R26jRmuGoV0A5q46SCtxMB0Xwe2JyWgT8n60O7xtakAJSE1DMHvNvvzBfe6ikTuxcwO8iKNv7KQ+qcFXn02eQ0BPgqCvE80KPeO0wzxvgGAnf2pE/y7k3hC+PWei9m+drM5ltwBnB4G2pq9c074euhLGCAvuIQmLbEJP0xCkREXjqjVjdPsRtTmWViDkWTwSkAFt3/u4Ii6wLBL6wbLeadNmYlGCD11/afYaRXpOg+I350q+1CIRYsrQhvmEQDRCafI0oiTSbLUWX+e0po=
   draft: true
+  prerelease: true
   tag_name: "$TRAVIS_TAG"
   name: vscode-sysl $TRAVIS_TAG
-  file: client/vscode-sysl-$TRAVIS_TAG.vsix
-  skip_cleanup: true
-  prerelease: true
+  file_glob: true
+  file: client/*.vsix
   on:
     repo: anz-bank/vscode-sysl
     tags: true
