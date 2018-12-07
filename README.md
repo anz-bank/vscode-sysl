@@ -6,19 +6,26 @@
 
 ## Features
 
+### Goto Definition
+Goto definition of a symbol.
+
 ### Syntax Highlighting
 
 Provides syntax colouring for the Sysl Language.
 
 ## Requirements
 
-Needs `go-sysl` binary.
+Needs `gosysl` binary, which is installed by default for windows and mac operating systems.
 
 ## Known Issues
 
-- Windows users will need to manually install the `go-sysl` tool.
+- Syntax highlighting in the `!view` needs more work.
 
 ## Release Notes
+
+### 0.0.2
+- Adds gosysl for windows.
+- Handles sysl transformation syntax.
 
 ### 0.0.1
 
