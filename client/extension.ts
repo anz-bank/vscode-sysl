@@ -14,7 +14,7 @@ function setGoSysl(p: string) {
     syslConfig.update("parser", p, false);
 }
 
-function getGoSysl() {
+function getGoSysl(): any {
     return workspace.getConfiguration("sysl.tool").get("parser");
 }
 
@@ -30,13 +30,26 @@ function getRoot() {
 function activate(context: ExtensionContext) {
     const root = getRoot();
     // tslint:disable-next-line:no-console
-    console.log(root);
+    console.log("workspace root: " + root);
+    // tslint:disable-next-line:no-console
+    let gosysl = getGoSysl();
 
-    if (getGoSysl() === "") {
-        const gosysl = context.asAbsolutePath(path.join("server", "bin", os.platform(), os.arch(), "gosysl"));
-        if (fs.existsSync(gosysl)) {
-            setGoSysl(gosysl);
+    if (typeof gosysl === "string") {
+      if ( gosysl !== "") {
+        if (fs.existsSync(gosysl) === false) {
+          // tslint:disable-next-line:no-console
+          console.log("WARN: check gosysl path");
+          // tslint:disable-next-line:no-console
+          console.log("Does not exist:" + gosysl);
         }
+      }
+    } else {
+      if (gosysl.default === "") {
+        gosysl = context.asAbsolutePath(gosysl[os.platform()]);
+        if (fs.existsSync(gosysl)) {
+          setGoSysl(gosysl);
+        }
+      }
     }
 
     context.subscriptions.push(commands.registerCommand("sysl.selectRoot", () => {

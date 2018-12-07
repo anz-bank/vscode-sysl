@@ -49,7 +49,6 @@ export class DefinitionProvider  {
         const ast = this.loadAST(param.textDocument.uri);
         const symbols = this.findSymbolUnderCaret(ast, row);
         let index: number;
-        const thisObj = this;
         const symbol = symbols.filter((obj: any, i: number) => {
             const start = obj.start.column;
             const end = start + obj.name.length;

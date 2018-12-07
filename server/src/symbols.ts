@@ -71,7 +71,6 @@ export class SymbolsProvider implements ISyslConfigChangeListener {
     public fileSymbols(tree: any): any[] {
       const syms = this.allSymbols(tree, undefined);
       const symbols: any[] = [];
-      const thisObj = this;
       syms.forEach((obj) => {
         if (symbols[obj.start.line] === undefined) {
           symbols[obj.start.line] = [];
