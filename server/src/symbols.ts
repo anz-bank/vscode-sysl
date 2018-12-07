@@ -4,16 +4,16 @@ import path = require("path");
 import { IConnection } from "vscode-languageserver";
 import Uri from "vscode-uri";
 // tslint:disable-next-line:no-var-requires
-const SyslParser = require("./sysl/SyslParser").SyslParser;
 import { ISettings, ISyslConfigChangeListener, SyslConfigProvider  } from "./config";
 // tslint:disable-next-line:no-var-requires
-const antlr4 = require("antlr4");
+const sysl = require("sysljs");
 // tslint:disable-next-line:no-var-requires
-const SyslLexer = require("./sysl/SyslLexer").SyslLexer;
+const SyslParser = sysl.SyslParser;
 
 export enum SymbolType {
     Application = 1,
     Endpoint,
+    View,
     Field,
     Param,
     Type,
@@ -41,9 +41,10 @@ parserToSymbolType[SyslParser.RULE_reference] = SymbolType.TypeRef; // combo of 
 parserToSymbolType[SyslParser.RULE_target] = SymbolType.Application;
 parserToSymbolType[SyslParser.RULE_target_endpoint] = SymbolType.Endpoint;
 parserToSymbolType[SyslParser.RULE_table] = SymbolType.Type;
+parserToSymbolType[SyslParser.RULE_types] = SymbolType.Type;
+parserToSymbolType[SyslParser.RULE_view] = SymbolType.View;
 
 export class SymbolsProvider implements ISyslConfigChangeListener {
-    private tree: any;
     private settings: ISettings;
     private tempFolder: string;
     private conn: IConnection;
@@ -70,7 +71,7 @@ export class SymbolsProvider implements ISyslConfigChangeListener {
     public fileSymbols(tree: any): any[] {
       const syms = this.allSymbols(tree, undefined);
       const symbols: any[] = [];
-
+      const thisObj = this;
       syms.forEach((obj) => {
         if (symbols[obj.start.line] === undefined) {
           symbols[obj.start.line] = [];
@@ -84,10 +85,20 @@ export class SymbolsProvider implements ISyslConfigChangeListener {
       if (tree === undefined || tree.ruleIndex === undefined) { return []; }
 
       let symbols: any[] = [];
-
       switch (tree.ruleIndex) {
-        case SyslParser.RULE_name_str:
+        case SyslParser.RULE_user_defined_type:
         case SyslParser.RULE_app_name:
+          {
+            const appSymbol = {
+              end: tree.stop,
+              name: tree.getText(),
+              start: tree.start,
+              type: SymbolType.Application,
+              };
+            symbols.push(appSymbol);
+            return symbols;
+          }
+        case SyslParser.RULE_name_str:
           const symbol = {
             end: tree.stop,
             name: tree.getText(),
@@ -96,15 +107,18 @@ export class SymbolsProvider implements ISyslConfigChangeListener {
           };
           symbols.push(symbol);
           return symbols;
+        case SyslParser.RULE_reference:
         case SyslParser.RULE_application:
         case SyslParser.RULE_endpoint_name:
         case SyslParser.RULE_field:
         case SyslParser.RULE_field_type:
         case SyslParser.RULE_method_def:
-        case SyslParser.RULE_reference:
         case SyslParser.RULE_target:
         case SyslParser.RULE_target_endpoint:
         case SyslParser.RULE_table:
+        case SyslParser.RULE_view:
+        case SyslParser.RULE_types:
+        case SyslParser.RULE_expr_func:
           parent = tree.ruleIndex;
           break;
         case SyslParser.RULE_imports_decl:
@@ -114,8 +128,13 @@ export class SymbolsProvider implements ISyslConfigChangeListener {
         case undefined:
           return symbols;
       }
-
+      if (tree.children == null) {
+        return symbols;
+      }
       for (const rule of tree.children) {
+        if (rule.children == null) {
+          continue;
+        }
         const childSyms = this.allSymbols(rule, parent);
         symbols = symbols.concat(childSyms);
       }
@@ -124,20 +143,7 @@ export class SymbolsProvider implements ISyslConfigChangeListener {
     }
 
     public parse(text: string, listener: any): any {
-      const chars = new antlr4.InputStream(text);
-      const lexer = new SyslLexer(chars);
-      const tokens = new antlr4.CommonTokenStream(lexer);
-      const parser = new SyslParser(tokens);
-
-      parser.buildParseTrees = true;
-      parser.removeErrorListeners();
-
-      if (listener !== undefined) {
-        parser.addErrorListener(listener);
-      }
-
-      this.tree = parser.sysl_file();
-      return this.tree;
+      return sysl.SyslParse(text, listener);
     }
 
     public getRoot(): string {

@@ -11,6 +11,7 @@
 	},
 	"dependencies": {
 		"antlr4": "^4.7.1",
+		"sysljs": "^1.0.0",
 		"vscode-languageserver": "^3.4.2",
 		"vscode-uri": "^1.0.5"
 	},

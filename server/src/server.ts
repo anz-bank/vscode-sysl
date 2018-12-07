@@ -10,7 +10,7 @@ import { DefinitionProvider } from "./definition";
 import { SymbolsProvider } from "./symbols";
 
 // tslint:disable-next-line:no-var-requires
-const SyslParserErrorListener = require("./sysl/SyslParserErrorListener").SyslParserErrorListener;
+const SyslExtnParserErrorListener = require("./sysl/SyslExtnParserErrorListener").SyslExtnParserErrorListener;
 const connection: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
 // Create a simple text document manager. The text document manager
 // supports full document sync only
@@ -53,8 +53,7 @@ function createDiagnostic(lineNum: number, charIndex: number, msg: string): Diag
 
 function validateTextDocument(textDocument: TextDocument): void {
     const diagnostics: Diagnostic[] = [];
-    const listener = new SyslParserErrorListener();
-
+    const listener = new SyslExtnParserErrorListener(connection);
     symbolsProvider.parse(textDocument.getText(), listener);
 
     if (listener.errors.length > 0) {
@@ -84,6 +83,8 @@ connection.onDefinition((params: TextDocumentPositionParams): Definition => {
     try {
         return definitionProvider.onDefinition(params);
     } catch (e) {
+        connection.console.log("Error: onDefinition");
+        connection.console.log(JSON.stringify(e));
         connection.console.error(e);
     }
     return null;

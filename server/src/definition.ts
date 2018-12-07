@@ -2,7 +2,7 @@ import { Definition, IConnection, Location, TextDocumentPositionParams } from "v
 import Uri from "vscode-uri";
 import { ISourceContext, SymbolsProvider, SymbolType } from "./symbols";
 // tslint:disable-next-line:no-var-requires
-const SyslParserErrorListener = require("./sysl/SyslParserErrorListener").SyslParserErrorListener;
+const SyslExtnParserErrorListener = require("./sysl/SyslExtnParserErrorListener").SyslExtnParserErrorListener;
 
 export class DefinitionProvider  {
     // tslint:disable-next-line:member-access
@@ -15,7 +15,7 @@ export class DefinitionProvider  {
     }
 
     public loadAST(uri: string): any {
-        const listener = new SyslParserErrorListener();
+        const listener = new SyslExtnParserErrorListener(this.conn);
         const ast =  this.symbolsProvider.loadAST(uri, listener);
         return ast;
     }
@@ -49,11 +49,15 @@ export class DefinitionProvider  {
         const ast = this.loadAST(param.textDocument.uri);
         const symbols = this.findSymbolUnderCaret(ast, row);
         let index: number;
+        const thisObj = this;
         const symbol = symbols.filter((obj: any, i: number) => {
             const start = obj.start.column;
             const end = start + obj.name.length;
-            index = i;
-            return (column >= start && column <= end);
+            const isUnderCursor = (column >= start && column <= end);
+            if (isUnderCursor === true) {
+              index = i;
+            }
+            return isUnderCursor;
         });
 
         if (symbol.length === 1) {
@@ -81,9 +85,11 @@ export class DefinitionProvider  {
                      break;
                 case SymbolType.TypeRef:
                     {
-                        const prev = symbols[index - 1].name;
-                        const app = projectSymbols[prev];
-                        if (app === undefined || app.types === undefined) { return null; }
+                        const appName = symbols[index - 1].name;
+                        const app = projectSymbols[appName];
+                        if (app === undefined || app.types === undefined) {
+                          return null;
+                        }
                         sc = app.types[symbolUnderCaret].sourceContext as ISourceContext;
                     }
                     break;
