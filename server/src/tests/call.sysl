@@ -1,0 +1,6 @@
+Foo :: Server:
+  Server Endpoint: ...
+
+Foo :: Client:
+  Endpoint:
+    Foo :: Server <- Server Endpoint

@@ -7,7 +7,7 @@ import {
 } from "vscode-languageserver";
 import { SyslConfigProvider } from "./config";
 import { DefinitionProvider } from "./definition";
-import { SymbolsProvider } from "./symbols";
+import { SymbolsProvider } from "./symbolsProvider";
 
 // tslint:disable-next-line:no-var-requires
 const SyslExtnParserErrorListener = require("./sysl/SyslExtnParserErrorListener").SyslExtnParserErrorListener;

@@ -1,6 +1,7 @@
 import { Definition, IConnection, Location, TextDocumentPositionParams } from "vscode-languageserver";
 import Uri from "vscode-uri";
-import { ISourceContext, SymbolsProvider, SymbolType } from "./symbols";
+import { SymbolType } from "./symbols";
+import { ISourceContext, SymbolsProvider } from "./symbolsProvider";
 // tslint:disable-next-line:no-var-requires
 const SyslExtnParserErrorListener = require("./sysl/SyslExtnParserErrorListener").SyslExtnParserErrorListener;
 
@@ -58,7 +59,6 @@ export class DefinitionProvider  {
             }
             return isUnderCursor;
         });
-
         if (symbol.length === 1) {
             const projectSymbols = this.symbolsProvider.loadSymbolsForFile(param.textDocument.uri);
             const symbolUnderCaret = symbol[0].name;
@@ -81,7 +81,17 @@ export class DefinitionProvider  {
                 case SymbolType.Field:
                 case SymbolType.Param:
                 case SymbolType.Type:
-                     break;
+                    {
+                      Object.keys(projectSymbols).forEach((element) => {
+                        if (projectSymbols.hasOwnProperty(element)) {
+                          if ( projectSymbols[element].types !== null
+                            && projectSymbols[element].types[symbolUnderCaret] !== null) {
+                            sc = projectSymbols[element].types[symbolUnderCaret].sourceContext as ISourceContext;
+                          }
+                      }
+                      });
+                    }
+                    break;
                 case SymbolType.TypeRef:
                     {
                         const appName = symbols[index - 1].name;
