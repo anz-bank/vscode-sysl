@@ -12,6 +12,4 @@
 	},
 	"typescript.tsdk": "./node_modules/typescript/lib",
   "typescript.tsc.autoDetect": "off",
-  "sysl.workspace.root": "/Users/singhs93/projects/vscode-sysl",
-  "sysl.tool.parser": "/Users/singhs93/.vscode/extensions/anz-bank.vscode-sysl-0.0.2/server/bin/gosysl-darwin"
 }
