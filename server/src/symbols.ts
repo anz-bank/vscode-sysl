@@ -1,10 +1,5 @@
-import child_process = require("child_process");
 import fs = require("fs");
-import path = require("path");
-import { IConnection } from "vscode-languageserver";
 import Uri from "vscode-uri";
-// tslint:disable-next-line:no-var-requires
-import { ISettings, ISyslConfigChangeListener, SyslConfigProvider  } from "./config";
 // tslint:disable-next-line:no-var-requires
 const sysl = require("sysljs");
 // tslint:disable-next-line:no-var-requires
@@ -41,26 +36,12 @@ parserToSymbolType[SyslParser.RULE_reference] = SymbolType.TypeRef; // combo of 
 parserToSymbolType[SyslParser.RULE_target] = SymbolType.Application;
 parserToSymbolType[SyslParser.RULE_target_endpoint] = SymbolType.Endpoint;
 parserToSymbolType[SyslParser.RULE_table] = SymbolType.Type;
+parserToSymbolType[SyslParser.RULE_user_defined_type] = SymbolType.Type;
 parserToSymbolType[SyslParser.RULE_types] = SymbolType.Type;
 parserToSymbolType[SyslParser.RULE_view] = SymbolType.View;
+parserToSymbolType[SyslParser.RULE_view_param] = SymbolType.Param;
 
-export class SymbolsProvider implements ISyslConfigChangeListener {
-    private settings: ISettings;
-    private tempFolder: string;
-    private conn: IConnection;
-
-    constructor(config: SyslConfigProvider, conn: IConnection) {
-      config.register(this);
-      this.conn = conn;
-    }
-
-    public onChange(settings: ISettings) {
-      this.settings = settings;
-      this.tempFolder = settings.sysl.workspace.root + "/.sysl-tmp/";
-      if (fs.existsSync(this.tempFolder) === false) {
-        fs.mkdirSync(this.tempFolder);
-      }
-    }
+export class SyslSymbols {
 
     public loadAST(uri: string, listener: any): any {
       const fileName = Uri.parse(uri).fsPath;
@@ -85,7 +66,6 @@ export class SymbolsProvider implements ISyslConfigChangeListener {
 
       let symbols: any[] = [];
       switch (tree.ruleIndex) {
-        case SyslParser.RULE_user_defined_type:
         case SyslParser.RULE_app_name:
           {
             const appSymbol = {
@@ -116,8 +96,10 @@ export class SymbolsProvider implements ISyslConfigChangeListener {
         case SyslParser.RULE_target_endpoint:
         case SyslParser.RULE_table:
         case SyslParser.RULE_view:
+        case SyslParser.RULE_view_param:
         case SyslParser.RULE_types:
         case SyslParser.RULE_expr_func:
+        case SyslParser.RULE_user_defined_type:
           parent = tree.ruleIndex;
           break;
         case SyslParser.RULE_imports_decl:
@@ -143,63 +125,5 @@ export class SymbolsProvider implements ISyslConfigChangeListener {
 
     public parse(text: string, listener: any): any {
       return sysl.SyslParse(text, listener);
-    }
-
-    public getRoot(): string {
-      return this.settings.sysl.workspace.root;
-    }
-
-    public getTempLocation(): string {
-      return this.tempFolder;
-    }
-
-    public getModuleNameFromRoot(root: string, filename: string) {
-      const end = filename.indexOf(root, 0);
-      const modulePath = filename.substring(end + root.length);
-      return modulePath;
-    }
-
-    public docUriToTempFile(uri: string): string {
-      const filename = Uri.parse(uri).fsPath;
-      const jsonFile = path.basename(filename) + ".json";
-      return this.getTempLocation() + jsonFile;
-    }
-
-    public loadSymbolsForFile(uri: string) {
-      const obj = JSON.parse(fs.readFileSync(this.docUriToTempFile(uri), "utf8"));
-      return obj.apps;
-    }
-
-    public parseSyslInput(uri: string): void {
-      const parserPath = this.settings.sysl.tool.parser;
-
-      if (parserPath === "" || fs.existsSync(parserPath) === false) {
-        this.conn.console.warn("go-sysl tool path is empty or the tool does not exists!");
-        this.conn.console.warn("Use SYSL: Select Go-Sysl tool command to set the path.");
-        return;
-      }
-
-      const filename = Uri.parse(uri).fsPath;
-      const tempOutputFile = this.docUriToTempFile(uri);
-      const args = [
-        "--root",
-        this.getRoot(),
-        "-o",
-        tempOutputFile,
-        this.getModuleNameFromRoot(this.getRoot(), filename),
-      ];
-
-      this.conn.console.log(args.toString());
-      const parser = child_process.spawn(parserPath, args);
-      parser.on("exit", (code: number) => {
-        // TODO: push diagnostics, warn about changing root
-        if (code === 1) {
-          this.conn.console.error(parserPath + " exited with " + code);
-          this.conn.console.error("Check your SYSL root!");
-          this.conn.console.error("Use Sysl: Select Root command to set the root path.");
-        } else {
-            this.conn.console.log(parserPath + " exited with " + code);
-        }
-      });
     }
 }

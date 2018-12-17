@@ -55,13 +55,13 @@
                         "description": "Default root folder for the sysl compiler"
                     },
                     "sysl.tool.parser": {
-                      "type": "string",
-                      "default": {
-                        "default": "",
-                        "windows": "./server/bin/gosysl.exe",
-                        "darwin": "./server/bin/gosysl-darwin"
-                      },
-                      "description": "Path to Go-Sysl compiler"
+                        "type": "string",
+                        "default": {
+                            "default": "",
+                            "windows": "./server/bin/gosysl.exe",
+                            "darwin": "./server/bin/gosysl-darwin"
+                        },
+                        "description": "Path to Go-Sysl compiler"
                     },
                     "sysl.tool.tempOutput": {
                         "type": "string",

@@ -1,0 +1,11 @@
+ViewTest[package="abc"]:
+  !view Foo(p2 <: set of Bar) -> Baz:
+    p2 -> (:
+      .abc
+    )
+
+  !type Bar:
+    id <: int
+
+  !type Baz:
+    id <: int

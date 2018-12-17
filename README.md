@@ -7,7 +7,8 @@
 ## Features
 
 ### Goto Definition
-Goto definition of a symbol.
+
+Find definition of a type.
 
 ### Syntax Highlighting
 
@@ -15,13 +16,13 @@ Provides syntax colouring for the Sysl Language.
 
 ## Requirements
 
-Needs `gosysl` binary, which is installed by default for windows and mac operating systems.
-
 ## Known Issues
-
-- Syntax highlighting in the `!view` needs more work.
+- GoTo does not work for expressions defined inside `!view`.
 
 ## Release Notes
+
+### 0.0.3
+- Recognise latest version of sysl grammar
 
 ### 0.0.2
 - Adds gosysl for windows.
