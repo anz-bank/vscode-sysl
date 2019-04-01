@@ -21,8 +21,12 @@ Provides syntax colouring for the Sysl Language.
 
 ## Release Notes
 
+### 0.0.4
+- Recognize latest version of sysl grammar
+- use sysljs 1.0.2
+
 ### 0.0.3
-- Recognise latest version of sysl grammar
+- Recognize latest version of sysl grammar
 
 ### 0.0.2
 - Adds gosysl for windows.
