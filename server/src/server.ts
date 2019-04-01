@@ -76,7 +76,7 @@ documents.onDidOpen((e: TextDocumentChangeEvent) => {
 
 connection.onDidChangeWatchedFiles(() => {
     // Monitored files have change in VSCode
-    connection.console.log("We recevied an file change event");
+    connection.console.log("We received an file change event");
 });
 
 connection.onDefinition((params: TextDocumentPositionParams): Definition => {
