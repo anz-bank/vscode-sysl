@@ -66,8 +66,7 @@ export class SyslSymbols {
 
       let symbols: any[] = [];
       switch (tree.ruleIndex) {
-        case SyslParser.RULE_app_name:
-          {
+        case SyslParser.RULE_app_name: {
             const appSymbol = {
               end: tree.stop,
               name: tree.getText(),
