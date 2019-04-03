@@ -22,7 +22,7 @@
     },
     "application": {
       "name": "meta.type.application.sysl",
-      "begin": "^(\\w[^\"\\[]+)",
+      "begin": "^(\\w[^\"\\[]+)(?=[^\n]*: *$)",
       "end": "^(?=\\w)",
       "captures": {
         "1": {
@@ -38,6 +38,8 @@
         { "include": "#type" },
         { "include": "#alias" },
         { "include": "#endpoint" },
+        { "include": "#string_doubleQuote" },
+        {"include": "#string_singleQuote"},
         { "include": "#http-endpoint" }
       ]
     },
@@ -74,6 +76,7 @@
         { "include": "#brackets" },
         { "include": "#annotation" },
         { "include": "#flow-control" },
+        {"include": "#string_singleQuote"},
         { "include": "#string_doubleQuote" }
       ]
     },
@@ -124,6 +127,7 @@
       "patterns": [
         { "include": "#annotation" },
         { "include": "#brackets" },
+        { "include": "#operators" },
         { "include": "#string_doubleQuote" },
         { "include": "#comments" }
       ]
@@ -192,7 +196,7 @@
     },
     "operators": {
       "name": "keyword.control.sysl",
-      "match": ":|-\\|>|=:|<:|=|\\?|<->|\\.\\.\\.|->|<-|!|~>"
+      "match": ":|-\\|>|=:|<:|=|\\?|<->|\\.\\.\\.|->|<-|!|~>|\\.\\.\\."
     },
     "string_doubleQuote": {
       "match": "\"(?:\\\\.|[^\"])*\"?",
