@@ -31,15 +31,16 @@
       },
       "patterns": [
         { "include": "#brackets" },
+        { "include": "#comments" },
         { "include": "#annotation" },
+        { "include": "#http-endpoint" },
         { "include": "#view" },
         { "include": "#abstract-view" },
         { "include": "#type" },
         { "include": "#alias" },
         { "include": "#endpoint" },
         { "include": "#string_doubleQuote" },
-        {"include": "#string_singleQuote"},
-        { "include": "#http-endpoint" }
+        {"include": "#string_singleQuote"}
       ]
     },
     "alias": {
@@ -117,7 +118,7 @@
 
     "endpoint": {
       "begin": "^([ \t]+)(\\w[^\"\\[(]*)(?=[^\n]*: *(\\.\\.\\.)?$)",
-      "end": "^(?=[^ \t#]|\\1[^ \t#])",
+      "end": "^(?=[^ \t\n#]|\\1[^ \t#])",
       "name": "meta.type.endpoint.sysl",
       "beginCaptures": {
         "2": { "name": "support.type.application.endpoint" },
@@ -132,8 +133,8 @@
       ]
     },
     "http-endpoint": {
-      "begin": "^([ \t]+)(/)",
-      "end": "^(?=[^ \t]|(\\1[^ ]))",
+      "begin": "^([ \t]+)(/[^{\"\\[(]*)(?=[^\n]*: *$)",
+      "end": "^(?=[^ \t\n]|(\\1[^# \t]))",
       "name": "meta.type.http.sysl",
       "beginCaptures": {
         "2": {
@@ -142,15 +143,14 @@
       },
       "patterns": [
         { "include": "#annotation" },
-        { "include": "#http-endpoint" },
         { "include": "#comments" },
-        {"include": "#flow-control" },
+        { "include": "#flow-control" },
         { "include": "#http-method" }
       ]
     },
     "http-method": {
       "begin": "^([ \t]+)(GET|POST|PUT|PATCH|DELETE)",
-      "end": "^(?=[^ \t]|(\\1[^ ]))",
+      "end": "^(?=[^ \t]|(\\1[^ \t]))",
       "name": "meta.type.http.method.sysl",
       "beginCaptures": {
         "2": {
@@ -161,8 +161,6 @@
         {"include": "#annotation" },
         {"include": "#comments" },
         {"include": "#operators" },
-        {"include": "#http-endpoints" },
-        {"include": "#http-methods" },
         {"include": "#brackets" },
         {"include": "#datatype" },
         {"include": "#flow-control" },
