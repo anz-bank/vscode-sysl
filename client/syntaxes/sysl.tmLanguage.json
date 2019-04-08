@@ -1,144 +1,265 @@
 {
-	"name": "Sysl",
-	"scopeName": "source.sysl",
-    "patterns": [
-        { "include": "#importstmt"},
-        { "include": "#application"},
+  "name": "Sysl",
+  "scopeName": "source.sysl",
+  "patterns": [
+    { "include": "#import-stmt" },
+    { "include": "#comments" },
+    { "include": "#application" }
+  ],
+  "repository": {
+    "import-stmt": {
+      "match": "^\\b(import)\\b(.*)$",
+      "name": "keyword.control.sysl",
+      "captures": {
+        "2": {
+          "name": "variable.parameter.import.path"
+        }
+      }
+    },
+    "comments": {
+      "name": "comment.line.hash.sysl",
+      "match": "^[ \t]*(#|\\|).*$"
+    },
+    "application": {
+      "name": "meta.type.application.sysl",
+      "begin": "^(\\w[^\"\\[]+)(?=[^\n]*: *$)",
+      "end": "^(?=\\w)",
+      "captures": {
+        "1": {
+          "name": "variable.other.application"
+        }
+      },
+      "patterns": [
+        { "include": "#brackets" },
+        { "include": "#comments" },
+        { "include": "#annotation" },
+        { "include": "#http-endpoint" },
+        { "include": "#view" },
+        { "include": "#abstract-view" },
+        { "include": "#type" },
+        { "include": "#alias" },
+        { "include": "#endpoint" },
+        { "include": "#string_doubleQuote" },
+        {"include": "#string_singleQuote"}
+      ]
+    },
+    "alias": {
+      "name": "meta.type.application.alias",
+      "begin": "^([ ]+|\t)(!alias) +(\\w+)[^\n:]+:",
+      "beginCaptures": {
+        "2": {
+          "name": "keyword.other.application.alias"
+        }
+      },
+      "end": "^\\1\\1(sequence of|set of)? *(\\w+)$",
+      "endCaptures": {
+        "1": {"name": "keyword.other" },
+        "2": {"name": "support.type.alias.of" }
+      },
+      "patterns": [
+        { "include": "#comments" }
+      ]
+    },
+    "type": {
+      "name": "meta.type.application.type",
+      "begin": "^([ \t]+)(!type|!table) +\\w+(?=[^:]*: *$)",
+      "beginCaptures": {
+        "2": { "name": "keyword.other.application.type" },
+        "3": { "name": "support.type.application.type" }
+      },
+      "end": "^(?=[^ \t]|(\\1[^ ]))",
+      "patterns": [
         { "include": "#operators" },
         { "include": "#comments" },
-        { "include": "#string_doubleQuote" },
+        { "include": "#datatype" },
+        { "include": "#number_decimal" },
+        { "include": "#brackets" },
+        { "include": "#annotation" },
+        { "include": "#flow-control" },
+        {"include": "#string_singleQuote"},
+        { "include": "#string_doubleQuote" }
+      ]
+    },
+    "view": {
+      "name": "meta.type.application.view",
+      "begin": "^([ \t]+)(!view) +(\\w+)(?=\\([^)]+\\) *[^:]*:$)",
+      "end": "^\\1\\1\\)[ \t]*$",
+      "beginCaptures": {
+        "2": { "name": "keyword.other.application.view" },
+        "3": { "name": "support.type.view.name" },
+        "4": { "name": "keyword.control.return.type" },
+        "5": { "name": "support.type.view.return.type" }
+      },
+      "patterns": [
+        { "include": "#annotation" },
+        { "include": "#operators" },
+        { "include": "#number_decimal" },
+        { "include": "#comments" },
+        { "include": "#brackets" },
+        { "include": "#annotation" },
+        { "include": "#flow-control" },
+        { "include": "#view-keywords" },
+        { "include": "#view-functions" },
+        { "include": "#view-constants" },
+        {"include": "#string_singleQuote"},
+        {"include": "#string_doubleQuote"}
+      ]
+    },
+    "abstract-view": {
+      "name": "meta.type.application.abstract.view",
+      "match": "^([ \t]+)(!view) +(\\w+)(?=\\([^)]+\\) +(->) +[^\\[]+\\[.abstract\\]$)",
+      "captures": {
+        "2": { "name": "keyword.other.application.view" },
+        "3": { "name": "support.type.view.name" },
+        "4": { "name": "keyword.control.return.type" },
+        "5": { "name": "support.type.view.return.type" }
+      }
+    },
+
+    "endpoint": {
+      "begin": "^([ \t]+)(\\w[^\"\\[(]*)(?=[^\n]*: *(\\.\\.\\.)?$)",
+      "end": "^(?=[^ \t\n#]|\\1[^ \t#])",
+      "name": "meta.type.endpoint.sysl",
+      "beginCaptures": {
+        "2": { "name": "support.type.application.endpoint" },
+        "3": { "name": "string.quoted.double.endpoint.longname" }
+      },
+      "patterns": [
         { "include": "#annotation" },
         { "include": "#brackets" },
-        { "include": "#parens" },
-        { "include": "#keywords" },
-        { "include": "#definitions" },
-        { "include": "#http-endpoints" },
-        { "include": "#flowcontrol" },
-        { "include": "#datatype" }
-    ],
-    "repository": {
-		"importstmt": {
-			"match": "^\\b(import)\\b(.*)$",
-            "name": "keyword.control.sysl",
-            "captures": {
-                "2": { "name": "variable.parameter.import.path" }
-            }
-    	},
-		"comments": {
-            "name": "comment.line.hash.sysl",
-            "match": "^[ \t]*(#|\\|).*$"
-		},
-		"application": {
-            "name": "meta.type.application.sysl",
-            "begin": "(?=^\\w[^\\n]+: *)",
-            "end": "$",
-			"patterns":[
-				{ "include": "#appname" },
-				{ "include": "#operators" },
-				{ "include": "#brackets" },                
-				{ "include": "#string_doubleQuote" }
-            ]
-        },
-		"http-endpoints": {
-			"begin": "^([ \t]+)/",
-			"end": "(?=:\\s*$)",
-			"name": "meta.type.http.sysl",
-			"patterns":[
-				{ "include": "#operators" },
-				{ "include": "#brackets" },
-				{ "include": "#datatype" },
-				{ "include": "#string_doubleQuote" }
-            ]
-		},
-        "definitions": {
-            "name": "keyword.other",
-            "match": "!\\b(table|wrap|view|type)\\b"
-        },
-        "datatype": {
-            "name": "support.type",
-            "match": "\\b(int|string|xml|datetime|uuid|date)\\b"
-        },
-        "keywords": {
-            "name": "keyword.other",
-            "match": "\\b(set of|GET|POST|PUT|PATCH|DELETE)\\b"
-        },
-        "flowcontrol": {
-            "name": "keyword.control",
-            "match": "\\b(return|[fF][oO][rR]|[Oo]ne [Oo]f|[Ll]oop|[Uu]ntil|[Ww]hile|alt|[Ii]f|[Ee]lse)\\b"
-        },
-		"appname": {
-			"name": "variable.other.application",
-			"begin": "^\\w",
-            "end": "(?=[\"\n\\[])",
-			"patterns":[
-                { "include": "#doublecolon" }
-            ]            
-        },
-		"doublecolon": {
-			"name" : "keyword.control.package.sep.sysl",
-			"match": "(::)"
-		},                
-		"annotation": {
-			"name" : "entity.name",
-            "match": "(@)(\\S+)"
-        },
-		"operators": {
-			"name" : "keyword.control.sysl",
-			"match": ":|(-\\|>)|(=:)|(<:)|=|\\?|<->|\\.\\.\\.|->|<-"
-        },
-        "string_doubleQuote": {
-            "match": "\"(?:\\\\.|[^\"])*\"?",
-            "name": "string.quoted.double"
-        },
-        "formatted_string_doubleQuote": {
-            "begin": "\"",
-            "end": "\"",
-            "name": "string.quoted.double",
-            "patterns": [
-				{ "include": "#expression" }
-            ]
-        },
-		"expression": {
-			"name" : "keyword.control",
-            "begin": "%\\(",
-            "end": "\\)",
-            "patterns": [
-				{ "include": "#vars" }
-            ]
-        },
-		"vars": {
-			"name" : "entity.name",
-            "match": "@\\w+"
-        },
-        "string_singleQuote": {
-            "match": "'(?:\\\\.|[^'])*'?",
-            "name": "string.quoted.single"
-        },
-        "parens": {
-            "name": "punctuation.section",
-            "begin": "\\(",
-            "end": "\\)",
-            "patterns":[
-				{ "include": "#number_decimal" }
-            ]
-        },
-        "number_decimal": {
-            "match": "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:[eE][+-]?\\d+)?\\b",
-            "name": "constant.numeric.number"
-        },
-        "brackets": {
-            "begin": "\\[",
-            "end": "\\]",
-            "name": "punctuation.section",
-			"patterns":[
-				{ "include": "#operators" },
-				{ "include": "#brackets" },
-                { "include": "#formatted_string_doubleQuote" },
-                {
-                    "match": "\\w+\\s*",
-                    "name": "entity.name"
-                }
-            ]
+        { "include": "#operators" },
+        { "include": "#string_doubleQuote" },
+        { "include": "#comments" }
+      ]
+    },
+    "http-endpoint": {
+      "begin": "^([ \t]+)(/[^{\"\\[(]*)(?=[^\n]*: *$)",
+      "end": "^(?=[^ \t\n]|(\\1[^# \t]))",
+      "name": "meta.type.http.sysl",
+      "beginCaptures": {
+        "2": {
+          "name": "keyword.control.application.http-endpoint.path"
         }
+      },
+      "patterns": [
+        { "include": "#annotation" },
+        { "include": "#comments" },
+        { "include": "#flow-control" },
+        { "include": "#http-method" }
+      ]
+    },
+    "http-method": {
+      "begin": "^([ \t]+)(GET|POST|PUT|PATCH|DELETE)",
+      "end": "^(?=[^ \t]|(\\1[^ \t]))",
+      "name": "meta.type.http.method.sysl",
+      "beginCaptures": {
+        "2": {
+          "name": "keyword.control.application.http.method"
+        }
+      },
+      "patterns": [
+        {"include": "#annotation" },
+        {"include": "#comments" },
+        {"include": "#operators" },
+        {"include": "#brackets" },
+        {"include": "#datatype" },
+        {"include": "#flow-control" },
+        {"include": "#string_doubleQuote" }
+      ]
+    },
+    "datatype": {
+      "name": "support.type",
+      "match": "\\b(int(32|64)?|float|any|string|xml|bool|datetime|uuid|date|decimal)\\b"
+    },
+    "view-keywords": {
+      "name": "keyword.other",
+      "match": "\\b(sequence of|set of|let|table of)\\b"
+    },
+    "view-functions": {
+      "name": "support.function.sysl.view",
+      "match": "\\b(max|sum|min|snapshot|singleOrNull|count|autoinc|substr)\\b"
+    },
+    "view-constants": {
+      "name": "support.constant.sysl.view",
+      "match": "\\b(true|false|null)\\b"
+    },
+    "flow-control": {
+      "name": "keyword.control",
+      "match": "\\b(return|[fF][oO][rR]|[Oo]ne [Oo]f|[Ll]oop|[Uu]ntil|[Ww]hile|alt|[Ii]f|[Ee]lse)\\b"
+    },
+    "annotation": {
+      "name": "entity.name.tag",
+      "match": "@\\S+"
+    },
+    "operators": {
+      "name": "keyword.control.sysl",
+      "match": ":|-\\|>|=:|<:|=|\\?|<->|\\.\\.\\.|->|<-|!|~>|\\.\\.\\."
+    },
+    "string_doubleQuote": {
+      "match": "\"(?:\\\\.|[^\"])*\"?",
+      "name": "string.quoted.double"
+    },
+    "expression": {
+      "name": "constant.character.escape",
+      "begin": "%\\(",
+      "end": "\\)",
+      "patterns": [
+        { "include": "#operators" },
+        { "include": "#vars" }
+      ]
+    },
+    "ternary-expr": {
+      "name": "constant.other.id",
+      "begin": "?"
+    },
+    "vars": {
+      "name": "constant.other.id",
+      "match": "@\\S+"
+    },
+    "string_singleQuote": {
+      "match": "'(?:\\\\.|[^'])*'?",
+      "name": "string.quoted.single"
+    },
+    "parens": {
+      "name": "punctuation.section",
+      "begin": "\\(",
+      "end": "\\)",
+      "patterns": [
+        {
+          "include": "#number_decimal"
+        }
+      ]
+    },
+    "number_decimal": {
+      "match": "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:[eE][+-]?\\d+)?\\b",
+      "name": "constant.numeric.number"
+    },
+    "pattern": {
+      "match": "~[_0-9+a-zA-Z]+",
+      "name": "entity.name.tag"
+    },
+    "formatted_string_doubleQuote": {
+      "begin": "\"",
+      "end": "\"",
+      "name": "string.quoted.double",
+      "patterns": [
+        { "include": "#format-operators" }
+      ]
+    },
+    "format-operators": {
+      "name": "keyword.control.sysl",
+      "match": "\\?|//|\\(|\\)|<|>|%|=="
+    },
+    "brackets": {
+      "begin": "\\[",
+      "end": "\\]",
+      "name": "punctuation.section.application.attributes",
+      "patterns": [
+        { "include": "#operators" },
+        { "include": "#pattern" },
+        { "include": "#string_singleQuote" },
+        { "include": "#formatted_string_doubleQuote" }
+      ]
     }
+  }
 }
