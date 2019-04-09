@@ -1,7 +1,7 @@
 {
 	"name": "vscode-sysl",
 	"description": "VS Code extension for SYSL Language.",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"author": "Sahejpreet Singh",
 	"publisher": "ANZ-BANK",
 	"license": "Apache-2.0",

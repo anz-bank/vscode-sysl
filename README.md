@@ -17,9 +17,15 @@ Provides syntax colouring for the Sysl Language.
 ## Requirements
 
 ## Known Issues
-- GoTo does not work for expressions defined inside `!view`.
+- None.
 
 ## Release Notes
+
+### 0.0.5
+- onDefinition for view calls
+- Updated syntax highlighting rules
+- Recognize latest version of sysl grammar
+- use sysljs 1.0.3
 
 ### 0.0.4
 - Recognize latest version of sysl grammar
