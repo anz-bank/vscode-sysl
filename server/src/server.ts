@@ -74,6 +74,10 @@ documents.onDidOpen((e: TextDocumentChangeEvent) => {
     symbolsProvider.parseSyslInput(e.document.uri);
 });
 
+documents.onDidSave((e) => {
+  symbolsProvider.parseSyslInput(e.document.uri);
+});
+
 connection.onDidChangeWatchedFiles(() => {
     // Monitored files have change in VSCode
     connection.console.log("We received an file change event");

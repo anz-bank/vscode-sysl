@@ -43,6 +43,8 @@ describe("parse", () => {
     expect(s[2][0].type).toBe(SymbolType.View);
     expect(s[2][1].name).toBe("p2");
     expect(s[2][1].type).toBe(SymbolType.Param);
+    expect(s[4][0].name).toBe("FooBar");
+    expect(s[4][0].type).toBe(SymbolType.FuncCall);
   });
 
   test("load call file", () => {
