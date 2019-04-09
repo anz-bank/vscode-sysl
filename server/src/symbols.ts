@@ -13,6 +13,7 @@ export enum SymbolType {
     Param,
     Type,
     TypeRef,
+    FuncCall,
 }
 
 export interface ISourceLocation {
@@ -40,6 +41,7 @@ parserToSymbolType[SyslParser.RULE_user_defined_type] = SymbolType.Type;
 parserToSymbolType[SyslParser.RULE_types] = SymbolType.Type;
 parserToSymbolType[SyslParser.RULE_view] = SymbolType.View;
 parserToSymbolType[SyslParser.RULE_view_param] = SymbolType.Param;
+parserToSymbolType[SyslParser.RULE_expr_func] = SymbolType.FuncCall;
 
 export class SyslSymbols {
 
@@ -97,9 +99,17 @@ export class SyslSymbols {
         case SyslParser.RULE_view:
         case SyslParser.RULE_view_param:
         case SyslParser.RULE_types:
-        case SyslParser.RULE_expr_func:
         case SyslParser.RULE_user_defined_type:
           parent = tree.ruleIndex;
+          break;
+        case SyslParser.RULE_expr_func:
+          const funcName = {
+            end: tree.stop,
+            name: tree.start.text,
+            start: tree.start,
+            type: parserToSymbolType[SyslParser.RULE_expr_func],
+          };
+          symbols.push(funcName);
           break;
         case SyslParser.RULE_imports_decl:
           return symbols;

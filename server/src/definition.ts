@@ -39,7 +39,7 @@ export class DefinitionProvider  {
                     line: sc.start.line - 1,
                 },
             },
-            uri:  Uri.file(sc.file).toString(),
+            uri:  Uri.file(this.symbolsProvider.getRoot() + sc.file).toString(),
         };
         return loc;
     }
@@ -59,6 +59,7 @@ export class DefinitionProvider  {
             }
             return isUnderCursor;
         });
+
         if (symbol.length === 1) {
             const projectSymbols = this.symbolsProvider.loadSymbolsForFile(param.textDocument.uri);
             const symbolUnderCaret = symbol[0].name;
@@ -67,6 +68,19 @@ export class DefinitionProvider  {
             switch (symbol[0].type) {
                 case SymbolType.Application:
                     sc = projectSymbols[symbolUnderCaret].sourceContext as ISourceContext;
+                    break;
+                case SymbolType.FuncCall:
+                    {
+                      Object.keys(projectSymbols).forEach((element) => {
+                        if (projectSymbols.hasOwnProperty(element)) {
+                          if ( projectSymbols[element] !== undefined
+                            && projectSymbols[element].views !== undefined
+                            && projectSymbols[element].views[symbolUnderCaret] !== undefined) {
+                            sc = projectSymbols[element].views[symbolUnderCaret].sourceContext as ISourceContext;
+                          }
+                        }
+                      });
+                    }
                     break;
                 case SymbolType.Endpoint:
                     {

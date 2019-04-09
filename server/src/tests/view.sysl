@@ -1,6 +1,12 @@
 ViewTest[package="abc"]:
   !view Foo(p2 <: set of Bar) -> Baz:
     p2 -> (:
+      let a = FooBar(p2)
+      .abc
+    )
+
+  !view FooBar(p2 <: set of Bar) -> Baz:
+    p2 -> (:
       .abc
     )
 

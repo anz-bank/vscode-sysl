@@ -73,15 +73,20 @@ export class SymbolsProvider extends SyslSymbols implements ISyslConfigChangeLis
       const filename = Uri.parse(uri).fsPath;
       const tempOutputFile = this.docUriToTempFile(uri);
       const args = [
+        "-mode", "json",
         "--root",
         this.getRoot(),
         "-o",
         tempOutputFile,
+        "-log", "debug",
         this.getModuleNameFromRoot(this.getRoot(), filename),
       ];
 
       this.conn.console.log(args.toString());
       const parser = child_process.spawn(parserPath, args);
+      parser.stderr.on("data", (data) => {
+        this.conn.console.log(`${data}`);
+      });
       parser.on("exit", (code: number) => {
         // TODO: push diagnostics, warn about changing root
         if (code === 1) {
