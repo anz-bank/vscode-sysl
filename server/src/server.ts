@@ -2,8 +2,9 @@
 
 import {
     createConnection, Definition, Diagnostic, DiagnosticSeverity,
-    IConnection, InitializeResult, IPCMessageReader, IPCMessageWriter,
-    TextDocument, TextDocumentChangeEvent, TextDocumentPositionParams, TextDocuments,
+    ExecuteCommandParams, IConnection, InitializeParams, InitializeResult,
+    IPCMessageReader, IPCMessageWriter, TextDocument,
+    TextDocumentChangeEvent, TextDocumentPositionParams, TextDocuments,
 } from "vscode-languageserver";
 import { SyslConfigProvider } from "./config";
 import { DefinitionProvider } from "./definition";
@@ -15,16 +16,23 @@ const connection: IConnection = createConnection(new IPCMessageReader(process), 
 // Create a simple text document manager. The text document manager
 // supports full document sync only
 const documents: TextDocuments = new TextDocuments();
-const config = new SyslConfigProvider();
+const config: SyslConfigProvider = new SyslConfigProvider();
 const symbolsProvider = new SymbolsProvider(config, connection);
 const definitionProvider = new DefinitionProvider(symbolsProvider, connection);
 
 documents.listen(connection);
 
-connection.onInitialize((/*_params: InitializeParams*/): InitializeResult => {
+connection.onInitialize((params: InitializeParams): InitializeResult => {
+    config.setGoSysl(params.initializationOptions.gosysl);
+    config.update();
     return {
         capabilities: {
             definitionProvider: true,
+            executeCommandProvider: {
+              commands: [
+                "sysl.Build",
+              ],
+            },
             // Tell the client that the server works in FULL text document sync mode
             textDocumentSync: documents.syncKind,
         },
@@ -32,8 +40,8 @@ connection.onInitialize((/*_params: InitializeParams*/): InitializeResult => {
 });
 
 connection.onDidChangeConfiguration((change) => {
-    const settings = change.settings;
-    config.update(settings);
+    config.setWorkspaceRoot(change.settings.sysl.workspace.root);
+    config.update();
     documents.all().forEach((doc: TextDocument) => {
         symbolsProvider.parseSyslInput(doc.uri);
     });
@@ -81,6 +89,16 @@ documents.onDidSave((e) => {
 connection.onDidChangeWatchedFiles(() => {
     // Monitored files have change in VSCode
     connection.console.log("We received an file change event");
+});
+
+connection.onExecuteCommand((params: ExecuteCommandParams) => {
+    // Monitored files have change in VSCode
+    switch (params.command) {
+      case "sysl.Build":
+        documents.all().forEach((doc: TextDocument) => {
+          symbolsProvider.parseSyslInput(doc.uri);
+        });
+    }
 });
 
 connection.onDefinition((params: TextDocumentPositionParams): Definition => {

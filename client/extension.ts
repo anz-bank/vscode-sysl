@@ -9,11 +9,6 @@ function setRoot(rootPath: string) {
     syslConfig.update("root", rootPath, false);
 }
 
-function setGoSysl(p: string) {
-    const syslConfig = workspace.getConfiguration("sysl.tool");
-    syslConfig.update("parser", p, false);
-}
-
 function getGoSysl(): any {
     return workspace.getConfiguration("sysl.tool").get("parser");
 }
@@ -32,24 +27,12 @@ function activate(context: ExtensionContext) {
     // tslint:disable-next-line:no-console
     console.log("workspace root: " + root);
     // tslint:disable-next-line:no-console
-    let gosysl = getGoSysl();
-
-    if (typeof gosysl === "string") {
-      if ( gosysl !== "") {
-        if (fs.existsSync(gosysl) === false) {
-          // tslint:disable-next-line:no-console
-          console.log("WARN: check gosysl path");
-          // tslint:disable-next-line:no-console
-          console.log("Does not exist:" + gosysl);
-        }
-      }
-    } else {
-      if (gosysl.default === "") {
-        gosysl = context.asAbsolutePath(gosysl[os.platform()]);
-        if (fs.existsSync(gosysl)) {
-          setGoSysl(gosysl);
-        }
-      }
+    const gosysl: string = context.asAbsolutePath(getGoSysl()[os.platform()]);
+    if (fs.existsSync(gosysl) === false) {
+      // tslint:disable-next-line:no-console
+      console.log("WARN: check gosysl path");
+      // tslint:disable-next-line:no-console
+      console.log("Does not exist:" + gosysl);
     }
 
     context.subscriptions.push(commands.registerCommand("sysl.selectRoot", () => {
@@ -65,18 +48,6 @@ function activate(context: ExtensionContext) {
         });
     }));
 
-    context.subscriptions.push(commands.registerCommand("sysl.selectGoSysl", () => {
-        window.showOpenDialog({
-            canSelectFiles: true,
-            canSelectFolders: false,
-            canSelectMany: false,
-            openLabel: "Select Go-Sysl",
-        }).then((p) => {
-            if (p === undefined) { return; }
-            setGoSysl(p[0].path);
-        });
-    }));
-
     const serverModule = context.asAbsolutePath(path.join("server", "server.js"));
     const debugOptions = { /*execArgv: ["--nolazy", "--inspect=6009"]*/ };
 
@@ -88,7 +59,8 @@ function activate(context: ExtensionContext) {
     const clientOptions: LanguageClientOptions = {
         documentSelector: [scheme],
         initializationOptions: {
-            root,
+          gosysl,
+          root,
         },
         synchronize: {
             configurationSection: "sysl",
