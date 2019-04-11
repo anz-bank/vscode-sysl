@@ -36,12 +36,18 @@ export class SyslConfigProvider implements ISettings {
     private listeners: ISyslConfigChangeListener[];
 
     constructor() {
-    //   this.workspaceRoot = "";
       this.listeners = [];
     }
 
-    public update(s: ISettings) {
-      this.sysl = s.sysl;
+    public setWorkspaceRoot(root: string) {
+      this.sysl.workspace.root = root;
+    }
+
+    public setGoSysl(path: string) {
+      this.sysl.tool.parser = path;
+    }
+
+    public update() {
       for (const o of this.listeners) {
         o.onChange(this);
       }

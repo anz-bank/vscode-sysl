@@ -30,7 +30,7 @@ export class SymbolsProvider extends SyslSymbols implements ISyslConfigChangeLis
 
     public onChange(settings: ISettings) {
       this.settings = settings;
-      this.tempFolder = settings.sysl.workspace.root + "/.sysl-tmp/";
+      this.tempFolder = path.join(settings.sysl.workspace.root, ".sysl-tmp");
       if (fs.existsSync(this.tempFolder) === false) {
         fs.mkdirSync(this.tempFolder);
       }
@@ -46,14 +46,14 @@ export class SymbolsProvider extends SyslSymbols implements ISyslConfigChangeLis
 
     public getModuleNameFromRoot(root: string, filename: string) {
       const end = filename.indexOf(root, 0);
-      const modulePath = filename.substring(end + root.length);
-      return modulePath;
+      const filePath = filename.substring(end + root.length);
+      return Uri.file(filePath).path;
     }
 
     public docUriToTempFile(uri: string): string {
       const filename = Uri.parse(uri).fsPath;
       const jsonFile = path.basename(filename) + ".json";
-      return this.getTempLocation() + jsonFile;
+      return path.join(this.getTempLocation(), jsonFile);
     }
 
     public loadSymbolsForFile(uri: string) {

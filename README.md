@@ -14,12 +14,26 @@ Find definition of a type.
 
 Provides syntax colouring for the Sysl Language.
 
+### Commands
+
+#### sysl.SelectRoot
+
+`sysl` tool expects root folder to import other modules. Set root by using this command as Sysl parser requires root to be set.
+
+#### sysl.Build
+
+Builds all the open sysl files and generates output in workspace root's `.sysl-tmp` directory.
+
 ## Requirements
 
 ## Known Issues
-- None.
+- `sysl.Build` command builds all the currently open `.sysl` files.
 
 ## Release Notes
+
+### 0.0.6
+- Introduce sysl.Build command
+- Fix path issues on windows
 
 ### 0.0.5
 - onDefinition for view calls
