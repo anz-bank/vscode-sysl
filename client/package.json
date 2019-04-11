@@ -57,7 +57,7 @@
                         "type": "string",
                         "default": {
                             "default": "",
-                            "windows": "./server/bin/gosysl.exe",
+                            "win32": ".\\server\\bin\\gosysl.exe",
                             "darwin": "./server/bin/gosysl-darwin"
                         },
                         "description": "Path to Go-Sysl compiler"

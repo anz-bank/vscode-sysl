@@ -6,6 +6,8 @@ import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } f
 
 function setRoot(rootPath: string) {
     const syslConfig = workspace.getConfiguration("sysl.workspace");
+    // tslint:disable-next-line:no-console
+    console.log("workspace root: " + rootPath);
     syslConfig.update("root", rootPath, false);
 }
 
@@ -44,7 +46,7 @@ function activate(context: ExtensionContext) {
             openLabel: "Select Root",
         }).then((folder) => {
             if (folder === undefined) { return; }
-            setRoot(folder[0].path);
+            setRoot(folder[0].fsPath);
         });
     }));
 
