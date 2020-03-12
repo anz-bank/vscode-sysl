@@ -18,7 +18,7 @@
     },
     "comments": {
       "name": "comment.line.hash.sysl",
-      "match": "^[ \t]*(#|\\|).*$"
+      "match": "[ \t]*(#|\\|).*$"
     },
     "application": {
       "name": "meta.type.application.sysl",
@@ -126,6 +126,7 @@
       },
       "patterns": [
         { "include": "#annotation" },
+        { "include": "#http-endpoint" },
         { "include": "#brackets" },
         { "include": "#operators" },
         { "include": "#string_doubleQuote" },
