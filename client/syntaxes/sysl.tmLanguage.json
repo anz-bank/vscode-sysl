@@ -65,7 +65,7 @@
     },
     "type": {
       "name": "meta.type.application.type",
-      "begin": "^([ \t]+)(!type|!table)( )+(\\w+)(?=[^:]*: *$)",
+      "begin": "^([ \t]+)(!type|!table)( )+(\\w+)( )*:( )*",
       "beginCaptures": {
         "2": { "name": "keyword.other.application.type" },
         "4": { "name": "entity.name.type.sysl" }
@@ -158,7 +158,7 @@
       "name": "meta.type.http.sysl",
       "beginCaptures": {
         "2": {
-          "name": "keyword.control.application.http-endpoint.path"
+          "name": "entity.name.endpoint.sysl"
         }
       },
       "patterns": [
@@ -169,7 +169,7 @@
       ]
     },
     "http-method": {
-      "begin": "^([ \t]+)(GET|POST|PUT|PATCH|DELETE)",
+      "begin": "^([ \t]+)(GET|POST|PUT|PATCH|DELETE):",
       "end": "^(?=[^ \t]|(\\1[^ \t]))",
       "name": "meta.type.http.method.sysl",
       "beginCaptures": {
