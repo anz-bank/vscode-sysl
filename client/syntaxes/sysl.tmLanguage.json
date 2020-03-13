@@ -31,6 +31,7 @@
       },
       "contentName": "meta.tag.application.sysl",
       "patterns": [
+        { "include": "#definition-keywords"},
         { "include": "#brackets" },
         { "include": "#comments" },
         { "include": "#annotation" },
@@ -40,6 +41,7 @@
         { "include": "#type" },
         { "include": "#alias" },
         { "include": "#endpoint" },
+        { "include": "#wrap" },
         { "include": "#string_doubleQuote" },
         { "include": "#string_singleQuote"}
       ]
@@ -79,6 +81,19 @@
         { "include": "#flow-control" },
         { "include": "#string_singleQuote"},
         { "include": "#string_doubleQuote" }
+      ]
+    },
+    "wrap": {
+      "begin": "^([ \t]+)(!wrap)( )+(\\w+)(?=[^:]*: *$)",
+      "end": "^(?=[^ \t]|(\\1[^ ]))",
+      "beginCaptures": {
+        "2": { "name": "keyword.other.application.type" },
+        "4": { "name": "entity.name.type.sysl" }
+      },
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#brackets" },
+        { "include": "#wrap-statement"}
       ]
     },
     "view": {
@@ -192,6 +207,10 @@
       "name": "keyword.control",
       "match": "\\b(return|[fF][oO][rR]|[Oo]ne [Oo]f|[Ll]oop|[Uu]ntil|[Ww]hile|alt|[Ii]f|[Ee]lse)\\b"
     },
+    "definition-keywords": {
+      "name": "keyword.other.sysl",
+      "match": "(!union|!type|!wrap|!table|!view|!alias)"
+    },
     "annotation": {
       "name": "entity.name.tag",
       "match": "@\\S+"
@@ -274,6 +293,18 @@
     "escaped-endpoint-char": {
       "name": "constant.character.escape.sysl",
       "match": "%[a-fA-F0-9][a-fA-F0-9]"
+    },
+    "wrap-statement": {
+      "comments": "used in wrap",
+      "begin": "^([ \t]+)(!table|!type|!union) \\w+\\s*(:\\s*\\n+)?",
+      "end": "(^(?=[^ \t\n#]|\\1[^ \t#])|\n)",
+      "beginCaptures": {
+        "2": { "name": "keyword.other.sysl"},
+        "4": { "name": "entity.name.type.sysl"}
+      },
+      "patterns": [
+        { "include": "#brackets" }
+      ]
     }
   }
 }
