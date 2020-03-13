@@ -122,7 +122,10 @@
       "end": "^(?=[^ \t\n#]|\\1[^ \t#])",
       "name": "meta.type.endpoint.sysl",
       "beginCaptures": {
-        "2": { "name": "support.type.application.endpoint" },
+        "2": {
+          "comments": "non-REST endpoint name",
+          "name": "entity.name.endpoint.sysl"
+        },
         "3": { "name": "string.quoted.double.endpoint.longname" }
       },
       "patterns": [
