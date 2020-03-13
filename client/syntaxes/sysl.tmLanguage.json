@@ -29,6 +29,7 @@
           "name": "variable.other.application"
         }
       },
+      "contentName": "variable.other.application",
       "patterns": [
         { "include": "#brackets" },
         { "include": "#comments" },
@@ -40,7 +41,7 @@
         { "include": "#alias" },
         { "include": "#endpoint" },
         { "include": "#string_doubleQuote" },
-        {"include": "#string_singleQuote"}
+        { "include": "#string_singleQuote"}
       ]
     },
     "alias": {
@@ -76,7 +77,7 @@
         { "include": "#brackets" },
         { "include": "#annotation" },
         { "include": "#flow-control" },
-        {"include": "#string_singleQuote"},
+        { "include": "#string_singleQuote"},
         { "include": "#string_doubleQuote" }
       ]
     },
@@ -256,11 +257,16 @@
       "end": "\\]",
       "name": "punctuation.section.application.attributes",
       "patterns": [
+        { "include": "#attribute-var"},
         { "include": "#operators" },
         { "include": "#pattern" },
         { "include": "#string_singleQuote" },
         { "include": "#formatted_string_doubleQuote" }
       ]
+    },
+    "attribute-var": {
+      "name": "entity.name.tag.sysl",
+      "match": "\\w+(?==)"
     }
   }
 }
