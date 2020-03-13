@@ -63,10 +63,10 @@
     },
     "type": {
       "name": "meta.type.application.type",
-      "begin": "^([ \t]+)(!type|!table) +\\w+(?=[^:]*: *$)",
+      "begin": "^([ \t]+)(!type|!table)( )+(\\w+)(?=[^:]*: *$)",
       "beginCaptures": {
         "2": { "name": "keyword.other.application.type" },
-        "3": { "name": "support.type.application.type" }
+        "4": { "name": "entity.name.type.sysl" }
       },
       "end": "^(?=[^ \t]|(\\1[^ ]))",
       "patterns": [
