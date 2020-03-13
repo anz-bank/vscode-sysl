@@ -26,10 +26,10 @@
       "end": "^(?=\\w)",
       "captures": {
         "1": {
-          "name": "variable.other.application"
+          "name": "entity.name.type.sysl"
         }
       },
-      "contentName": "variable.other.application",
+      "contentName": "meta.tag.application.sysl",
       "patterns": [
         { "include": "#brackets" },
         { "include": "#comments" },
@@ -270,6 +270,10 @@
     "attribute-var": {
       "name": "entity.name.tag.sysl",
       "match": "\\w+(?==)"
+    },
+    "escaped-endpoint-char": {
+      "name": "constant.character.escape.sysl",
+      "match": "%[a-fA-F0-9][a-fA-F0-9]"
     }
   }
 }
