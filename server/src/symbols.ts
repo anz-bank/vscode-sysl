@@ -1,5 +1,5 @@
 import fs = require("fs");
-import path = require('path')
+import path = require("path");
 import {URI} from "vscode-uri";
 // tslint:disable-next-line:no-var-requires
 const sysl = require("sysljs");

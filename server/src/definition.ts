@@ -1,5 +1,5 @@
 import { Definition, IConnection, Location, TextDocumentPositionParams } from "vscode-languageserver";
-import Uri from "vscode-uri";
+import { URI } from "vscode-uri";
 import { SymbolType } from "./symbols";
 import { ISourceContext, SymbolsProvider } from "./symbolsProvider";
 // tslint:disable-next-line:no-var-requires
@@ -39,7 +39,7 @@ export class DefinitionProvider  {
                     line: sc.start.line - 1,
                 },
             },
-            uri:  Uri.file(this.symbolsProvider.getRoot() + sc.file).toString(),
+            uri:  URI.file(this.symbolsProvider.getRoot() + sc.file).toString(),
         };
         return loc;
     }
