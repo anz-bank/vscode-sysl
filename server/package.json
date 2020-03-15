@@ -19,7 +19,7 @@
         "antlr4": "^4.7.1",
         "sysljs": "^1.0.5",
         "vscode-languageserver": "^5.1.0",
-        "vscode-uri": "^1.0.5"
+        "vscode-uri": "^2.1.1"
     },
     "scripts": {
         "test": "jest",

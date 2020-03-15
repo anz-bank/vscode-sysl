@@ -1,5 +1,6 @@
 import fs = require("fs");
-import Uri from "vscode-uri";
+import path = require('path')
+import {URI} from "vscode-uri";
 // tslint:disable-next-line:no-var-requires
 const sysl = require("sysljs");
 // tslint:disable-next-line:no-var-requires
@@ -46,7 +47,7 @@ parserToSymbolType[SyslParser.RULE_expr_func] = SymbolType.FuncCall;
 export class SyslSymbols {
 
     public loadAST(uri: string, listener: any): any {
-      const fileName = Uri.parse(uri).fsPath;
+      const fileName = URI.parse("file://" + path.resolve(uri)).fsPath;
       const input = fs.readFileSync(fileName, "utf8");
       return this.parse(input, listener);
     }
