@@ -18,7 +18,7 @@
     },
     "comments": {
       "name": "comment.line.hash.sysl",
-      "match": "^[ \t]*(#|\\|).*$"
+      "match": "[ \t]*(#|\\|).*$"
     },
     "application": {
       "name": "meta.type.application.sysl",
@@ -26,10 +26,12 @@
       "end": "^(?=\\w)",
       "captures": {
         "1": {
-          "name": "variable.other.application"
+          "name": "entity.name.type.sysl"
         }
       },
+      "contentName": "meta.tag.application.sysl",
       "patterns": [
+        { "include": "#definition-keywords"},
         { "include": "#brackets" },
         { "include": "#comments" },
         { "include": "#annotation" },
@@ -39,8 +41,9 @@
         { "include": "#type" },
         { "include": "#alias" },
         { "include": "#endpoint" },
+        { "include": "#wrap" },
         { "include": "#string_doubleQuote" },
-        {"include": "#string_singleQuote"}
+        { "include": "#string_singleQuote"}
       ]
     },
     "alias": {
@@ -62,10 +65,10 @@
     },
     "type": {
       "name": "meta.type.application.type",
-      "begin": "^([ \t]+)(!type|!table) +\\w+(?=[^:]*: *$)",
+      "begin": "^([ \t]+)(!type|!table)( )+(\\w+)( )*:( )*",
       "beginCaptures": {
         "2": { "name": "keyword.other.application.type" },
-        "3": { "name": "support.type.application.type" }
+        "4": { "name": "entity.name.type.sysl" }
       },
       "end": "^(?=[^ \t]|(\\1[^ ]))",
       "patterns": [
@@ -76,8 +79,21 @@
         { "include": "#brackets" },
         { "include": "#annotation" },
         { "include": "#flow-control" },
-        {"include": "#string_singleQuote"},
+        { "include": "#string_singleQuote"},
         { "include": "#string_doubleQuote" }
+      ]
+    },
+    "wrap": {
+      "begin": "^([ \t]+)(!wrap)( )+(\\w+)(?=[^:]*: *$)",
+      "end": "^(?=[^ \t]|(\\1[^ ]))",
+      "beginCaptures": {
+        "2": { "name": "keyword.other.application.type" },
+        "4": { "name": "entity.name.type.sysl" }
+      },
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#brackets" },
+        { "include": "#wrap-statement"}
       ]
     },
     "view": {
@@ -121,11 +137,15 @@
       "end": "^(?=[^ \t\n#]|\\1[^ \t#])",
       "name": "meta.type.endpoint.sysl",
       "beginCaptures": {
-        "2": { "name": "support.type.application.endpoint" },
+        "2": {
+          "comments": "non-REST endpoint name",
+          "name": "entity.name.endpoint.sysl"
+        },
         "3": { "name": "string.quoted.double.endpoint.longname" }
       },
       "patterns": [
         { "include": "#annotation" },
+        { "include": "#http-endpoint" },
         { "include": "#brackets" },
         { "include": "#operators" },
         { "include": "#string_doubleQuote" },
@@ -138,7 +158,7 @@
       "name": "meta.type.http.sysl",
       "beginCaptures": {
         "2": {
-          "name": "keyword.control.application.http-endpoint.path"
+          "name": "entity.name.endpoint.sysl"
         }
       },
       "patterns": [
@@ -149,7 +169,7 @@
       ]
     },
     "http-method": {
-      "begin": "^([ \t]+)(GET|POST|PUT|PATCH|DELETE)",
+      "begin": "^([ \t]+)(GET|POST|PUT|PATCH|DELETE):",
       "end": "^(?=[^ \t]|(\\1[^ \t]))",
       "name": "meta.type.http.method.sysl",
       "beginCaptures": {
@@ -186,6 +206,10 @@
     "flow-control": {
       "name": "keyword.control",
       "match": "\\b(return|[fF][oO][rR]|[Oo]ne [Oo]f|[Ll]oop|[Uu]ntil|[Ww]hile|alt|[Ii]f|[Ee]lse)\\b"
+    },
+    "definition-keywords": {
+      "name": "keyword.other.sysl",
+      "match": "(!union|!type|!wrap|!table|!view|!alias)"
     },
     "annotation": {
       "name": "entity.name.tag",
@@ -255,10 +279,31 @@
       "end": "\\]",
       "name": "punctuation.section.application.attributes",
       "patterns": [
+        { "include": "#attribute-var"},
         { "include": "#operators" },
         { "include": "#pattern" },
         { "include": "#string_singleQuote" },
         { "include": "#formatted_string_doubleQuote" }
+      ]
+    },
+    "attribute-var": {
+      "name": "entity.name.tag.sysl",
+      "match": "\\w+(?==)"
+    },
+    "escaped-endpoint-char": {
+      "name": "constant.character.escape.sysl",
+      "match": "%[a-fA-F0-9][a-fA-F0-9]"
+    },
+    "wrap-statement": {
+      "comments": "used in wrap",
+      "begin": "^([ \t]+)(!table|!type|!union) \\w+\\s*(:\\s*\\n+)?",
+      "end": "(^(?=[^ \t\n#]|\\1[^ \t#])|\n)",
+      "beginCaptures": {
+        "2": { "name": "keyword.other.sysl"},
+        "4": { "name": "entity.name.type.sysl"}
+      },
+      "patterns": [
+        { "include": "#brackets" }
       ]
     }
   }

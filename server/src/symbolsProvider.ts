@@ -2,7 +2,7 @@ import child_process = require("child_process");
 import fs = require("fs");
 import path = require("path");
 import { IConnection } from "vscode-languageserver";
-import Uri from "vscode-uri";
+import { URI } from "vscode-uri";
 // tslint:disable-next-line:no-var-requires
 import { ISettings, ISyslConfigChangeListener, SyslConfigProvider  } from "./config";
 import {SyslSymbols} from "./symbols";
@@ -47,11 +47,11 @@ export class SymbolsProvider extends SyslSymbols implements ISyslConfigChangeLis
     public getModuleNameFromRoot(root: string, filename: string) {
       const end = filename.indexOf(root, 0);
       const filePath = filename.substring(end + root.length);
-      return Uri.file(filePath).path;
+      return URI.file(filePath).path;
     }
 
     public docUriToTempFile(uri: string): string {
-      const filename = Uri.parse(uri).fsPath;
+      const filename = URI.parse(uri).fsPath;
       const jsonFile = path.basename(filename) + ".json";
       return path.join(this.getTempLocation(), jsonFile);
     }
@@ -70,7 +70,7 @@ export class SymbolsProvider extends SyslSymbols implements ISyslConfigChangeLis
         return;
       }
 
-      const filename = Uri.parse(uri).fsPath;
+      const filename = URI.parse(uri).fsPath;
       const tempOutputFile = this.docUriToTempFile(uri);
       const args = [
         "-mode", "json",
