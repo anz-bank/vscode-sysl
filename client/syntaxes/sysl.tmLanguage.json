@@ -37,6 +37,7 @@
         { "include": "#annotation" },
         { "include": "#http-endpoint" },
         { "include": "#view" },
+        { "include": "#enum" },
         { "include": "#abstract-view" },
         { "include": "#type" },
         { "include": "#alias" },
@@ -81,6 +82,21 @@
         { "include": "#flow-control" },
         { "include": "#string_singleQuote"},
         { "include": "#string_doubleQuote" }
+      ]
+    },
+    "enum": {
+      "name": "meta.type.application.enum.sysl",
+      "begin": "^([ \t]+)(!enum)( )+(\\w[^\"\\[]+)(?=[^\n]*: *$)",
+      "beginCaptures": {
+        "2": { "name": "keyword.other.application.type.enum.sysl" },
+        "4": { "name": "entity.name.type.sysl" }
+      },
+      "end": "^(?=[^ \t]|(\\1[^ ]))",
+      "patterns": [
+        { "include": "#enum-statement" },
+        { "include": "#comments" },
+        { "include": "#number_decimal" },
+        { "include": "#brackets" }
       ]
     },
     "wrap": {
@@ -209,7 +225,7 @@
     },
     "definition-keywords": {
       "name": "keyword.other.sysl",
-      "match": "(!union|!type|!wrap|!table|!view|!alias)"
+      "match": "(!union|!type|!wrap|!table|!view|!alias|!enum)"
     },
     "annotation": {
       "name": "entity.name.tag",
@@ -305,6 +321,13 @@
       "patterns": [
         { "include": "#brackets" }
       ]
+    },
+    "enum-statement": {
+      "comments": "used in enum",
+      "match": "^([ \t]+)(\\w+)(\\s*):(\\s*)(?=[1-9][0-9]+\\s*\\n)",
+      "captures": {
+        "2": { "name": "entity.name.other.attribute-name" }
+      }
     }
   }
 }
