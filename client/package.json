@@ -1,100 +1,25 @@
 {
     "name": "vscode-sysl",
-    "displayName": "vscode-sysl",
     "description": "VS Code extension for SYSL Language.",
-    "version": "0.0.8",
-    "author": "Sahejpreet Singh",
-    "publisher": "ANZ-BANK",
+    "author": "ANZ-OSS",
     "license": "Apache-2.0",
+    "version": "0.1.0",
+    "publisher": "ANZ-BANK",
     "repository": {
         "type": "git",
         "url": "https://github.com/anz-bank/vscode-sysl"
     },
     "engines": {
-        "vscode": "^1.30.0"
-    },
-    "categories": [
-        "Programming Languages"
-    ],
-    "activationEvents": [
-        "onLanguage:sysl"
-    ],
-    "main": "./out/extension",
-    "dependencies": {
-        "vscode-languageclient": "^5.1.0"
-    },
-    "contributes": {
-        "languages": [
-            {
-                "id": "sysl",
-                "aliases": [
-                    "Sysl",
-                    "sysl"
-                ],
-                "extensions": [
-                    ".sysl"
-                ],
-                "configuration": "./language-configuration.json"
-            }
-        ],
-        "grammars": [
-            {
-                "language": "sysl",
-                "scopeName": "source.sysl",
-                "path": "./syntaxes/sysl.tmLanguage.json"
-            }
-        ],
-        "configuration": [
-            {
-                "title": "Sysl configuration",
-                "properties": {
-                    "sysl.workspace.root": {
-                        "type": "string",
-                        "default": ".",
-                        "description": "Default root folder for the sysl compiler"
-                    },
-                    "sysl.tool.parser": {
-                        "type": "string",
-                        "default": {
-                            "default": "",
-                            "win32": ".\\server\\bin\\gosysl.exe",
-                            "darwin": "./server/bin/gosysl-darwin"
-                        },
-                        "description": "Path to Go-Sysl compiler"
-                    },
-                    "sysl.tool.tempOutput": {
-                        "type": "string",
-                        "default": "",
-                        "description": "Relative or Absolute Path where Sysl compiler can generate temporary output"
-                    }
-                }
-            }
-        ],
-        "commands": [
-            {
-                "command": "sysl.selectRoot",
-                "title": "SYSL: Select Root"
-            },
-            {
-                "command": "sysl.Build",
-                "title": "SYSL: Build Current"
-            }
-        ]
+        "vscode": "^1.33.0"
     },
     "scripts": {
-        "vscode:prepublish": "tsc -p ./",
-        "compile": "tsc -p ./",
-        "watch": "tsc -w -p ./",
-        "update-vscode": "node ./node_modules/vscode/bin/install",
-        "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "node ./node_modules/vscode/bin/test"
+        "update-vscode": "vscode-install",
+        "postinstall": "vscode-install"
+    },
+    "dependencies": {
+        "vscode-languageclient": "^5.2.1"
     },
     "devDependencies": {
-        "@types/mocha": "^2.2.42",
-        "@types/node": "^7.0.0",
-        "eslint": "^6.8.0",
-        "mocha": "^7.1.0",
-        "typescript": "^3.4.3",
-        "vscode": "^1.1.30"
+        "vscode": "^1.1.35"
     }
 }

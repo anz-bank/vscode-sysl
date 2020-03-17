@@ -22,3 +22,4 @@ deploy:
     repo: anz-bank/vscode-sysl
     tags: true
     condition: "$TRAVIS_NODE_VERSION = 10.0"
+
