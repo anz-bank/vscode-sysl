@@ -31,6 +31,9 @@ Builds all the open sysl files and generates output in workspace root's `.sysl-t
 
 ## Release Notes
 
+### 0.0.7
+- Updated the syntax highlighting
+
 ### 0.0.6
 - Introduce sysl.Build command
 - Fix path issues on windows
