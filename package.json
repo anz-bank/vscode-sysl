@@ -21,6 +21,12 @@
 	],
 	"main": "./client/out/extension",
 	"contributes": {
+		"commands":[
+			{
+				"command": "sysl.tools.installSyslLsp",
+            	"title": "Sysl: Install Language Server"
+			}
+		],
 		"languages": [
 			{
 				"id": "sysl",

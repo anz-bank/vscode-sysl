@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path';
-import { workspace, ExtensionContext } from 'vscode';
+import { workspace, commands, ExtensionContext } from 'vscode';
 
 import {
 	LanguageClient,
@@ -15,6 +15,7 @@ import {
 import { KeyObject } from 'crypto';
 
 import { getBinPath, getCurrentGoPath, getGoConfig, getToolsEnvVars } from './utils';
+import { installSyslLsp } from './installSyslLsp';
 
 let client: LanguageClient;
 
@@ -83,6 +84,7 @@ export function activate(context: ExtensionContext) {
 		serverOptions,
 		clientOptions
 	);
+	commands.registerCommand("sysl.tools.installSyslLsp", installSyslLsp)
 
 	// Start the client. This will also launch the server
 	client.start();
