@@ -4,18 +4,17 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path';
-import { workspace, commands, ExtensionContext } from 'vscode';
+import { window, commands, ExtensionContext } from 'vscode';
 
 import {
 	LanguageClient,
 	LanguageClientOptions,
 	ServerOptions,
-	TransportKind
 } from 'vscode-languageclient';
-import { KeyObject } from 'crypto';
 
 import { getBinPath, getCurrentGoPath, getGoConfig, getToolsEnvVars } from './utils';
 import { installSyslLsp } from './installSyslLsp';
+import { outputChannel } from './goStatus';
 
 let client: LanguageClient;
 
@@ -100,9 +99,22 @@ export function deactivate(): Thenable<void> | undefined {
 export function getLanguageServerToolPath(): string {
 	// Get the path to gopls or any alternative that the user might have set for gopls.
 	const goplsBinaryPath = getBinPath('sysllsp');
-	if (path.isAbsolute(goplsBinaryPath)) {
-		return goplsBinaryPath;
+	outputChannel.append(goplsBinaryPath);
+	if (!path.isAbsolute(goplsBinaryPath)) {
+		showMissingSyslLSPBox()
 	}
+	return goplsBinaryPath;
+}
+
+export function showMissingSyslLSPBox() {
+	window.showInformationMessage(
+		"You need to install Sysl LSP to use the language server, would you like to install it?",
+		"Yes", "No"
+	).then((value: string) => {
+		if (value == "Yes") {
+			commands.executeCommand("sysl.tools.installSyslLsp")
+		}
+	})
 }
 
 export function parseLanguageServerConfig(): LanguageServerConfig {

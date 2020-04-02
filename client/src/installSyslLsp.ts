@@ -40,15 +40,9 @@ export async function installSyslLsp() {
 		});
 	}
 	const editor = vscode.window.activeTextEditor;
-	const cwd = path.dirname(editor.document.uri.fsPath);
 
 	const goConfig = getGoConfig();
 	const buildFlags = goConfig['buildFlags'] || [];
-	const args = ['install', 'github.com/anz-bank/sysl/cmd/sysllsp', ...buildFlags];
-
-	if (goConfig['buildTags'] && buildFlags.indexOf('-tags') === -1) {
-		args.push('-tags', goConfig['buildTags']);
-	}
 
 	outputChannel.clear();
 	outputChannel.show();
@@ -59,16 +53,27 @@ export async function installSyslLsp() {
 		cwd: toolsTmpDir,
 		env: env
 	}
-	const getArgs = ["get", "-v", "-u", "github.com/anz-bank/sysl/cmd/sysl"];
-	//TODO: need to do install directly to the language server
+
+	const getArgs = ["get", "-v", "github.com/anz-bank/sysl/cmd/sysllsp"];
 	cp.execFile(goRuntimePath, getArgs, getOpts, (err, stdout, stderr) => {
 			outputChannel.appendLine(`running ` + goRuntimePath + ` `+ getArgs.join(" "));
 			if (err) {
 				outputChannel.appendLine(`Installation failed: ${stderr}`);
+			} else {
+				const args = ['install', 'github.com/anz-bank/sysl/cmd/sysllsp', ...buildFlags];
+				if (goConfig['buildTags'] && buildFlags.indexOf('-tags') === -1) {
+					args.push('-tags', goConfig['buildTags']);
+				}
+
+				const cwd = path.dirname(editor.document.uri.fsPath);
+
+				cp.execFile(goRuntimePath, args, { env, cwd }, (err, stdout, stderr) => {
+					outputChannel.appendLine(err ? `Installation failed: ${stderr}` : `Installation successful`);
+					if (!err) {
+						outputChannel.appendLine("Please reload the VS Code window to use the language server.")
+					}
+				});
 			}
 		}
 	)
-	cp.execFile(goRuntimePath, args, { env, cwd }, (err, stdout, stderr) => {
-		outputChannel.appendLine(err ? `Installation failed: ${stderr}` : `Installation successful`);
-	});
 }
