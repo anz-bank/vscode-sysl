@@ -1,14 +1,6 @@
 {
-    "defaultSeverity": "error",
-    "extends": [
-        "tslint:recommended"
-    ],
-    "jsRules": {},
-    "rules": {},
-    "rulesDirectory": [],
-    "linterOptions": {
-        "exclude": [
-            "server/src/sysl/*.js"
-        ]
-    }
+	"rules": {
+		"indent": [true, "tabs"],
+		"semicolon": [true, "always"]
+	}
 }
