@@ -1,12 +1,11 @@
 'use strict'
 import cp = require('child_process');
 import fs = require('fs');
-import path = require('path');
 import vscode = require('vscode');
 import { outputChannel } from './goStatus';
 import { envPath } from './goPath';
 
-import { getBinPath, getGoConfig, getTempFilePath} from './utils';
+import { getBinPath, getGoConfig, getTempFilePath } from './utils';
 
 export async function installSyslLsp() {
 	const goRuntimePath = getBinPath('go');
@@ -39,7 +38,6 @@ export async function installSyslLsp() {
 			HTTPS_PROXY: httpProxy
 		});
 	}
-	const editor = vscode.window.activeTextEditor;
 
 	const goConfig = getGoConfig();
 	const buildFlags = goConfig['buildFlags'] || [];
@@ -49,31 +47,29 @@ export async function installSyslLsp() {
 
 	// Install tools in a temporary directory, to avoid altering go.mod files.
 	const toolsTmpDir = fs.mkdtempSync(getTempFilePath('go-tools-'));
-	const getOpts = {
+	const opts = {
 		cwd: toolsTmpDir,
 		env: env
 	}
 
-	const getArgs = ["get", "-v", "github.com/anz-bank/sysl/cmd/sysllsp"];
-	cp.execFile(goRuntimePath, getArgs, getOpts, (err, stdout, stderr) => {
-			outputChannel.appendLine(`running ` + goRuntimePath + ` `+ getArgs.join(" "));
-			if (err) {
-				outputChannel.appendLine(`Installation failed: ${stderr}`);
-			} else {
-				const args = ['install', 'github.com/anz-bank/sysl/cmd/sysllsp', ...buildFlags];
-				if (goConfig['buildTags'] && buildFlags.indexOf('-tags') === -1) {
-					args.push('-tags', goConfig['buildTags']);
-				}
-
-				const cwd = path.dirname(editor.document.uri.fsPath);
-
-				cp.execFile(goRuntimePath, args, { env, cwd }, (err, stdout, stderr) => {
-					outputChannel.appendLine(err ? `Installation failed: ${stderr}` : `Installation successful`);
-					if (!err) {
-						outputChannel.appendLine("Please reload the VS Code window to use the language server.")
-					}
-				});
+	const getArgs = ["get", "-u", "-d", "-v", "github.com/anz-bank/sysl/cmd/sysllsp"];
+	outputChannel.appendLine(`running ` + goRuntimePath + ` ` + getArgs.join(" "));
+	cp.execFile(goRuntimePath, getArgs, opts, (err, stdout, stderr) => {
+		if (err) {
+			outputChannel.appendLine(`Installation failed: ${stderr}`);
+		} else {
+			const args = ['install', 'github.com/anz-bank/sysl/cmd/sysllsp', ...buildFlags];
+			if (goConfig['buildTags'] && buildFlags.indexOf('-tags') === -1) {
+				args.push('-tags', goConfig['buildTags']);
 			}
+
+			cp.execFile(goRuntimePath, args, opts, (err, stdout, stderr) => {
+				outputChannel.appendLine(err ? `Installation failed: ${stderr}` : `Installation successful`);
+				if (!err) {
+					outputChannel.appendLine("Please reload the VS Code window to use the language server.")
+				}
+			});
 		}
-	)
+	})
+
 }
