@@ -2,7 +2,7 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  * Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------*/
-// Forked and modidified on 1st of April 2020
+// Forked on 1st of April 2020
 'use strict';
 
 import vscode = require('vscode');

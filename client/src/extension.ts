@@ -4,15 +4,17 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path';
-import { window, commands, ExtensionContext } from 'vscode';
+import { window, commands } from 'vscode';
 
 import {
 	LanguageClient,
+	// eslint-disable-next-line no-unused-vars
 	LanguageClientOptions,
+	// eslint-disable-next-line no-unused-vars
 	ServerOptions,
 } from 'vscode-languageclient';
 
-import { getBinPath, getCurrentGoPath, getGoConfig, getToolsEnvVars } from './utils';
+import { getBinPath,  getToolsEnvVars } from './utils';
 import { installSyslLsp } from './installSyslLsp';
 import { outputChannel } from './goStatus';
 
@@ -23,7 +25,7 @@ interface LanguageServerConfig {
 }
 
 
-export function activate(context: ExtensionContext) {
+export function activate() {
 	/*
 	// The server is implemented in node
 	let serverModule = context.asAbsolutePath(

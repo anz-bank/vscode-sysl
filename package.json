@@ -1,98 +1,101 @@
 {
-	"name": "vscode-sysl",
-	"description": "VS Code extension for SYSL Language.",
-	"author": "ANZ-OSS",
-	"license": "Apache-2.0",
-	"version": "0.1.0",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/anz-bank/vscode-sysl"
-	},
-	"publisher": "ANZ-BANK",
-	"categories": [
-		"Programming Languages"
-	],
-	"keywords": [],
-	"engines": {
-		"vscode": "^1.33.0"
-	},
-	"activationEvents": [
-		"onLanguage:sysl"
-	],
-	"main": "./client/out/extension",
-	"contributes": {
-		"commands":[
-			{
-				"command": "sysl.tools.installSyslLsp",
-            	"title": "Sysl: Install Language Server"
-			}
-		],
-		"languages": [
-			{
-				"id": "sysl",
-				"aliases": [
-					"Sysl",
-					"sysl"
-				],
-				"extensions": [
-					".sysl"
-				],
-				"configuration": "./language-configuration.json"
-			}
-		],
-		"grammars": [
-			{
-				"language": "sysl",
-				"scopeName": "source.sysl",
-				"path": "./syntaxes/sysl.tmLanguage.json"
-			}
-		],
-		"configuration": {
-			"type": "object",
-			"title": "Sysl configuration",
-			"properties": {
-				"sysl.workspace.root": {
-					"type": "string",
-					"default": ".",
-					"description": "Default root folder for the sysl compiler"
-				},
-				"sysl.tool.tempOutput": {
-					"type": "string",
-					"default": "",
-					"description": "Relative or Absolute Path where Sysl compiler can generate temporary output"
-				},
-				"sysl.tool.maxNumberOfProblems": {
-					"scope": "resource",
-					"type": "number",
-					"default": 100,
-					"description": "Controls the maximum number of problems produced by the server."
-				},
-				"sysl.trace.server": {
-					"scope": "window",
-					"type": "string",
-					"enum": [
-						"off",
-						"messages",
-						"verbose"
-					],
-					"default": "off",
-					"description": "Traces the communication between VS Code and the language server."
-				}
-			}
-		}
-	},
-	"scripts": {
-		"vscode:prepublish": "cd client && npm run update-vscode && cd .. && npm run compile",
-		"compile": "tsc -b",
-		"package": "vsce package",
-		"watch": "tsc -b -w",
-		"postinstall": "cd client && npm install && cd ..",
-		"test": "sh ./scripts/e2e.sh"
-	},
-	"devDependencies": {
-		"@types/mocha": "^5.2.7",
-		"@types/node": "^12.11.7",
-		"tslint": "^5.16.0",
-		"typescript": "^3.6.4"
-	}
+  "name": "vscode-sysl",
+  "description": "VS Code extension for SYSL Language.",
+  "author": "ANZ-OSS",
+  "license": "Apache-2.0",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anz-bank/vscode-sysl"
+  },
+  "publisher": "ANZ-BANK",
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [],
+  "engines": {
+    "vscode": "^1.33.0"
+  },
+  "activationEvents": [
+    "onLanguage:sysl"
+  ],
+  "main": "./client/out/extension",
+  "contributes": {
+    "commands": [
+      {
+        "command": "sysl.tools.installSyslLsp",
+        "title": "Sysl: Install Language Server"
+      }
+    ],
+    "languages": [
+      {
+        "id": "sysl",
+        "aliases": [
+          "Sysl",
+          "sysl"
+        ],
+        "extensions": [
+          ".sysl"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "sysl",
+        "scopeName": "source.sysl",
+        "path": "./syntaxes/sysl.tmLanguage.json"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Sysl configuration",
+      "properties": {
+        "sysl.workspace.root": {
+          "type": "string",
+          "default": ".",
+          "description": "Default root folder for the sysl compiler"
+        },
+        "sysl.tool.tempOutput": {
+          "type": "string",
+          "default": "",
+          "description": "Relative or Absolute Path where Sysl compiler can generate temporary output"
+        },
+        "sysl.tool.maxNumberOfProblems": {
+          "scope": "resource",
+          "type": "number",
+          "default": 100,
+          "description": "Controls the maximum number of problems produced by the server."
+        },
+        "sysl.trace.server": {
+          "scope": "window",
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Traces the communication between VS Code and the language server."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "cd client && npm run update-vscode && cd .. && npm run compile",
+    "lint": "eslint . --ext .ts,.tsx",
+    "compile": "tsc -b",
+    "package": "vsce package",
+    "watch": "tsc -b -w",
+    "postinstall": "cd client && npm install && cd ..",
+    "test": "sh ./scripts/e2e.sh"
+  },
+  "devDependencies": {
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^12.11.7",
+    "@typescript-eslint/eslint-plugin": "^2.26.0",
+    "@typescript-eslint/parser": "^2.26.0",
+    "eslint": "^6.8.0",
+    "typescript": "^3.6.4"
+  }
 }
