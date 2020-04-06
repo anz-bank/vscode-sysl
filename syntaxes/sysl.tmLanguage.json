@@ -287,7 +287,7 @@
             "match": "\\b(GET|POST|PUT|PATCH|DELETE)\\b"
         },
         "query-params": {
-            "begin": "(?=\\?)",
+            "begin": "(?=\\?\\w)",
             "end": "(?=[ \t:\\[])",
             "patterns": [
                 {
@@ -364,21 +364,22 @@
                     "include": "#brackets"
                 },
                 {
+                    "include": "#app-reference"
+                },
+                {
+                    "include": "#package-name"
+                },
+                {
+                    "include": "#operators"
+                },
+                {
                     "include": "#app-name"
                 }
             ]
         },
         "app-name": {
-            "match": "([-.\\w ]+\\b)[ \t]*(::)?",
-            "name": "meta.application.def.name.sysl",
-            "captures": {
-                "1": {
-                    "name": "entity.name.type.app-name.sysl"
-                },
-                "2": {
-                    "name": "keyword.other.app-name-separator.sysl"
-                }
-            }
+            "match": "[-.\\w ]+\\b",
+            "name": "entity.name.type.app-name.sysl"
         },
         "field-assignment": {
             "match": "([-.\\w]+)(?=[ \t]*(\\([^ \\)]+\\))?[ \t]*<:)",
