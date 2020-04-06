@@ -386,7 +386,7 @@
             "name": "entity.name.type.field.sysl"
         },
         "enum-assignment": {
-            "match": "^[ \t]+([-\\w]+)(?=[ \t]*:)",
+            "match": "^[ \t]+([-\\w]+)(?=[ \t]*:[ \t]*\\d+)",
             "name": "entity.name.type.enum.sysl"
         },
         "range": {
