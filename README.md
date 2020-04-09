@@ -73,6 +73,10 @@ vsce
 
 ## Release Notes
 
+### 0.1.2
+
+* Stop extension stealing the output window
+
 ### 0.1.1
 
 * Fixed incorrect CI/CD configuration

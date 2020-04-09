@@ -10,11 +10,12 @@ import {
 	LanguageClient,
 	// eslint-disable-next-line no-unused-vars
 	LanguageClientOptions,
+	RevealOutputChannelOn,
 	// eslint-disable-next-line no-unused-vars
 	ServerOptions,
 } from 'vscode-languageclient';
 
-import { getBinPath,  getToolsEnvVars } from './utils';
+import { getBinPath, getToolsEnvVars } from './utils';
 import { installSyslLsp } from './installSyslLsp';
 import { outputChannel } from './goStatus';
 
@@ -76,6 +77,7 @@ export function activate() {
 	let clientOptions: LanguageClientOptions = {
 		// Register the server for plain text documents
 		documentSelector: [{ scheme: 'file', language: 'sysl' }],
+		revealOutputChannelOn: RevealOutputChannelOn.Never,
 	};
 
 	// Create the language client and start the client.
