@@ -73,6 +73,10 @@ vsce
 
 ## Release Notes
 
+### 0.1.1
+
+* Fixed incorrect CI/CD configuration
+
 ### 0.1.0
 
 * Upgrading vscode-sysl plugin base to current sample version
