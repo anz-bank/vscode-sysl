@@ -1,6 +1,0 @@
-Model:
-  !type Foo:
-    id <: int
-
-  !type Bar:
-    foo <: set of Foo

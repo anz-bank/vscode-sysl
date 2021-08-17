@@ -1,17 +1,19 @@
-# **The** VS Code extension for Sysl
+# Sysl extension for Visual Studio Code
+
+Accelerate your Sysl spec development with rich language features and interactive side-by-side diagrams.
 
 ## Structure
 
 ```
 .
-├── client // Language Client
-│   ├── src
-│   │   ├── test // End to End tests for Language Client / Server
-│   │   └── extension.ts // Language Client entry point
-├── package.json // The extension manifest.
-└── oldserver // old Language Server
-    └── src
-        └── server.ts // Language Server entry point
+├── package.json            # Manifest
+├── extension               # VS Code integration points
+│   └── src
+│       ├── lsp             # Implementation of the LSP client, including server download
+│       ├── syntax          # Configuration for syntax highlighting
+│       ├── test            # Tests for the extension
+│       ├── constants.ts    # Names used by the extension declared in package.json
+│       └── main.ts         # Extension entry point
 ```
 
 ## Features
@@ -22,109 +24,100 @@ Find definition of a type.
 
 ### Syntax Highlighting
 
-Provides syntax colouring for the Sysl Language.
+Sysl source syntax highlighting improves the legibility of Sysl specifications.
 
-* `package.json` - this is the manifest file in which you declare your language support and define the location of the grammar file that has been copied into your extension.
-* `syntaxes/sysl.tmLanguage.json` - this is the Text mate grammar file that is used for tokenization.
-* `language-configuration.json` - this is the language configuration, defining the tokens that are used for comments and brackets.
+The Sysl language server provides additional language features, and is implemented in [anz-bank/sysl](https://github.com/anz-bank/sysl/blob/master/cmd/sysllsp/main.go).
 
 ### Commands
 
-#### sysl.SelectRoot
+#### sysl.tools.installSyslLsp
 
-`sysl` tool expects root folder to import other modules. Set root by using this command as Sysl parser requires root to be set.
-
-#### sysl.Build
-
-Builds all the open sysl files and generates output in workspace root's `.sysl-tmp` directory.
+Initiates a process to install the Sysl Language Server, which provides Sysl language features such as autocompletion.
 
 ## Requirements
 
-npm
-ts
-vsce
+-   [Visual Studio Code](https://code.visualstudio.com/)
+-   `yarn`
 
 ## Usage
 
 ### Running the extension
 
-* Run `npm install` in this folder. This installs all necessary npm modules in both the client folder
-* Open VS Code on this folder.
-* Press Ctrl+Shift+B to compile the client.
-* Switch to the Debug viewlet.
-* Select `Launch Client` from the drop down.
-* Run the launch config.
-* If you want to debug the server as well use the launch configuration `Attach to Server`
-* In the [Extension Development Host] instance of VSCode, open a sysl document in 'plain text' language mode.
-  * Type sysl code for syntax highlighting and diagnostics
+-   Run `yarn install` in this folder
+-   Press `F5` to invoke the `Run Extension` launch configuration
+-   In the `[Extension Development Host]` instance of VS Code, open a Sysl file (`*.sysl`) to exercise the extension's features
 
 ### Building the extension
 
-* `npm install`
-* `npm run compile`
-* `npm run package` creates a vsix extension
+-   `yarn install`
+-   `yarn compile`
+-   `yarn package` creates a [VSIX bundle](https://code.visualstudio.com/docs/editor/extension-marketplace#_install-from-a-vsix)
 
-## Known Issues
-
-* `sysl.Build` commands are no longer functional
-* `sysl.SelectRoot` command WIP for golang implementation
-* `Attach to server` no longer works due to upgrading to go server (WIP)
-* `Goto definition` WIP for golang implementation
 
 ## Release Notes
 
+### 0.2.0
+
+-   Clean up repository for new development
+    -   Remove unused `oldserver`
+    -   Update and refactor old code, including launch tasks, `package.json`, dependencies, TypeScript code and config
+    -   Update and fix tests - no real coverage, but there wasn't before either, and they run properly now
+    -   Add `publish` GitHub workflow to publishes commits to `master`
+    -   Tidy with `prettier`
+    -   Switch from `npm` to `yarn`
+
 ### 0.1.2
 
-* Stop extension stealing the output window
+-   Stop extension stealing the output window
 
 ### 0.1.1
 
-* Fixed incorrect CI/CD configuration
+-   Fixed incorrect CI/CD configuration
 
 ### 0.1.0
 
-* Upgrading vscode-sysl plugin base to current sample version
-* Using a golang lsp instead of typescipt for sysl diagnostics
+-   Upgrading vscode-sysl plugin base to current sample version
+-   Using a golang lsp instead of typescipt for sysl diagnostics
 
 ### 0.0.8
 
-* Total rewrite of syntax highlighter
+-   Total rewrite of syntax highlighter
 
 ### 0.0.7
 
-* Updated the syntax highlighting
+-   Updated the syntax highlighting
 
 ### 0.0.6
 
-* Introduce sysl.Build command
-* Fix path issues on windows
+-   Introduce sysl.Build command
+-   Fix path issues on windows
 
 ### 0.0.5
 
-* onDefinition for view calls
-* Updated syntax highlighting rules
-* Recognize latest version of sysl grammar
-* use sysljs 1.0.3
+-   onDefinition for view calls
+-   Updated syntax highlighting rules
+-   Recognize latest version of sysl grammar
+-   use sysljs 1.0.3
 
 ### 0.0.4
 
-* Recognize latest version of sysl grammar
-* use sysljs 1.0.2
+-   Recognize latest version of sysl grammar
+-   use sysljs 1.0.2
 
 ### 0.0.3
 
-* Recognize latest version of sysl grammar
+-   Recognize latest version of sysl grammar
 
 ### 0.0.2
 
-* Adds gosysl for windows.
-* Handles sysl transformation syntax.
+-   Adds gosysl for windows.
+-   Handles sysl transformation syntax.
 
 ### 0.0.1
 
 Initial version.
 
-* Syntax highlighting.
-* Syntax errors.
-* Go to Definition for Application, Endpoints.
-* `go-sysl` binary added for osx users.
+-   Syntax highlighting.
+-   Syntax errors.
+-   Go to Definition for Application, Endpoints.
+-   `go-sysl` binary added for osx users.
