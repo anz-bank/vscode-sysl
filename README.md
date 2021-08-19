@@ -53,8 +53,13 @@ Initiates a process to install the Sysl Language Server, which provides Sysl lan
 -   `yarn compile`
 -   `yarn package` creates a [VSIX bundle](https://code.visualstudio.com/docs/editor/extension-marketplace#_install-from-a-vsix)
 
-
 ## Release Notes
+
+### 0.2.1
+
+-   Fix automatic indentation behavior:
+    -   Indent the line following a line ending in `:`
+    -   Never dedent automatically
 
 ### 0.2.0
 
