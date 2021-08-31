@@ -7,20 +7,37 @@
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": ["--extensionDevelopmentPath=${workspaceFolder}"],
-			"outFiles": ["${workspaceFolder}/out/**/*.js"],
+			"outFiles": [
+				"${workspaceFolder}/out/**/*.js",
+				"${workspaceFolder}/renderer/build/**",
+			],
 			"preLaunchTask": "${defaultBuildTask}"
 		},
 		{
-			  "name": "Extension Tests",
-			  "type": "extensionHost",
-			  "request": "launch",
-			  "runtimeExecutable": "${execPath}",
-			  "args": [
+			"name": "Test Extension",
+			"type": "extensionHost",
+			"request": "launch",
+			"runtimeExecutable": "${execPath}",
+			"args": [
+				"${workspaceFolder}/extension/test/fixtures/",
 				"--disable-extensions",
 				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
-			  ],
-			  "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
-			}
+				"--extensionTestsPath=${workspaceFolder}/out/test/ui/index"
+			],
+			"outFiles": [
+				"${workspaceFolder}/out/test/**/*.js",
+				"${workspaceFolder}/renderer/build/**"
+			]
+		},
+		{
+			"name": "Unit Test Extension",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceFolder}/node_modules/.bin/ts-node",
+			"cwd": "${workspaceFolder}",
+			"args": [
+				"extension/test/runUnitTest"
+			]
+		}
 	]
 }

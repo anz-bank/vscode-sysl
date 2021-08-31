@@ -16,10 +16,10 @@
     "plugins": ["@typescript-eslint"],
     "ignorePatterns": [
         "out/",
-        "node_modules/"
+        "node_modules/",
         "extension/lsp/utils.ts",
         "extension/lsp/go*.ts",
-        "extension/node_modules/",
+        "extension/node_modules/"
     ],
     "rules": {
         "no-unused-vars": "off",

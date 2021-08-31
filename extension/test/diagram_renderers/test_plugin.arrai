@@ -1,0 +1,19 @@
+# For each app, renders two nodes in a group with an edge between them.
+
+let toJson = //encoding.json.encoder((strict: false));
+
+\input
+	let apps = input.models(0).rel.app => $`${.appName::_}`;
+	(
+		output: toJson((
+			nodes: //rel.union(apps => {
+				(key: $`group_${.}`, label: $`group_${.}`, isGroup: true),
+				(key: $`node_${.}.1`, label: $`node_${.}.1`, group: $`group_${.}`),
+				(key: $`node_${.}.2`, label: $`node_${.}.2`, group: $`group_${.}`),
+			}),
+			edges: apps => (key: $`node_${.}.1->node_${.}.2`, from: $`node_${.}.1`, to: $`node_${.}.2`),
+			templates: (
+				diagramLabel: 'test_plugin',
+			),
+		))
+	)

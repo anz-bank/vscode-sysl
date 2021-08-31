@@ -1,0 +1,24 @@
+name: Plugins
+
+on: [pull_request]
+
+jobs:
+  build-and-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Ensure no changes
+        working-directory: extension/plugins
+        run: make -B plugins && make check-clean
+
+      - name: Run tests
+        working-directory: extension/plugins
+        run: make test

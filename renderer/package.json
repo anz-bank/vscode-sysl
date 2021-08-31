@@ -1,0 +1,64 @@
+{
+    "name": "sysl",
+    "displayName": "Sysl",
+    "description": "Write Sysl specs easily with instant visual feedback.",
+    "version": "0.3.0",
+    "categories": [
+        "Programming Languages"
+    ],
+    "author": "ANZ Bank",
+    "publisher": "anz-bank",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/anz-bank/vscode-sysl"
+    },
+    "license": "Apache-2.0",
+    "scripts": {
+        "start": "craco start",
+        "build": "craco build && browserify -e build/static/js/main.js -o build/static/js/main.js",
+        "test": "craco test",
+        "eject": "craco eject"
+    },
+    "dependencies": {
+        "@craco/craco": "^6.2.0",
+        "@material-ui/core": "^4.12.3",
+        "@material-ui/lab": "^4.0.0-alpha.60",
+        "@testing-library/jest-dom": "^5.11.4",
+        "@testing-library/react": "^11.1.0",
+        "@testing-library/user-event": "^12.1.10",
+        "gojs": "^2.1.47",
+        "gojs-react": "^1.0.10",
+        "lodash": "^4.17.21",
+        "react": "^17.0.2",
+        "react-dom": "^17.0.2",
+        "react-scripts": "4.0.3"
+    },
+    "devDependencies": {
+        "@types/jest": "^26.0.24",
+        "@types/lodash": "^4.14.172",
+        "@types/node": "^16.4.12",
+        "@types/react": "^17.0.15",
+        "@types/react-dom": "^17.0.9",
+        "browserify": "^17.0.0",
+        "canvas": "^2.8.0",
+        "typescript": "^4.3.5"
+    },
+    "eslintConfig": {
+        "extends": [
+            "react-app",
+            "react-app/jest"
+        ]
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    }
+}

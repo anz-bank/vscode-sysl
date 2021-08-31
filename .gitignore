@@ -1,5 +1,11 @@
+# Test
+.vscode-test
+extension/test/screenshots
+/go.*
+
+# Build
 out
 node_modules
-.vscode-test
 *.vsix
 *error.log
+/main.js*

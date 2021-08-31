@@ -1,0 +1,24 @@
+# For each app, renders three nodes in a group with a cycle of edges between them.
+
+let toJson = //encoding.json.encoder((strict: false));
+
+\input
+	let apps = input.models(0).rel.app => $`${.appName::_}`;
+	(
+		output: toJson((
+			nodes: //rel.union(apps => {
+				(key: $`group_${.}`, label: $`group_${.}`, isGroup: true),
+				(key: $`node_${.}.1`, label: $`node_${.}.1`, group: $`group_${.}`),
+				(key: $`node_${.}.2`, label: $`node_${.}.2`, group: $`group_${.}`),
+				(key: $`node_${.}.3`, label: $`node_${.}.3`, group: $`group_${.}`),
+			}),
+			edges: //rel.union(apps => {
+				(key: $`node_${.}.1->node_${.}.2`, from: $`node_${.}.1`, to: $`node_${.}.2`),
+				(key: $`node_${.}.2->node_${.}.3`, from: $`node_${.}.2`, to: $`node_${.}.3`),
+				(key: $`node_${.}.3->node_${.}.1`, from: $`node_${.}.3`, to: $`node_${.}.1`),
+			}),
+			templates: (
+				diagramLabel: 'test_plugin_2',
+			),
+		))
+	)

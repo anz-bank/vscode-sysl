@@ -1,10 +1,13 @@
 # Dependencies
 node_modules
+/extension/test/fixtures
+/extension/test/screenshots
 
 # Production
 /out
 /dist
-/build
+/renderer/build
+main.js*
 
 # Misc
 .DS_Store

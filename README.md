@@ -1,26 +1,44 @@
+# <img width="400px" src="./docs/vscode-logo-text.png"/> + <img width="400px" src="./docs/sysl-logo-text.png"/>
+
 # Sysl extension for Visual Studio Code
 
 Accelerate your Sysl spec development with rich language features and interactive side-by-side diagrams.
+
+![Screenshot of the Sysl extension](./docs/hero-screenshot.png)
 
 ## Structure
 
 ```
 .
-├── package.json            # Manifest
-├── extension               # VS Code integration points
-│   └── src
-│       ├── lsp             # Implementation of the LSP client, including server download
-│       ├── syntax          # Configuration for syntax highlighting
-│       ├── test            # Tests for the extension
-│       ├── constants.ts    # Names used by the extension declared in package.json
-│       └── main.ts         # Extension entry point
+├── package.json        # Manifest for the complete extension
+├── extension           # VS Code integration points
+│   ├── editor          # Custom editor binding for the renderer
+│   ├── lsp             # Implementation of the LSP client, including server download
+│   ├── plugins         # Built-in Sysl renderers
+|   │   └── integration # The integration diagram renderer
+│   ├── syntax          # Configuration for syntax highlighting
+│   ├── test            # Tests for the extension
+|   │   ├── fixtures    # Source files for testing
+|   │   └── ui          # End-to-end UI test cases
+│   ├── tools           # Wrappers for finding and using external programs (especially Sysl)
+│   ├── transform       # Implement mappings from a Sysl source Document to a editor view model
+│   ├── constants.ts    # Names used by the extension declared in package.json
+│   └── main.ts         # Extension entry point
+│
+└── renderer                # React app to render custom views for the extension
+    ├── build               # Build output (the extension loads runtime JS/CSS from here)
+    ├── src                 # React app source code
+    │   ├── components      # Components that comprise the app
+    │   │   └── Diagram.tsx # Renders the diagram model in GoJS
+    │   ├── index.css       # Root styling
+    │   ├── index.ts        # Document root
+    │   └── App.tsx         # React app container
+    ├── craco.config.js     # Additional config for the create-react-app build
+    └── package.json        # Manifest for the React app
+
 ```
 
 ## Features
-
-### Goto Definition
-
-Find definition of a type.
 
 ### Syntax Highlighting
 
@@ -28,32 +46,59 @@ Sysl source syntax highlighting improves the legibility of Sysl specifications.
 
 The Sysl language server provides additional language features, and is implemented in [anz-bank/sysl](https://github.com/anz-bank/sysl/blob/master/cmd/sysllsp/main.go).
 
+### Diagram rendering
+
+Visualize a specification as an interactive diagram in real time.
+
+### Configuration
+
+| Setting                | Description                                         |
+| ---------------------- | --------------------------------------------------- |
+| `sysl.tool.binaryPath` | Path to the Sysl binary to use for Sysl operations. |
+
 ### Commands
 
-#### sysl.tools.installSyslLsp
-
-Initiates a process to install the Sysl Language Server, which provides Sysl language features such as autocompletion.
+| Command                     | Description                                                                                                            |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `sysl.renderDiagram`        | Renders the current Sysl spec as an interactive diagram in a custom editor.                                            |
+| `sysl.tools.installSyslLsp` | Initiates a process to install the Sysl Language Server, which provides Sysl language features such as autocompletion. |
 
 ## Requirements
 
--   [Visual Studio Code](https://code.visualstudio.com/)
--   `yarn`
+Just [Visual Studio Code](https://code.visualstudio.com/). The extension will fetch any other dependencies it needs (e.g. the Sysl binary).
 
-## Usage
+---
 
-### Running the extension
+## Development
 
--   Run `yarn install` in this folder
--   Press `F5` to invoke the `Run Extension` launch configuration
--   In the `[Extension Development Host]` instance of VS Code, open a Sysl file (`*.sysl`) to exercise the extension's features
+### Building
 
-### Building the extension
+-   `yarn install`: Installs all JS dependencies.
+-   `yarn build`: Transpiles TypeScript and creates a production build of both renderer and extension scripts.
+-   `yarn package` creates a [VSIX bundle](https://code.visualstudio.com/docs/editor/extension-marketplace#_install-from-a-vsix) of the complete extension.
 
--   `yarn install`
--   `yarn compile`
--   `yarn package` creates a [VSIX bundle](https://code.visualstudio.com/docs/editor/extension-marketplace#_install-from-a-vsix)
+To work on the renderer in isolation, run `yarn install` and `yarn start` in the `renderer/` directory.
+
+### Testing
+
+To run the extension manually in an Extension Development Host, press `F5` to invoke the `Run Extension` launch configuration. In the new VS Code window, open a Sysl file (`*.sysl`) to exercise the extension's features
+
+To run automated tests, including end-to-end UI tests, run `yarn test` or launch the `Test Extension` launch configuration.
+
+---
 
 ## Release Notes
+
+### 0.3.0
+
+-   Basic side-by-side integration diagram rendering.
+-   Initial support for plugins to render custom diagrams.
+-   Cross-platform end-to-end test framework ([follows docs with @vscode/test-electron](https://code.visualstudio.com/api/working-with-extensions/testing-extension)).
+
+### 0.2.2
+
+-   Add UI testing
+    -   A very [explanatory blog post](https://developers.redhat.com/blog/2019/11/18/new-tools-for-automating-end-to-end-tests-for-vs-code-extensions#writing_the_tests)
 
 ### 0.2.1
 

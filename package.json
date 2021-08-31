@@ -4,7 +4,7 @@
     "description": "Write Sysl specs easily with instant visual feedback.",
     "author": "ANZ Bank",
     "publisher": "anz-bank",
-    "version": "0.2.1",
+    "version": "0.3.0",
     "license": "Apache-2.0",
     "repository": {
         "type": "git",
@@ -13,8 +13,11 @@
     "categories": [
         "Programming Languages"
     ],
-    "icon": "extension/icon.png",
-    "keywords": [],
+    "icon": "docs/icon.png",
+    "keywords": [
+        "specification",
+        "diagrams"
+    ],
     "engines": {
         "vscode": "^1.52.0"
     },
@@ -26,9 +29,25 @@
         "commands": [
             {
                 "command": "sysl.tools.installSyslLsp",
-                "title": "Sysl: Install Language Server"
+                "title": "Install Language Server",
+                "category": "Sysl"
+            },
+            {
+                "command": "sysl.renderDiagram",
+                "title": "Render Diagram",
+                "category": "Sysl",
+                "icon": "$(open-preview)"
             }
         ],
+        "menus": {
+            "editor/title": [
+                {
+                    "when": "resourceExtname == .sysl && activeCustomEditorId != 'sysl.gojsDiagram",
+                    "command": "sysl.renderDiagram",
+                    "group": "navigation@1"
+                }
+            ]
+        },
         "languages": [
             {
                 "id": "sysl",
@@ -51,48 +70,48 @@
         ],
         "configuration": {
             "type": "object",
-            "title": "Sysl configuration",
+            "title": "Sysl",
             "properties": {
-                "sysl.workspace.root": {
-                    "type": "string",
-                    "default": ".",
-                    "description": "Default root folder for the sysl compiler"
-                },
-                "sysl.tool.tempOutput": {
+                "sysl.tool.binaryPath": {
                     "type": "string",
                     "default": "",
-                    "description": "Relative or Absolute Path where Sysl compiler can generate temporary output"
-                },
-                "sysl.tool.maxNumberOfProblems": {
-                    "scope": "resource",
-                    "type": "number",
-                    "default": 100,
-                    "description": "Controls the maximum number of problems produced by the server."
-                },
-                "sysl.trace.server": {
-                    "scope": "window",
-                    "type": "string",
-                    "enum": [
-                        "off",
-                        "messages",
-                        "verbose"
-                    ],
-                    "default": "off",
-                    "description": "Traces the communication between VS Code and the language server."
+                    "description": "Path to the Sysl binary to use for Sysl operations."
                 }
             }
-        }
+        },
+        "customEditors": [
+            {
+                "viewType": "sysl.gojsDiagram",
+                "displayName": "Sysl Diagram",
+                "selector": [
+                    {
+                        "filenamePattern": "*.sysl"
+                    }
+                ],
+                "priority": "option"
+            }
+        ]
     },
     "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "tidy": "prettier --write .",
-        "lint": "eslint . --ext .ts,.tsx",
+        "vscode:prepublish": "yarn build",
+        "esbuild-base": "esbuild ./extension/main.ts --bundle --outfile=out/main.js --external:vscode --external:electron --format=cjs --platform=node",
+        "esbuild": "npm run esbuild-base -- --sourcemap",
+        "esbuild-prod": "npm run esbuild-base -- --minify",
+        "postinstall": "yarn --cwd renderer install",
+        "prebuild": "yarn install",
+        "build": "yarn --cwd renderer build && yarn compile && yarn esbuild-prod && yarn plugins",
         "compile": "tsc",
+        "plugins": "make -C extension/plugins plugins",
         "watch": "tsc -w",
         "package": "vsce package",
-        "test": "node out/test/runTest"
+        "tidy": "prettier --write .",
+        "lint": "eslint . --ext .ts,.tsx",
+        "test": "yarn test-unit && yarn test-ui",
+        "test-ui": "node out/test/runTest",
+        "test-unit": "ts-node extension/test/runUnitTest"
     },
     "devDependencies": {
+        "@types/chai": "^4.2.21",
         "@types/glob": "^7.1.4",
         "@types/mocha": "^9.0.0",
         "@types/node": "^14.17.5",
@@ -100,12 +119,23 @@
         "@typescript-eslint/eslint-plugin": "^2.26.0",
         "@typescript-eslint/parser": "^2.26.0",
         "@vscode/test-electron": "^1.6.2",
+        "chai": "^4.3.4",
+        "download": "^8.0.0",
+        "esbuild": "^0.12.21",
         "eslint": "^7.32.0",
         "glob": "^7.1.7",
-        "mocha": "^9.0.3",
+        "got": "^11.8.2",
+        "mocha": "^9.1.0",
+        "p-retry": "^4.6.1",
         "prettier": "^2.3.2",
+        "sinon": "^11.1.2",
+        "ts-node": "^10.2.1",
         "typescript": "^4.3.5",
-        "vscode-languageclient": "^7.0.0",
-        "vscode": "^1.1.37"
+        "vsce": "^1.96.2",
+        "vscode": "^1.1.37",
+        "vscode-languageclient": "^7.0.0"
+    },
+    "dependencies": {
+        "lodash": "^4.17.21"
     }
 }

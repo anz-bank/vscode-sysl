@@ -1,0 +1,36 @@
+{
+  "edges": [
+    {
+      "fromId": "A :: B1",
+      "id": "A :: B1-A :: B2",
+      "label": null,
+      "toId": "A :: B2",
+      "visible": true
+    }
+  ],
+  "nodes": [
+    {
+      "expanded": null,
+      "group": "A",
+      "key": "A :: B1",
+      "label": "B1",
+      "visible": true
+    },
+    {
+      "expanded": null,
+      "group": "A",
+      "key": "A :: B2",
+      "label": "B2",
+      "visible": true
+    },
+    {
+      "expanded": true,
+      "key": "A",
+      "label": "A",
+      "visible": true
+    }
+  ],
+  "templates": {
+    "diagramLabel": "Integration"
+  }
+}
