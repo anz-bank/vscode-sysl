@@ -73,9 +73,9 @@ Just [Visual Studio Code](https://code.visualstudio.com/). The extension will fe
 
 ### Building
 
--   `yarn install`: Installs all JS dependencies.
--   `yarn build`: Transpiles TypeScript and creates a production build of both renderer and extension scripts.
--   `yarn package` creates a [VSIX bundle](https://code.visualstudio.com/docs/editor/extension-marketplace#_install-from-a-vsix) of the complete extension.
+- `yarn install`: Installs all JS dependencies.
+- `yarn build`: Transpiles TypeScript and creates a production build of both renderer and extension scripts.
+- `yarn package` creates a [VSIX bundle](https://code.visualstudio.com/docs/editor/extension-marketplace#_install-from-a-vsix) of the complete extension.
 
 To work on the renderer in isolation, run `yarn install` and `yarn start` in the `renderer/` directory.
 
@@ -91,83 +91,83 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ### 0.3.0
 
--   Basic side-by-side integration diagram rendering.
--   Initial support for plugins to render custom diagrams.
--   Cross-platform end-to-end test framework ([follows docs with @vscode/test-electron](https://code.visualstudio.com/api/working-with-extensions/testing-extension)).
+- Basic side-by-side integration diagram rendering.
+- Initial support for plugins to render custom diagrams.
+- Cross-platform end-to-end test framework ([follows docs with @vscode/test-electron](https://code.visualstudio.com/api/working-with-extensions/testing-extension)).
 
 ### 0.2.2
 
--   Add UI testing
-    -   A very [explanatory blog post](https://developers.redhat.com/blog/2019/11/18/new-tools-for-automating-end-to-end-tests-for-vs-code-extensions#writing_the_tests)
+- Add UI testing
+  - A very [explanatory blog post](https://developers.redhat.com/blog/2019/11/18/new-tools-for-automating-end-to-end-tests-for-vs-code-extensions#writing_the_tests)
 
 ### 0.2.1
 
--   Fix automatic indentation behavior:
-    -   Indent the line following a line ending in `:`
-    -   Never dedent automatically
+- Fix automatic indentation behavior:
+  - Indent the line following a line ending in `:`
+  - Never dedent automatically
 
 ### 0.2.0
 
--   Clean up repository for new development
-    -   Remove unused `oldserver`
-    -   Update and refactor old code, including launch tasks, `package.json`, dependencies, TypeScript code and config
-    -   Update and fix tests - no real coverage, but there wasn't before either, and they run properly now
-    -   Add `publish` GitHub workflow to publishes commits to `master`
-    -   Tidy with `prettier`
-    -   Switch from `npm` to `yarn`
+- Clean up repository for new development
+  - Remove unused `oldserver`
+  - Update and refactor old code, including launch tasks, `package.json`, dependencies, TypeScript code and config
+  - Update and fix tests - no real coverage, but there wasn't before either, and they run properly now
+  - Add `publish` GitHub workflow to publishes commits to `master`
+  - Tidy with `prettier`
+  - Switch from `npm` to `yarn`
 
 ### 0.1.2
 
--   Stop extension stealing the output window
+- Stop extension stealing the output window
 
 ### 0.1.1
 
--   Fixed incorrect CI/CD configuration
+- Fixed incorrect CI/CD configuration
 
 ### 0.1.0
 
--   Upgrading vscode-sysl plugin base to current sample version
--   Using a golang lsp instead of typescipt for sysl diagnostics
+- Upgrading vscode-sysl plugin base to current sample version
+- Using a golang lsp instead of typescipt for sysl diagnostics
 
 ### 0.0.8
 
--   Total rewrite of syntax highlighter
+- Total rewrite of syntax highlighter
 
 ### 0.0.7
 
--   Updated the syntax highlighting
+- Updated the syntax highlighting
 
 ### 0.0.6
 
--   Introduce sysl.Build command
--   Fix path issues on windows
+- Introduce sysl.Build command
+- Fix path issues on windows
 
 ### 0.0.5
 
--   onDefinition for view calls
--   Updated syntax highlighting rules
--   Recognize latest version of sysl grammar
--   use sysljs 1.0.3
+- onDefinition for view calls
+- Updated syntax highlighting rules
+- Recognize latest version of sysl grammar
+- use sysljs 1.0.3
 
 ### 0.0.4
 
--   Recognize latest version of sysl grammar
--   use sysljs 1.0.2
+- Recognize latest version of sysl grammar
+- use sysljs 1.0.2
 
 ### 0.0.3
 
--   Recognize latest version of sysl grammar
+- Recognize latest version of sysl grammar
 
 ### 0.0.2
 
--   Adds gosysl for windows.
--   Handles sysl transformation syntax.
+- Adds gosysl for windows.
+- Handles sysl transformation syntax.
 
 ### 0.0.1
 
 Initial version.
 
--   Syntax highlighting.
--   Syntax errors.
--   Go to Definition for Application, Endpoints.
--   `go-sysl` binary added for osx users.
+- Syntax highlighting.
+- Syntax errors.
+- Go to Definition for Application, Endpoints.
+- `go-sysl` binary added for osx users.

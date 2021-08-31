@@ -1,28 +1,28 @@
 {
-    "env": {
-        "es6": true,
-        "node": true
-    },
-    "extends": ["eslint:recommended", "plugin:@typescript-eslint/eslint-recommended"],
-    "globals": {
-        "Atomics": "readonly",
-        "SharedArrayBuffer": "readonly"
-    },
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-        "ecmaVersion": 2018,
-        "sourceType": "module"
-    },
-    "plugins": ["@typescript-eslint"],
-    "ignorePatterns": [
-        "out/",
-        "node_modules/",
-        "extension/lsp/utils.ts",
-        "extension/lsp/go*.ts",
-        "extension/node_modules/"
-    ],
-    "rules": {
-        "no-unused-vars": "off",
-        "@typescript-eslint/no-unused-vars": "error"
-    }
+  "env": {
+    "es6": true,
+    "node": true
+  },
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/eslint-recommended"],
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly"
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint"],
+  "ignorePatterns": [
+    "out/",
+    "node_modules/",
+    "extension/lsp/utils.ts",
+    "extension/lsp/go*.ts",
+    "extension/node_modules/"
+  ],
+  "rules": {
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": "error"
+  }
 }

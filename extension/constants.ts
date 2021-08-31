@@ -12,8 +12,8 @@ export const syslBinaryPath = "sysl.tool.binaryPath";
 export type TextEditorCommand = "sysl.renderDiagram";
 
 export type CustomEditorCommand =
-    | "sysl.diagram.toggleComponentTree"
-    | "sysl.diagram.toggleDescriptionPane";
+  | "sysl.diagram.toggleComponentTree"
+  | "sysl.diagram.toggleDescriptionPane";
 
 export type TextEditorCommandMap = { [key in TextEditorCommand]: (editor: TextEditor) => any };
 export type CustomEditorCommandMap = { [key in CustomEditorCommand]: (...args: any[]) => any };

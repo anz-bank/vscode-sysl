@@ -1,559 +1,559 @@
 {
-    "name": "Sysl",
-    "scopeName": "source.sysl",
-    "patterns": [
-        {
-            "include": "#import-stmt"
-        },
-        {
-            "include": "#comments"
-        },
-        {
-            "include": "#comments-docstring"
-        },
-        {
-            "include": "#application"
-        }
-    ],
-    "repository": {
-        "import-stmt": {
-            "match": "^\\b(import)\\b([^\n#]*)",
-            "name": "keyword.control.sysl",
-            "captures": {
-                "2": {
-                    "name": "variable.parameter.import.path"
-                }
-            }
-        },
-        "comments": {
-            "name": "comment.line.number-sign.sysl",
-            "match": "[ \t]*(#).*$"
-        },
-        "comments-docstring": {
-            "name": "comment.line.character.docstring.sysl",
-            "match": "^[ \t]*(\\|).*$"
-        },
-        "application": {
-            "patterns": [
-                {
-                    "include": "#comments"
-                },
-                {
-                    "include": "#comments-docstring"
-                },
-                {
-                    "include": "#string-double-quote"
-                },
-                {
-                    "include": "#string-single-quote"
-                },
-                {
-                    "include": "#transform"
-                },
-                {
-                    "include": "params"
-                },
-                {
-                    "include": "#query-params"
-                },
-                {
-                    "include": "#range"
-                },
-                {
-                    "include": "#collector"
-                },
-                {
-                    "include": "#annotation"
-                },
-                {
-                    "include": "#type-definitions"
-                },
-                {
-                    "include": "#event-decl"
-                },
-                {
-                    "include": "#subscribe"
-                },
-                {
-                    "include": "#operators"
-                },
-                {
-                    "include": "#collection-type"
-                },
-                {
-                    "include": "#datatype"
-                },
-                {
-                    "include": "#brackets"
-                },
-                {
-                    "include": "#flow-control"
-                },
-                {
-                    "include": "#number-decimal"
-                },
-                {
-                    "include": "#generic-app-def"
-                },
-                {
-                    "include": "#http-verbs"
-                },
-                {
-                    "include": "#rest-endpoint-name"
-                },
-                {
-                    "include": "#single-dot"
-                },
-                {
-                    "include": "#package-name"
-                },
-                {
-                    "include": "#app-reference"
-                },
-                {
-                    "include": "#field-assignment"
-                },
-                {
-                    "include": "#enum-assignment"
-                },
-                {
-                    "include": "#mixin"
-                }
-            ]
-        },
-        "annotation": {
-            "match": "@[-\\w.]+",
-            "name": "entity.name.tag.sysl"
-        },
-        "string-double-quote": {
-            "match": "\"(?:\\\\.|[^\"])*\"?",
-            "name": "string.quoted.double"
-        },
-        "string-single-quote": {
-            "match": "'(?:\\\\.|[^'])*'?",
-            "name": "string.quoted.single"
-        },
-        "operators": {
-            "name": "keyword.control.sysl",
-            "match": "::|-\\|>|=:|<:|=|\\?|<->|\\.\\.\\.|->|<-|!|~>|\\.\\.\\."
-        },
-        "type-definitions": {
-            "name": "meta.type-definition.sysl",
-            "match": "(!union|!type|!wrap|!table|!view|!alias|!enum)((?:[ \t]+)[-\\w.]+)?",
-            "captures": {
-                "1": {
-                    "name": "keyword.other.sysl"
-                },
-                "2": {
-                    "name": "entity.name.type.sysl"
-                }
-            }
-        },
-        "datatype": {
-            "name": "support.type.sysl",
-            "match": "\\b(int(32|64)?|float|any|string|xml|bool|datetime|uuid|date|decimal)\\b"
-        },
-        "collection-type": {
-            "name": "keyword.other.collection-type.sysl",
-            "match": "\\b(set of|sequence of)\\b"
-        },
-        "brackets": {
-            "begin": "\\[",
-            "end": "\\]",
-            "name": "punctuation.section.application.attributes",
-            "patterns": [
-                {
-                    "include": "#brackets"
-                },
-                {
-                    "include": "#attribute-var"
-                },
-                {
-                    "include": "#operators"
-                },
-                {
-                    "include": "#abstract"
-                },
-                {
-                    "include": "#tilde"
-                },
-                {
-                    "include": "#string-single-quote"
-                },
-                {
-                    "include": "#formatted-string-double-quote"
-                }
-            ]
-        },
-        "abstract": {
-            "match": "~abstract",
-            "name": "constant.other.abstract.sysl"
-        },
-        "tilde": {
-            "match": "~[-._0-9+a-zA-Z]+",
-            "name": "entity.name.tag.sysl"
-        },
-        "attribute-var": {
-            "name": "entity.name.tag.sysl",
-            "match": "[-\\w.]+(?=[ \t]*=)"
-        },
-        "formatted-string-double-quote": {
-            "begin": "\"",
-            "end": "(?<!\\\\)\"",
-            "name": "string.quoted.double.formatted.sysl",
-            "patterns": [
-                {
-                    "include": "#format-operators"
-                }
-            ]
-        },
-        "format-operators": {
-            "name": "keyword.control.sysl",
-            "match": "\\?|//|\\(|\\)|<|>|%|=="
-        },
-        "flow-control": {
-            "name": "keyword.control.sysl",
-            "match": "\\b(return|for|one of|loop|until|while|alt|if|else)\\b"
-        },
-        "number-decimal": {
-            "match": "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:[eE][+-]?\\d+)?\\b",
-            "name": "constant.numeric.number.sysl"
-        },
-        "rest-endpoint-name": {
-            "begin": "(/)",
-            "end": "(?<!\\<)(?=:)| |\t|(?=\\[)",
-            "name": "meta.endpoint.rest.name.sysl",
-            "captures": {
-                "1": {
-                    "name": "keyword.other.endpoint.rest.sysl"
-                }
-            },
-            "patterns": [
-                {
-                    "include": "#datatype"
-                },
-                {
-                    "include": "#escaped-endpoint-char"
-                },
-                {
-                    "include": "#invalid-escaped-endpoint-char"
-                },
-                {
-                    "include": "#rest-endpoint-path-var"
-                },
-                {
-                    "include": "#rest-endpoint-path-name"
-                },
-                {
-                    "include": "#rest-endpoint-path-separator"
-                }
-            ]
-        },
-        "rest-endpoint-path-separator": {
-            "match": "/",
-            "name": "keyword.other.endpoint.rest.sysl"
-        },
-        "rest-endpoint-path-name": {
-            "match": "[-.~\\w]+",
-            "name": "entity.name.endpoint.sysl"
-        },
-        "rest-endpoint-path-var": {
-            "name": "meta.endpoint.rest.var.sysl",
-            "begin": "{",
-            "end": "}",
-            "patterns": [
-                {
-                    "include": "#field-assignment"
-                },
-                {
-                    "include": "#datatype"
-                },
-                {
-                    "match": "<:",
-                    "name": "keyword.operator.type-assign.sysl"
-                }
-            ]
-        },
-        "escaped-endpoint-char": {
-            "name": "constant.character.escape.sysl",
-            "match": "%[a-fA-F0-9]{2}"
-        },
-        "invalid-escaped-endpoint-char": {
-            "name": "invalid.illegal.escape.sysl",
-            "match": "%([^a-fA-F0-9].?|.?[^a-fA-F0-9]?)"
-        },
-        "http-verbs": {
-            "name": "keyword.other.http-verbs.sysl",
-            "match": "\\b(GET|POST|PUT|PATCH|DELETE)\\b"
-        },
-        "query-params": {
-            "begin": "(?=\\?\\w)",
-            "end": "(?=[ \t:\\[])",
-            "patterns": [
-                {
-                    "include": "#datatype"
-                },
-                {
-                    "match": "(=|\\?|&)",
-                    "name": "keyword.operator.query-params.sysl"
-                }
-            ]
-        },
-        "event-decl": {
-            "match": "(?<=<->)[ \t]+([-. \\w]+\\b)",
-            "name": "entity.name.type.event.sysl"
-        },
-        "params": {
-            "begin": "\\(",
-            "end": "\\)",
-            "name": "meta.params.sysl",
-            "patterns": [
-                {
-                    "include": "#assign"
-                },
-                {
-                    "include": "#datatype"
-                },
-                {
-                    "include": "#package-name"
-                },
-                {
-                    "include": "#app-reference"
-                }
-            ]
-        },
-        "mixin": {
-            "match": "(?<=-\\|>)[ \t]*([-. \\w]+\\b)",
-            "name": "entity.name.type.mixin.sysl"
-        },
-        "subscribe": {
-            "match": "[ \t]+([-. \\w]+\\b)[ \t]*(->)[ \t]*([-. \\w]+\\b)",
-            "name": "meta.subcsribe.sysl",
-            "captures": {
-                "1": {
-                    "name": "entity.name.subscriber.sysl"
-                },
-                "2": {
-                    "name": "keyword.operator.subscribe.sysl"
-                },
-                "3": {
-                    "name": "entity.other.subscribee.sysl"
-                }
-            }
-        },
-        "package-name": {
-            "match": "([-. \\w]+\\b)(?=[ \t]*::)",
-            "name": "entity.name.type.package-name.sysl"
-        },
-        "app-reference": {
-            "match": "(?<=::)[ \t]*([-. \\w]+\\b)",
-            "name": "entity.name.type.app-reference.sysl"
-        },
-        "generic-app-def": {
-            "begin": "^(?=\\w)",
-            "end": "(?<!:|<):(?!:)",
-            "name": "meta.application.def.sysl",
-            "patterns": [
-                {
-                    "include": "#string-single-quote"
-                },
-                {
-                    "include": "#string-double-quote"
-                },
-                {
-                    "include": "#brackets"
-                },
-                {
-                    "include": "#app-reference"
-                },
-                {
-                    "include": "#package-name"
-                },
-                {
-                    "include": "#operators"
-                },
-                {
-                    "include": "#app-name"
-                }
-            ]
-        },
-        "app-name": {
-            "match": "[-.\\w ]+\\b",
-            "name": "entity.name.type.app-name.sysl"
-        },
-        "field-assignment": {
-            "match": "([-.\\w]+)(?=[ \t]*(\\([^ \\)]+\\))?[ \t]*<:)",
-            "name": "entity.name.type.field.sysl"
-        },
-        "enum-assignment": {
-            "match": "^[ \t]+([-\\w]+)(?=[ \t]*:[ \t]*\\d+)",
-            "name": "entity.name.type.enum.sysl"
-        },
-        "range": {
-            "match": "\\(\\s*(\\d+)\\s*(\\.\\.?)\\s*(\\d*)\\s*(?=\\))",
-            "name": "meta.range.sysl",
-            "captures": {
-                "1": {
-                    "name": "constant.numeric.number.sysl"
-                },
-                "2": {
-                    "name": "keyword.other.range.sysl"
-                },
-                "3": {
-                    "name": "constant.numeric.number.sysl"
-                }
-            }
-        },
-        "collector": {
-            "match": ".. \\* <- \\*(?=:)",
-            "name": "keyword.other.collector.sysl"
-        },
-        "transform": {
-            "begin": "\\(\\s*(\\w*)\\s*(:)",
-            "end": "\\)",
-            "beginCaptures": {
-                "1": {
-                    "name": "entity.name.transform-param.sysl"
-                },
-                "2": {
-                    "name": "keyword.other.transform.begin.sysl"
-                }
-            },
-            "name": "meta.transform.sysl",
-            "patterns": [
-                {
-                    "include": "#comments"
-                },
-                {
-                    "include": "#comments-docstring"
-                },
-                {
-                    "include": "#string-double-quote"
-                },
-                {
-                    "include": "#string-single-quote"
-                },
-                {
-                    "include": "#transform"
-                },
-                {
-                    "include": "#range"
-                },
-                {
-                    "include": "#transform-args"
-                },
-                {
-                    "include": "#number-decimal"
-                },
-                {
-                    "include": "#collection-type"
-                },
-                {
-                    "include": "#operators"
-                },
-                {
-                    "include": "#format-operators"
-                },
-                {
-                    "include": "#brackets"
-                },
-                {
-                    "include": "#transform-keywords"
-                },
-                {
-                    "include": "#transform-funcs"
-                },
-                {
-                    "include": "#transform-literal"
-                },
-                {
-                    "include": "#transform-operator"
-                },
-                {
-                    "include": "#datatype"
-                },
-                {
-                    "include": "#single-dot"
-                }
-            ]
-        },
-        "transform-args": {
-            "begin": "\\((?!:)",
-            "end": "\\)",
-            "name": "meta.transform.args.sysl",
-            "patterns": [
-                {
-                    "include": "#comments"
-                },
-                {
-                    "include": "#comments-docstring"
-                },
-                {
-                    "include": "#string-double-quote"
-                },
-                {
-                    "include": "#string-single-quote"
-                },
-                {
-                    "include": "#transform-args"
-                },
-                {
-                    "include": "#single-dot"
-                },
-                {
-                    "include": "#range"
-                },
-                {
-                    "include": "#number-decimal"
-                },
-                {
-                    "include": "#collection-type"
-                },
-                {
-                    "include": "#operators"
-                },
-                {
-                    "include": "#format-operators"
-                },
-                {
-                    "include": "#brackets"
-                },
-                {
-                    "include": "#transform-literal"
-                },
-                {
-                    "include": "#transform-keywords"
-                },
-                {
-                    "include": "#transform-funcs"
-                },
-                {
-                    "include": "#transform-operator"
-                },
-                {
-                    "include": "#datatype"
-                }
-            ]
-        },
-        "transform-keywords": {
-            "match": "\\b(let|but not|in|contains|\\.?table of|if|then|else|singleOrNull|single|count|snapshot|by)\\b",
-            "name": "keyword.other.transform.sysl"
-        },
-        "transform-funcs": {
-            "match": "\\.?\\b(autoinc|str|substr|asc|desc|rank|min|max|sum|average|first|where|flatten|any)\\b(?=(<[- .\\w]+>)?\\((?!:))",
-            "name": "keyword.other.transform.function.sysl"
-        },
-        "transform-operator": {
-            "match": "\\|\\||&&|\\||&|\\band\\b|\\^|\\bxor\\b|<=|>=|>|<|==|\\+|\\*|\\*\\*|\\-|\\/|\\~|\\$!",
-            "name": "keyword.operator.transform.sysl"
-        },
-        "single-dot": {
-            "match": "(?<![\\w\\)])\\.(?!\\w)",
-            "name": "keyword.other.wildcard.sysl"
-        },
-        "transform-literal": {
-            "match": "\\b(true|false|null)\\b",
-            "name": "constant.language.transform.sysl"
-        }
+  "name": "Sysl",
+  "scopeName": "source.sysl",
+  "patterns": [
+    {
+      "include": "#import-stmt"
+    },
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#comments-docstring"
+    },
+    {
+      "include": "#application"
     }
+  ],
+  "repository": {
+    "import-stmt": {
+      "match": "^\\b(import)\\b([^\n#]*)",
+      "name": "keyword.control.sysl",
+      "captures": {
+        "2": {
+          "name": "variable.parameter.import.path"
+        }
+      }
+    },
+    "comments": {
+      "name": "comment.line.number-sign.sysl",
+      "match": "[ \t]*(#).*$"
+    },
+    "comments-docstring": {
+      "name": "comment.line.character.docstring.sysl",
+      "match": "^[ \t]*(\\|).*$"
+    },
+    "application": {
+      "patterns": [
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#comments-docstring"
+        },
+        {
+          "include": "#string-double-quote"
+        },
+        {
+          "include": "#string-single-quote"
+        },
+        {
+          "include": "#transform"
+        },
+        {
+          "include": "params"
+        },
+        {
+          "include": "#query-params"
+        },
+        {
+          "include": "#range"
+        },
+        {
+          "include": "#collector"
+        },
+        {
+          "include": "#annotation"
+        },
+        {
+          "include": "#type-definitions"
+        },
+        {
+          "include": "#event-decl"
+        },
+        {
+          "include": "#subscribe"
+        },
+        {
+          "include": "#operators"
+        },
+        {
+          "include": "#collection-type"
+        },
+        {
+          "include": "#datatype"
+        },
+        {
+          "include": "#brackets"
+        },
+        {
+          "include": "#flow-control"
+        },
+        {
+          "include": "#number-decimal"
+        },
+        {
+          "include": "#generic-app-def"
+        },
+        {
+          "include": "#http-verbs"
+        },
+        {
+          "include": "#rest-endpoint-name"
+        },
+        {
+          "include": "#single-dot"
+        },
+        {
+          "include": "#package-name"
+        },
+        {
+          "include": "#app-reference"
+        },
+        {
+          "include": "#field-assignment"
+        },
+        {
+          "include": "#enum-assignment"
+        },
+        {
+          "include": "#mixin"
+        }
+      ]
+    },
+    "annotation": {
+      "match": "@[-\\w.]+",
+      "name": "entity.name.tag.sysl"
+    },
+    "string-double-quote": {
+      "match": "\"(?:\\\\.|[^\"])*\"?",
+      "name": "string.quoted.double"
+    },
+    "string-single-quote": {
+      "match": "'(?:\\\\.|[^'])*'?",
+      "name": "string.quoted.single"
+    },
+    "operators": {
+      "name": "keyword.control.sysl",
+      "match": "::|-\\|>|=:|<:|=|\\?|<->|\\.\\.\\.|->|<-|!|~>|\\.\\.\\."
+    },
+    "type-definitions": {
+      "name": "meta.type-definition.sysl",
+      "match": "(!union|!type|!wrap|!table|!view|!alias|!enum)((?:[ \t]+)[-\\w.]+)?",
+      "captures": {
+        "1": {
+          "name": "keyword.other.sysl"
+        },
+        "2": {
+          "name": "entity.name.type.sysl"
+        }
+      }
+    },
+    "datatype": {
+      "name": "support.type.sysl",
+      "match": "\\b(int(32|64)?|float|any|string|xml|bool|datetime|uuid|date|decimal)\\b"
+    },
+    "collection-type": {
+      "name": "keyword.other.collection-type.sysl",
+      "match": "\\b(set of|sequence of)\\b"
+    },
+    "brackets": {
+      "begin": "\\[",
+      "end": "\\]",
+      "name": "punctuation.section.application.attributes",
+      "patterns": [
+        {
+          "include": "#brackets"
+        },
+        {
+          "include": "#attribute-var"
+        },
+        {
+          "include": "#operators"
+        },
+        {
+          "include": "#abstract"
+        },
+        {
+          "include": "#tilde"
+        },
+        {
+          "include": "#string-single-quote"
+        },
+        {
+          "include": "#formatted-string-double-quote"
+        }
+      ]
+    },
+    "abstract": {
+      "match": "~abstract",
+      "name": "constant.other.abstract.sysl"
+    },
+    "tilde": {
+      "match": "~[-._0-9+a-zA-Z]+",
+      "name": "entity.name.tag.sysl"
+    },
+    "attribute-var": {
+      "name": "entity.name.tag.sysl",
+      "match": "[-\\w.]+(?=[ \t]*=)"
+    },
+    "formatted-string-double-quote": {
+      "begin": "\"",
+      "end": "(?<!\\\\)\"",
+      "name": "string.quoted.double.formatted.sysl",
+      "patterns": [
+        {
+          "include": "#format-operators"
+        }
+      ]
+    },
+    "format-operators": {
+      "name": "keyword.control.sysl",
+      "match": "\\?|//|\\(|\\)|<|>|%|=="
+    },
+    "flow-control": {
+      "name": "keyword.control.sysl",
+      "match": "\\b(return|for|one of|loop|until|while|alt|if|else)\\b"
+    },
+    "number-decimal": {
+      "match": "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:[eE][+-]?\\d+)?\\b",
+      "name": "constant.numeric.number.sysl"
+    },
+    "rest-endpoint-name": {
+      "begin": "(/)",
+      "end": "(?<!\\<)(?=:)| |\t|(?=\\[)",
+      "name": "meta.endpoint.rest.name.sysl",
+      "captures": {
+        "1": {
+          "name": "keyword.other.endpoint.rest.sysl"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#datatype"
+        },
+        {
+          "include": "#escaped-endpoint-char"
+        },
+        {
+          "include": "#invalid-escaped-endpoint-char"
+        },
+        {
+          "include": "#rest-endpoint-path-var"
+        },
+        {
+          "include": "#rest-endpoint-path-name"
+        },
+        {
+          "include": "#rest-endpoint-path-separator"
+        }
+      ]
+    },
+    "rest-endpoint-path-separator": {
+      "match": "/",
+      "name": "keyword.other.endpoint.rest.sysl"
+    },
+    "rest-endpoint-path-name": {
+      "match": "[-.~\\w]+",
+      "name": "entity.name.endpoint.sysl"
+    },
+    "rest-endpoint-path-var": {
+      "name": "meta.endpoint.rest.var.sysl",
+      "begin": "{",
+      "end": "}",
+      "patterns": [
+        {
+          "include": "#field-assignment"
+        },
+        {
+          "include": "#datatype"
+        },
+        {
+          "match": "<:",
+          "name": "keyword.operator.type-assign.sysl"
+        }
+      ]
+    },
+    "escaped-endpoint-char": {
+      "name": "constant.character.escape.sysl",
+      "match": "%[a-fA-F0-9]{2}"
+    },
+    "invalid-escaped-endpoint-char": {
+      "name": "invalid.illegal.escape.sysl",
+      "match": "%([^a-fA-F0-9].?|.?[^a-fA-F0-9]?)"
+    },
+    "http-verbs": {
+      "name": "keyword.other.http-verbs.sysl",
+      "match": "\\b(GET|POST|PUT|PATCH|DELETE)\\b"
+    },
+    "query-params": {
+      "begin": "(?=\\?\\w)",
+      "end": "(?=[ \t:\\[])",
+      "patterns": [
+        {
+          "include": "#datatype"
+        },
+        {
+          "match": "(=|\\?|&)",
+          "name": "keyword.operator.query-params.sysl"
+        }
+      ]
+    },
+    "event-decl": {
+      "match": "(?<=<->)[ \t]+([-. \\w]+\\b)",
+      "name": "entity.name.type.event.sysl"
+    },
+    "params": {
+      "begin": "\\(",
+      "end": "\\)",
+      "name": "meta.params.sysl",
+      "patterns": [
+        {
+          "include": "#assign"
+        },
+        {
+          "include": "#datatype"
+        },
+        {
+          "include": "#package-name"
+        },
+        {
+          "include": "#app-reference"
+        }
+      ]
+    },
+    "mixin": {
+      "match": "(?<=-\\|>)[ \t]*([-. \\w]+\\b)",
+      "name": "entity.name.type.mixin.sysl"
+    },
+    "subscribe": {
+      "match": "[ \t]+([-. \\w]+\\b)[ \t]*(->)[ \t]*([-. \\w]+\\b)",
+      "name": "meta.subcsribe.sysl",
+      "captures": {
+        "1": {
+          "name": "entity.name.subscriber.sysl"
+        },
+        "2": {
+          "name": "keyword.operator.subscribe.sysl"
+        },
+        "3": {
+          "name": "entity.other.subscribee.sysl"
+        }
+      }
+    },
+    "package-name": {
+      "match": "([-. \\w]+\\b)(?=[ \t]*::)",
+      "name": "entity.name.type.package-name.sysl"
+    },
+    "app-reference": {
+      "match": "(?<=::)[ \t]*([-. \\w]+\\b)",
+      "name": "entity.name.type.app-reference.sysl"
+    },
+    "generic-app-def": {
+      "begin": "^(?=\\w)",
+      "end": "(?<!:|<):(?!:)",
+      "name": "meta.application.def.sysl",
+      "patterns": [
+        {
+          "include": "#string-single-quote"
+        },
+        {
+          "include": "#string-double-quote"
+        },
+        {
+          "include": "#brackets"
+        },
+        {
+          "include": "#app-reference"
+        },
+        {
+          "include": "#package-name"
+        },
+        {
+          "include": "#operators"
+        },
+        {
+          "include": "#app-name"
+        }
+      ]
+    },
+    "app-name": {
+      "match": "[-.\\w ]+\\b",
+      "name": "entity.name.type.app-name.sysl"
+    },
+    "field-assignment": {
+      "match": "([-.\\w]+)(?=[ \t]*(\\([^ \\)]+\\))?[ \t]*<:)",
+      "name": "entity.name.type.field.sysl"
+    },
+    "enum-assignment": {
+      "match": "^[ \t]+([-\\w]+)(?=[ \t]*:[ \t]*\\d+)",
+      "name": "entity.name.type.enum.sysl"
+    },
+    "range": {
+      "match": "\\(\\s*(\\d+)\\s*(\\.\\.?)\\s*(\\d*)\\s*(?=\\))",
+      "name": "meta.range.sysl",
+      "captures": {
+        "1": {
+          "name": "constant.numeric.number.sysl"
+        },
+        "2": {
+          "name": "keyword.other.range.sysl"
+        },
+        "3": {
+          "name": "constant.numeric.number.sysl"
+        }
+      }
+    },
+    "collector": {
+      "match": ".. \\* <- \\*(?=:)",
+      "name": "keyword.other.collector.sysl"
+    },
+    "transform": {
+      "begin": "\\(\\s*(\\w*)\\s*(:)",
+      "end": "\\)",
+      "beginCaptures": {
+        "1": {
+          "name": "entity.name.transform-param.sysl"
+        },
+        "2": {
+          "name": "keyword.other.transform.begin.sysl"
+        }
+      },
+      "name": "meta.transform.sysl",
+      "patterns": [
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#comments-docstring"
+        },
+        {
+          "include": "#string-double-quote"
+        },
+        {
+          "include": "#string-single-quote"
+        },
+        {
+          "include": "#transform"
+        },
+        {
+          "include": "#range"
+        },
+        {
+          "include": "#transform-args"
+        },
+        {
+          "include": "#number-decimal"
+        },
+        {
+          "include": "#collection-type"
+        },
+        {
+          "include": "#operators"
+        },
+        {
+          "include": "#format-operators"
+        },
+        {
+          "include": "#brackets"
+        },
+        {
+          "include": "#transform-keywords"
+        },
+        {
+          "include": "#transform-funcs"
+        },
+        {
+          "include": "#transform-literal"
+        },
+        {
+          "include": "#transform-operator"
+        },
+        {
+          "include": "#datatype"
+        },
+        {
+          "include": "#single-dot"
+        }
+      ]
+    },
+    "transform-args": {
+      "begin": "\\((?!:)",
+      "end": "\\)",
+      "name": "meta.transform.args.sysl",
+      "patterns": [
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#comments-docstring"
+        },
+        {
+          "include": "#string-double-quote"
+        },
+        {
+          "include": "#string-single-quote"
+        },
+        {
+          "include": "#transform-args"
+        },
+        {
+          "include": "#single-dot"
+        },
+        {
+          "include": "#range"
+        },
+        {
+          "include": "#number-decimal"
+        },
+        {
+          "include": "#collection-type"
+        },
+        {
+          "include": "#operators"
+        },
+        {
+          "include": "#format-operators"
+        },
+        {
+          "include": "#brackets"
+        },
+        {
+          "include": "#transform-literal"
+        },
+        {
+          "include": "#transform-keywords"
+        },
+        {
+          "include": "#transform-funcs"
+        },
+        {
+          "include": "#transform-operator"
+        },
+        {
+          "include": "#datatype"
+        }
+      ]
+    },
+    "transform-keywords": {
+      "match": "\\b(let|but not|in|contains|\\.?table of|if|then|else|singleOrNull|single|count|snapshot|by)\\b",
+      "name": "keyword.other.transform.sysl"
+    },
+    "transform-funcs": {
+      "match": "\\.?\\b(autoinc|str|substr|asc|desc|rank|min|max|sum|average|first|where|flatten|any)\\b(?=(<[- .\\w]+>)?\\((?!:))",
+      "name": "keyword.other.transform.function.sysl"
+    },
+    "transform-operator": {
+      "match": "\\|\\||&&|\\||&|\\band\\b|\\^|\\bxor\\b|<=|>=|>|<|==|\\+|\\*|\\*\\*|\\-|\\/|\\~|\\$!",
+      "name": "keyword.operator.transform.sysl"
+    },
+    "single-dot": {
+      "match": "(?<![\\w\\)])\\.(?!\\w)",
+      "name": "keyword.other.wildcard.sysl"
+    },
+    "transform-literal": {
+      "match": "\\b(true|false|null)\\b",
+      "name": "constant.language.transform.sysl"
+    }
+  }
 }

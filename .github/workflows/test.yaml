@@ -3,38 +3,38 @@ name: Test
 on: [pull_request]
 
 jobs:
-    test_renderer:
-        name: Run renderer tests
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@master
-            - uses: actions/setup-node@v2
-              with:
-                  node-version: "14"
-            - run: yarn install
-              working-directory: renderer
+  test_renderer:
+    name: Run renderer tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      - run: yarn install
+        working-directory: renderer
 
-            - name: Run test
-              working-directory: renderer
-              run: yarn test
+      - name: Run test
+        working-directory: renderer
+        run: yarn test
 
-    test_integration:
-        name: Run integration tests
-        strategy:
-            matrix:
-                os: [macos-latest, ubuntu-latest, windows-latest]
-        runs-on: ${{ matrix.os }}
-        steps:
-            - uses: actions/checkout@master
-            - uses: actions/setup-node@v2
-              with:
-                  node-version: "14"
-            - run: yarn build
+  test_integration:
+    name: Run integration tests
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      - run: yarn build
 
-            - name: Run test
-              if: runner.os == 'Linux'
-              run: xvfb-run -a yarn test
+      - name: Run test
+        if: runner.os == 'Linux'
+        run: xvfb-run -a yarn test
 
-            - name: Run test
-              if: runner.os != 'Linux'
-              run: yarn test
+      - name: Run test
+        if: runner.os != 'Linux'
+        run: yarn test

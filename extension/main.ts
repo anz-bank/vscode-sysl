@@ -9,22 +9,22 @@ import { buildClient, installSyslLsp } from "./lsp/syslLsp";
 let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
-    commands.registerCommand(installSyslLspCommand, installSyslLsp);
+  commands.registerCommand(installSyslLspCommand, installSyslLsp);
 
-    // Start the client. This will also launch the server.
-    client = buildClient();
-    // client.start();
+  // Start the client. This will also launch the server.
+  client = buildClient();
+  // client.start();
 
-    context.subscriptions.push(SyslGoJsDiagramEditorProvider.register(context));
-    const openWebview = commands.registerCommand("sysl.renderDiagram", openGoJSEditorFor);
-    context.subscriptions.push(openWebview);
+  context.subscriptions.push(SyslGoJsDiagramEditorProvider.register(context));
+  const openWebview = commands.registerCommand("sysl.renderDiagram", openGoJSEditorFor);
+  context.subscriptions.push(openWebview);
 }
 
 export async function deactivate(): Promise<void> {
-    await client?.stop();
+  await client?.stop();
 }
 
 function openGoJSEditorFor(uri: Uri | undefined): void {
-    uri ||= window.activeTextEditor?.document.uri;
-    uri && commands.executeCommand("vscode.openWith", uri, customViewType, ViewColumn.Beside);
+  uri ||= window.activeTextEditor?.document.uri;
+  uri && commands.executeCommand("vscode.openWith", uri, customViewType, ViewColumn.Beside);
 }
