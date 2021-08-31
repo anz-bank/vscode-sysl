@@ -99,7 +99,7 @@
         "esbuild-prod": "npm run esbuild-base -- --minify",
         "postinstall": "yarn --cwd renderer install",
         "prebuild": "yarn install",
-        "build": "yarn --cwd renderer build && yarn compile && yarn esbuild-prod && yarn plugins",
+        "build": "yarn --cwd renderer build && yarn compile && yarn esbuild-prod",
         "compile": "tsc",
         "plugins": "make -C extension/plugins plugins",
         "watch": "tsc -w",
