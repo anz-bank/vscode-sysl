@@ -89,6 +89,10 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+### 0.5.1
+
+- Fix dependency version.
+
 ### 0.5.0
 
 - Add initial version of Sysl Plugin Protocol spec in [`plugin.schema.json`](extension/protocol/plugin.schema.json).
