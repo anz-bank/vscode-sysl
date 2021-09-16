@@ -1,10 +1,10 @@
 {
   "edges": [
     {
-      "fromId": "A :: B1",
+      "from": "A :: B1",
       "id": "A :: B1-A :: B2",
       "label": null,
-      "toId": "A :: B2",
+      "to": "A :: B2",
       "visible": true
     }
   ],
@@ -25,6 +25,7 @@
     },
     {
       "expanded": true,
+      "isGroup": true,
       "key": "A",
       "label": "A",
       "visible": true

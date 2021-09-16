@@ -9,6 +9,8 @@ let (:integrationModel, ...) = //{github.com/anz-bank/sysl/pkg/arrai/diagrams/in
     let (:nodes, :edges) = integrationModel(mergedRelMods, ());
     let nodes = nodes => \(:id, :parentId, ...rest) (rest +> (key: id, group: parentId));
     let nodes = nodes => \node cond {!node.group: node.~|group|, _: node};
+    let nodes = nodes => \node cond {node.expanded?:{}: node +> (isGroup: true), _: node};
+    let edges = edges => . +> (from: .fromId, to: .toId) => .~|fromId, toId|;
     (output: //encoding.json.encoder((strict: false, indent: '  '))((
         :nodes,
         :edges,

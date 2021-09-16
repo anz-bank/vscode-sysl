@@ -1,12 +1,28 @@
-import React, { useState, useEffect } from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import * as React from "react";
+import * as go from "gojs";
+import { produce } from "immer";
+import { pick } from "lodash";
+
+import { withStyles } from "@material-ui/styles";
 import Tab from "@material-ui/core/Tab";
 import { TabPanel, TabList, TabContext } from "@material-ui/lab";
 
-import Diagram from "./components/Diagram";
-import { DiagramData } from "./components/DiagramTypes";
+import { vscode } from "./components/vscode/VsCode";
+import { DiagramData } from "./components/diagram/DiagramTypes";
+import { DiagramWrapper } from "./components/diagram/DiagramWrapper";
+import { GoJSIndex, shouldNotifyChange, updateState } from "./components/diagram/DiagramState";
 
-const useStyles = makeStyles(() => ({
+type AppState = {
+  diagrams: DiagramData[];
+  activeChild: number;
+};
+
+const initialState: AppState = {
+  activeChild: 0,
+  diagrams: [],
+};
+
+const styles = () => ({
   root: {
     flexGrow: 1,
     display: "flex",
@@ -26,84 +42,179 @@ const useStyles = makeStyles(() => ({
     flexGrow: 1,
     height: "100vh",
   },
-}));
+});
 
-const emptyData = [{ nodes: [], edges: [] }];
+interface AppProps {
+  classes: any;
+}
 
-export default function App() {
-  const [data, setData] = useState<DiagramData[]>(emptyData);
-  const classes = useStyles();
-  const [value, setValue] = useState("0");
-
-  const handleChange = (event: React.ChangeEvent<{}>, newValue: string) => {
-    setValue(newValue);
+type ParentMessageEvent = {
+  data: {
+    type: string;
+    model: DiagramData[];
   };
+};
 
-  useEffect(() => {
-    // Handle messages sent from the extension to the webview
-    const onMessage = (event: MessageEvent) => {
-      // The JSON data that the extension sent.
-      const message = event.data;
-      switch (message.type) {
-        case "render":
-          console.log("received render message", message.model);
-          const model: DiagramData[] = message.model;
-          setData(model);
-          break;
-      }
-    };
-    window.addEventListener("message", onMessage);
+class App extends React.Component<AppProps, AppState> {
+  private gojsIndexes: GoJSIndex[];
 
-    return () => {
-      window.removeEventListener("message", onMessage);
-    };
-  });
+  constructor(props: AppProps) {
+    super(props);
 
-  if (data.length <= 1) {
-    const diagramData = data[0] || emptyData[0]; // In case an empty array is set.
-    const key = diagramData.templates ? "custom" : "";
-    return (
-      <div className={classes.root}>
-        <Diagram
-          diagramKey={key}
-          template={diagramData.templates}
-          nodes={diagramData.nodes}
-          edges={diagramData.edges}
-        />
-      </div>
+    this.state = vscode.getState() || initialState;
+    this.gojsIndexes = this.state.diagrams.map(
+      ({ nodes, edges }) => new GoJSIndex({ nodes, edges })
     );
-  } else {
-    return (
-      <div className={classes.root}>
-        <TabContext value={value}>
-          <TabList classes={{ root: classes.tabs }} orientation="vertical" onChange={handleChange}>
-            {data.map((diagramData, index) => {
-              const label = diagramData.templates?.diagramLabel ?? `Diagram ${index + 1}`;
-              return (
-                <Tab
-                  key={index}
-                  classes={{ root: classes.tab }}
-                  label={label}
-                  value={index.toString()}
-                ></Tab>
-              );
-            })}
-          </TabList>
-          {data.map((diagramData, index) => {
-            const key = diagramData.templates ? "custom" : "";
-            return (
-              <TabPanel classes={{ root: classes.tabPanel }} value={index.toString()} key={index}>
-                <Diagram
-                  diagramKey={key}
-                  template={diagramData.templates}
-                  nodes={diagramData.nodes}
-                  edges={diagramData.edges}
-                />
-              </TabPanel>
+
+    // bind handler methods
+    this.handleDiagramEvent = this.handleDiagramEvent.bind(this);
+    this.handleModelChange = this.handleModelChange.bind(this);
+    this.handleParentMessage = this.handleParentMessage.bind(this);
+  }
+
+  public componentDidMount() {
+    window.addEventListener("message", this.handleParentMessage);
+  }
+
+  public componentWillUnmount() {
+    window.removeEventListener("message", this.handleParentMessage);
+  }
+
+  /**
+   * Handle messages sent from the extension to the webview.
+   */
+  public handleParentMessage(event: ParentMessageEvent) {
+    const message = event.data;
+    switch (message.type) {
+      case "render":
+        console.log("received render message", message.model);
+
+        this.setState(
+          produce((draft: AppState) => {
+            draft.diagrams = message.model.map((d) => ({ ...d, resetsDiagram: true }));
+            this.gojsIndexes = draft.diagrams.map(
+              ({ nodes, edges }) => new GoJSIndex({ nodes, edges })
             );
-          })}
-        </TabContext>
-      </div>
+          }),
+          () => {
+            vscode.setState(this.state);
+          }
+        );
+        break;
+    }
+  }
+
+  /**
+   * Handle any relevant DiagramEvents, in this case just selection changes.
+   * On ChangedSelection, find the corresponding data and set the selectedData state.
+   * @param e a GoJS DiagramEvent
+   */
+  public handleDiagramEvent(e: go.DiagramEvent) {
+    // TODO: Publish selection change events to the extension.
+  }
+
+  /**
+   * Handle GoJS model changes, which output an object of data changes via Model.toIncrementalData.
+   * This method iterates over those changes and updates state to keep in sync with the GoJS model.
+   * @param delta a JSON-formatted string
+   */
+  public handleModelChange(delta: go.IncrementalData) {
+    const index = this.gojsIndexes[this.state.activeChild];
+    const notify = shouldNotifyChange(index, delta);
+    console.log(`setting state (notify: ${notify})`, delta);
+
+    this.setState(
+      produce((draft: AppState) => {
+        updateState(index, draft.diagrams[this.state.activeChild], delta);
+      }),
+      () => {
+        vscode.setState(this.state);
+
+        if (notify) {
+          vscode.postMessage({
+            type: "diagramModelChange",
+            delta,
+            model: pick(this.state.diagrams[this.state.activeChild], "nodes", "edges"),
+          });
+        }
+      }
     );
   }
+
+  /**
+   * Handle changes to the active tab, updating the displayed diagram.
+   * @param event The change event.
+   * @param newValue The index of the new active tab as a string.
+   */
+  public handleTabChange(event: React.ChangeEvent<{}>, newValue: string) {
+    this.setState(
+      produce((draft: AppState) => {
+        draft.activeChild = parseInt(newValue);
+      })
+    );
+  }
+
+  public render() {
+    const { classes } = this.props;
+
+    if (this.state.diagrams.length <= 1) {
+      const data = this.state.diagrams[0] || { nodes: [], edges: [] };
+      const key = data.templates ? "custom" : "";
+      return (
+        <div className={classes.root}>
+          <DiagramWrapper
+            diagramKey={key}
+            nodes={data.nodes}
+            edges={data.edges}
+            templates={data.templates}
+            skipsDiagramUpdate={data.skipsDiagramUpdate || false}
+            onDiagramEvent={this.handleDiagramEvent}
+            onModelChange={this.handleModelChange}
+          />
+        </div>
+      );
+    } else {
+      return (
+        <div className={classes.root}>
+          <TabContext value={this.state.activeChild.toString()}>
+            <TabList
+              classes={{ root: classes.tabs }}
+              orientation="vertical"
+              onChange={this.handleTabChange.bind(this)}
+            >
+              {this.state.diagrams.map((data, index) => {
+                const label = data.templates?.diagramLabel ?? `Diagram ${index + 1}`;
+                return (
+                  <Tab
+                    key={index}
+                    classes={{ root: classes.tab }}
+                    label={label}
+                    value={index.toString()}
+                  ></Tab>
+                );
+              })}
+            </TabList>
+            {this.state.diagrams.map((data, index) => {
+              const key = data.templates ? "custom" : "";
+              return (
+                <TabPanel classes={{ root: classes.tabPanel }} value={index.toString()} key={index}>
+                  <DiagramWrapper
+                    diagramKey={key}
+                    nodes={data.nodes}
+                    edges={data.edges}
+                    templates={data.templates}
+                    skipsDiagramUpdate={data.skipsDiagramUpdate || false}
+                    onDiagramEvent={this.handleDiagramEvent}
+                    onModelChange={this.handleModelChange}
+                  />
+                </TabPanel>
+              );
+            })}
+          </TabContext>
+        </div>
+      );
+    }
+  }
 }
+
+export default withStyles(styles)(App);

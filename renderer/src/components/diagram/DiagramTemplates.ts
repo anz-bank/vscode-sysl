@@ -11,6 +11,7 @@ import {
   TemplateShape,
   TemplateTextBlock,
 } from "./DiagramTypes";
+import { stringifyPoint } from "./DiagramUtil";
 
 const $ = go.GraphObject.make;
 
@@ -18,16 +19,17 @@ export default function DiagramTemplate(props?: TemplateData) {
   const diagram = $(go.Diagram, {
     "undoManager.isEnabled": true,
     "undoManager.maxHistoryLength": 0,
-    "animationManager.duration": 200,
+    "animationManager.isEnabled": false,
     model: $(go.GraphLinksModel, { linkKeyProperty: "key" }),
     initialAutoScale: go.Diagram.Uniform,
     autoScrollRegion: 0,
     allowMove: true,
   });
 
-  props?.diagramLayout
-    ? (diagram.layout = new props.diagramLayout())
-    : new go.ForceDirectedLayout();
+  // Set layout if provided, else default to no layout.
+  if (props?.diagramLayout) {
+    diagram.layout = new props.diagramLayout();
+  }
 
   // restrict nodes positions to a grid
   diagram.grid.gridCellSize = new go.Size(16, 16);
@@ -48,7 +50,8 @@ export default function DiagramTemplate(props?: TemplateData) {
       new go.Binding("fill", "bgColor"),
       new go.Binding("stroke", "strokeColor")
     ),
-    $(go.TextBlock, { margin: 10 }, new go.Binding("text", "label").makeTwoWay())
+    $(go.TextBlock, { margin: 10 }, new go.Binding("text", "label").makeTwoWay()),
+    new go.Binding("location", "location", go.Point.parse).makeTwoWay(stringifyPoint)
   );
 
   /**
@@ -77,7 +80,8 @@ export default function DiagramTemplate(props?: TemplateData) {
       ),
       $(go.Placeholder, { padding: 32 })
     ),
-    $(go.TextBlock, new go.Binding("text", "label"))
+    $(go.TextBlock, new go.Binding("text", "label")),
+    new go.Binding("location", "location", go.Point.parse).makeTwoWay(stringifyPoint)
   );
 
   /**
@@ -125,7 +129,8 @@ function getCustomNodeTemplate(nodeTemplate: TemplateNodeData): go.Node {
     go.Node,
     "Auto",
     nodeTemplate.shadow ? getShadowStyle(nodeTemplate.shadow) : {},
-    $(go.Panel, "Horizontal", nodeTemplate.sections ? getSectionStyles(nodeTemplate.sections) : {})
+    $(go.Panel, "Horizontal", nodeTemplate.sections ? getSectionStyles(nodeTemplate.sections) : {}),
+    new go.Binding("location", "location", go.Point.parse).makeTwoWay(stringifyPoint)
   );
 }
 
@@ -140,6 +145,7 @@ function getCustomGroupTemplate(groupTemplate: TemplateGroupData): go.Group {
     go.Group,
     "Position",
     new go.Binding("isSubGraphExpanded", "expanded").makeTwoWay(),
+    new go.Binding("location", "location", go.Point.parse).makeTwoWay(stringifyPoint),
     groupTemplate.shadow ? getShadowStyle(groupTemplate.shadow) : {},
 
     // Collapsed group view

@@ -10,7 +10,7 @@ suite("Sysl", () => {
   const sysl = new Sysl("sysl");
 
   test("works", async () => {
-    const pb = await sysl.protobuf(fixture("simple.sysl"));
+    const pb = await sysl.protobufJson(fixture("simple.sysl"));
     expect(pb.apps).to.have.keys(["App"]);
     expect(pb.apps.App.name.part).to.deep.equal(["App"]);
   });

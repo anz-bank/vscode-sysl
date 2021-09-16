@@ -1,7 +1,5 @@
 # Test
 .vscode-test
-extension/test/screenshots
-/go.*
 
 # Build
 out

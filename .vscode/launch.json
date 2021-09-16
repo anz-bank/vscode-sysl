@@ -22,7 +22,8 @@
 				"${workspaceFolder}/extension/test/fixtures/",
 				"--disable-extensions",
 				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionTestsPath=${workspaceFolder}/out/test/ui/index"
+				"--extensionTestsPath=${workspaceFolder}/out/test/ui/index",
+				"--user-data-dir=${workspaceFolder}/.vscode-test/user-data"
 			],
 			"outFiles": [
 				"${workspaceFolder}/out/test/**/*.js",

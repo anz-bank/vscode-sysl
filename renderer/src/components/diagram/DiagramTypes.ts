@@ -2,11 +2,14 @@ export interface DiagramData {
   nodes: Node[];
   edges: Edge[];
   templates?: TemplateData;
+  selected?: go.ObjectData;
+  skipsDiagramUpdate?: boolean;
+  resetsDiagram?: boolean;
 }
 
 export interface Node {
-  key: string;
-  label: string;
+  key?: string;
+  label?: string;
   category?: string;
   group?: string;
   isGroup?: boolean;
@@ -14,9 +17,9 @@ export interface Node {
 }
 
 export interface Edge {
-  key: string;
-  from: string;
-  to: string;
+  key?: string;
+  from?: string;
+  to?: string;
   category?: string;
 }
 export interface TemplateData {

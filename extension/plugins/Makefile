@@ -2,7 +2,7 @@
 
 ARRAI = go run github.com/arr-ai/arrai/cmd/arrai
 
-all: plugins check-clean test
+all: plugins test
 
 %.arraiz: %.arrai $(shell find . -name '*.arrai')
 	$(ARRAI) bundle $< > $@

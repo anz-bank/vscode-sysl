@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
-import { handleTestDataRequest } from "./components/TestDataExtractor";
+import { handleTestDataRequest } from "./components/diagram/DiagramTestHelper";
 
 ReactDOM.render(
   <React.StrictMode>

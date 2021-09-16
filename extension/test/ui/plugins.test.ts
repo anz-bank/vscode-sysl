@@ -1,13 +1,17 @@
 import { expect } from "chai";
+import { Test } from "mocha";
 import path from "path";
-import { commands, TextDocument, window } from "vscode";
-import { Diagram, Fixtures, Screenshot, sleep } from "./helpers";
+import { commands, TextDocument, TextEditor, window } from "vscode";
+import { Diagram, Fixtures, Input, Screenshot, sleep } from "./helpers";
 
 /**
  * Test that diagram rendering plugins are detected and invoked by the extension.
  */
 suite("plugins", function () {
   this.timeout(20000);
+
+  // TODO: Enable when screenshot comparisons are reliable.
+  const assertScreenshots = false;
 
   const testRoot = path.resolve(__dirname, "../../../extension/test");
   const fixtures = new Fixtures(path.join(testRoot, "fixtures"));
@@ -18,6 +22,7 @@ suite("plugins", function () {
   let resetFixtures: () => Promise<void>;
 
   let doc: TextDocument;
+  let editor: TextEditor;
 
   setup(async function () {
     await fixtures.mkdir(".sysl/diagram_renderers");
@@ -25,7 +30,7 @@ suite("plugins", function () {
     resetFixtures = fixtures.prepare(["simple.sysl"]);
 
     doc = await fixtures.open("simple.sysl");
-    await window.showTextDocument(doc, 1, false);
+    editor = await window.showTextDocument(doc, 1, false);
     // Allow the extension time to get registered.
     await sleep(500);
   });
@@ -41,26 +46,52 @@ suite("plugins", function () {
   });
 
   suite("diagram renderers", async function () {
-    teardown(async function () {
-      await diagram.closeOthers();
-      await screenshot.ofDiagram(this.currentTest);
+    suite("builtin integration diagram plugin", async function () {
+      test("initial render", async function () {
+        await diagram.renderFull();
+
+        const data = await diagram.getData();
+        expect(data.nodes).to.have.length(1);
+        expect(data.edges).to.be.empty;
+
+        assertScreenshots && (await screenshot.compareExpectWriteAndRestore(this.test as Test));
+      });
+
+      test("after edit", async function () {
+        await diagram.render();
+
+        await editor.edit((builder) => {
+          builder.insert(Input.atEnd(editor), Input.emptyApp("Foo"));
+        });
+        await commands.executeCommand("workbench.action.files.save");
+        await sleep(2000);
+
+        await diagram.maximize();
+
+        const data = await diagram.getData();
+        expect(data.nodes).to.have.length(2);
+        expect(data.edges).to.be.empty;
+
+        assertScreenshots && (await screenshot.compareExpectWriteAndRestore(this.test as Test));
+      });
     });
 
-    test("fake diagram", async function () {
+    test("single local plugin", async function () {
       await fixtures.cp(
-        "../diagram_renderers/test_plugin.arrai",
-        ".sysl/diagram_renderers/test_plugin.arrai"
+        "../diagram_renderers/test_plugin_2.arrai",
+        ".sysl/diagram_renderers/test_plugin_2.arrai"
       );
 
-      await diagram.render();
+      await diagram.renderFull();
 
       const data = await diagram.getData();
-      expect(data.nodes).to.have.length(3);
-      expect(data.edges).to.have.length(1);
+      expect(data.nodes).to.have.length(4);
+      expect(data.edges).to.have.length(3);
+
+      assertScreenshots && (await screenshot.compareExpectWriteAndRestore(this.test as Test));
     });
 
-    // TODO: Enable when multiple plugins are supported.
-    test("multiple fake diagrams", async function () {
+    test("multiple local plugins", async function () {
       await fixtures.cp(
         "../diagram_renderers/test_plugin.arrai",
         ".sysl/diagram_renderers/test_plugin.arrai"
@@ -70,11 +101,13 @@ suite("plugins", function () {
         ".sysl/diagram_renderers/test_plugin_2.arrai"
       );
 
-      await diagram.render();
+      await diagram.renderFull();
 
       const data = await diagram.getData();
-      expect(data.nodes).to.have.length(4);
-      expect(data.edges).to.have.length(3);
+      expect(data.nodes).to.have.length(3);
+      expect(data.edges).to.have.length(1);
+
+      assertScreenshots && (await screenshot.compareExpectWriteAndRestore(this.test as Test));
     });
   });
 
@@ -99,8 +132,7 @@ suite("plugins", function () {
           // Allow the extension time to get registered.
           await sleep(500);
 
-          await diagram.render();
-          await sleep(2000);
+          await diagram.renderFull();
 
           const data = await diagram.getData();
           expect(data.nodes).to.have.length(expected.nodes);

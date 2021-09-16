@@ -1,19 +1,11 @@
-import { Diagram, Iterator } from "gojs";
+import { Diagram } from "gojs";
+import { diagramToData } from "./DiagramUtil";
+import { vscode } from "../vscode/VsCode";
 
 /** A DOM element containing a GoJS diagram. */
 interface DiagramElement extends Element {
   goDiagram: Diagram;
 }
-
-/** A fake implementation of the {@code vscode} API for dev server development. */
-class FakeVSCode {
-  postMessage(msg: any): void {
-    console.warn("fake vscode cannot postMessage:", msg);
-  }
-}
-
-//@ts-ignore
-const vscode = "acquireVsCodeApi" in window ? acquireVsCodeApi() : new FakeVSCode();
 
 /**
  * Responds to requests from tests to fetch the diagram data.
@@ -53,10 +45,7 @@ function getDiagramData(): { nodes: any[]; edges: any[] } | undefined {
   if (!diagram) {
     return undefined;
   }
-  return {
-    nodes: toArray(diagram.nodes).map((i) => i.data),
-    edges: toArray(diagram.links).map((i) => i.data),
-  };
+  return diagramToData(diagram);
 }
 
 /** Takes a screenshot of the diagram and returns it. */
@@ -74,13 +63,4 @@ function getDiagram(): Diagram | undefined {
     return undefined;
   }
   return el.goDiagram;
-}
-
-/** Converts a GoJS iterator to a regular array. */
-function toArray<T>(it: Iterator<T>): T[] {
-  const arr: T[] = [];
-  while (it.next()) {
-    arr.push(it.value);
-  }
-  return arr;
 }

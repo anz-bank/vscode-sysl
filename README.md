@@ -89,6 +89,20 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+### 0.5.0
+
+- Add initial version of Sysl Plugin Protocol spec in [`plugin.schema.json`](extension/protocol/plugin.schema.json).
+  - A plugin is any program that implements this protocol: receiving requests and sending responses according to the schema.
+  - Diagram model changes are published to plugins via the extension, and their responses can render new diagrams.
+  - See the [example](extension/protocol) directory for a minimal example of implementing a plugin "server".
+  - Multiple plugins can be detected and invoked, and each can return multiple diagrams. Multiple diagrams are selectable via tabs in the renderer.
+- Add support for "screenshots" (SVG exports) of diagrams in UI tests (stable comparison and assertion still TODO).
+- General refactoring and rendering improvements.
+
+### 0.4.0
+
+- Minor cleanup
+
 ### 0.3.0
 
 - Basic side-by-side integration diagram rendering.
