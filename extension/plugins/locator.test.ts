@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import path from "path";
 import { CommandPluginClient } from "../protocol/client";
 import { Sysl } from "../tools/sysl";
 import { SyslTransformPluginClient } from "../transform/transform_plugin";
@@ -34,7 +35,7 @@ suite("plugins", () => {
         );
 
         expect(plugins.map((p) => p.scriptPath)).to.deep.equal([
-          "root/extension/plugins/integration/integration_model_plugin.arraiz",
+          path.normalize("root/extension/plugins/integration/integration_model_plugin.arraiz"),
         ]);
       });
 
@@ -50,7 +51,7 @@ suite("plugins", () => {
         );
 
         expect(plugins.map((p) => p.scriptPath)).to.deep.equal([
-          "root/extension/plugins/integration/integration_model_plugin.arraiz",
+          path.normalize("root/extension/plugins/integration/integration_model_plugin.arraiz"),
         ]);
       });
     });
@@ -70,7 +71,7 @@ suite("plugins", () => {
         );
 
         expect(plugins.map((p) => p.serverOptions.run.command)).to.deep.equal([
-          "workspace/.sysl/plugins/foo.arraiz",
+          path.normalize("workspace/.sysl/plugins/foo.arraiz"),
         ]);
       });
 
@@ -85,9 +86,9 @@ suite("plugins", () => {
         );
 
         expect(plugins.map((p) => p.serverOptions.run.command)).to.deep.equal([
-          "workspace/.sysl/plugins/bar.arraiz",
-          "workspace/.sysl/plugins/baz.arraiz",
-          "workspace/.sysl/plugins/foo.arraiz",
+          path.normalize("workspace/.sysl/plugins/bar.arraiz"),
+          path.normalize("workspace/.sysl/plugins/baz.arraiz"),
+          path.normalize("workspace/.sysl/plugins/foo.arraiz"),
         ]);
       });
     });

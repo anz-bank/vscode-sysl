@@ -6,21 +6,22 @@ import { pick } from "lodash";
 import { withStyles } from "@material-ui/styles";
 import Tab from "@material-ui/core/Tab";
 import { TabPanel, TabList, TabContext } from "@material-ui/lab";
-import Snackbar from '@material-ui/core/Snackbar';
-import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
+import Snackbar from "@material-ui/core/Snackbar";
+import MuiAlert, { AlertProps } from "@material-ui/lab/Alert";
 
 import { vscode } from "./components/vscode/VsCode";
 import { DiagramData } from "./components/diagram/DiagramTypes";
 import { DiagramWrapper } from "./components/diagram/DiagramWrapper";
 import { GoJSIndex, shouldNotifyChange, updateState } from "./components/diagram/DiagramState";
+import { DiagramSnapshotter } from "./components/diagram/SnapshottingDiagram";
 
 type AppState = {
   diagrams: DiagramData[];
   activeChild: number;
-  error? : {
+  error?: {
     openSnackBar: boolean;
     errorMessage: string | null;
-  }
+  };
 };
 
 const initialState: AppState = {
@@ -28,8 +29,8 @@ const initialState: AppState = {
   diagrams: [],
   error: {
     openSnackBar: false,
-    errorMessage: null
-  }
+    errorMessage: null,
+  },
 };
 
 interface StyleObject {
@@ -57,8 +58,8 @@ const styles: StyleObject = () => ({
     height: "100vh",
   },
   alert: {
-    whiteSpace: "pre-wrap"
-  }
+    whiteSpace: "pre-wrap",
+  },
 });
 
 interface AppProps {
@@ -69,7 +70,7 @@ type ParentMessageEvent = {
   data: {
     type: string;
     model: DiagramData[];
-    error?: {[key: string]: any};
+    error?: { [key: string]: any };
   };
 };
 
@@ -78,9 +79,8 @@ function Alert(props: AlertProps) {
 }
 
 function isDiagramData(model: DiagramData[]) {
-  const hasNodesAndEdges = (obj: any) => 
-    (obj.hasOwnProperty("nodes") && obj.hasOwnProperty("edges"));
-  return (model.every(hasNodesAndEdges));
+  const hasNodesAndEdges = (obj: any) => obj.hasOwnProperty("nodes") && obj.hasOwnProperty("edges");
+  return model.every(hasNodesAndEdges);
 }
 
 class App extends React.Component<AppProps, AppState> {
@@ -112,8 +112,8 @@ class App extends React.Component<AppProps, AppState> {
    * Updates state to show error in snackbar.
    * @param error received from extension
    */
-  public showError = (error: {[key: string]: any}, action?: string) => {
-    let errorText = '';
+  public showError = (error: { [key: string]: any }, action?: string) => {
+    let errorText = "";
     switch (action) {
       case "render":
         errorText = `The diagram could not be rendered because the following error occurred:\n\n`;
@@ -121,26 +121,27 @@ class App extends React.Component<AppProps, AppState> {
       default:
         errorText = `The following error occurred:\n\n`;
     }
-    if(error.errorId) {
-      errorText = errorText.concat(error.errorId.toString()+": ");
+    if (error.errorId) {
+      errorText = errorText.concat(error.errorId.toString() + ": ");
     }
     errorText = errorText.concat(error.errorMsg);
 
-    this.setState(
-      {error: {openSnackBar: true, errorMessage: errorText}},
-      () => { vscode.setState(this.state)}
-    );
-  }
+    this.setState({ error: { openSnackBar: true, errorMessage: errorText } }, () => {
+      vscode.setState(this.state);
+    });
+  };
 
   /**
    * Handles close event of error snackbar.
    */
   public handleClose = (event?: React.SyntheticEvent, reason?: string) => {
-    if (reason === 'clickaway') {
+    if (reason === "clickaway") {
       return;
     }
-    this.setState({error: {openSnackBar: false, errorMessage: null}}, () => { vscode.setState(this.state)});
-  }
+    this.setState({ error: { openSnackBar: false, errorMessage: null } }, () => {
+      vscode.setState(this.state);
+    });
+  };
 
   /**
    * Handle messages sent from the extension to the webview.
@@ -150,9 +151,9 @@ class App extends React.Component<AppProps, AppState> {
     if (message.error) {
       this.showError(message.error, message.type);
     } else if (!message.model) {
-      this.showError({errorMsg: "data object not found/undefined"}, message.type);
+      this.showError({ errorMsg: "data object not found/undefined" }, message.type);
     } else if (!isDiagramData(message.model)) {
-      this.showError({errorMsg: "data object is missing nodes and/or edges"}, message.type);
+      this.showError({ errorMsg: "data object is missing nodes and/or edges" }, message.type);
     } else {
       try {
         switch (message.type) {
@@ -160,7 +161,7 @@ class App extends React.Component<AppProps, AppState> {
             console.log("received render message", message.model);
             this.setState(
               produce((draft: AppState) => {
-                draft.error = {openSnackBar: false, errorMessage: null};
+                draft.error = { openSnackBar: false, errorMessage: null };
                 draft.diagrams = message.model.map((d) => ({ ...d, resetsDiagram: true }));
                 this.gojsIndexes = draft.diagrams.map(
                   ({ nodes, edges }) => new GoJSIndex({ nodes, edges })
@@ -173,7 +174,7 @@ class App extends React.Component<AppProps, AppState> {
             break;
         }
       } catch (e) {
-        this.showError({errorMsg: e}, message.type);
+        this.showError({ errorMsg: e }, message.type);
       }
     }
   }
@@ -236,30 +237,44 @@ class App extends React.Component<AppProps, AppState> {
       const key = data.templates ? "custom" : "";
       return (
         <div className={classes.root}>
-          {this.state.error && <Snackbar data-testid="error-snackbar" open={this.state.error.openSnackBar} onClose={this.handleClose}>
-            <Alert classes={{root: classes.alert}} onClose={this.handleClose} severity="error">
-              {this.state.error.errorMessage}
-            </Alert>
-          </Snackbar>}
-          <DiagramWrapper
-            diagramKey={key}
-            nodes={data.nodes}
-            edges={data.edges}
-            templates={data.templates}
-            skipsDiagramUpdate={data.skipsDiagramUpdate || false}
-            onDiagramEvent={this.handleDiagramEvent}
-            onModelChange={this.handleModelChange}
-          />
+          {this.state.error && (
+            <Snackbar
+              data-testid="error-snackbar"
+              open={this.state.error.openSnackBar}
+              onClose={this.handleClose}
+            >
+              <Alert classes={{ root: classes.alert }} onClose={this.handleClose} severity="error">
+                {this.state.error.errorMessage}
+              </Alert>
+            </Snackbar>
+          )}
+          <DiagramSnapshotter name={data.templates?.diagramLabel}>
+            <DiagramWrapper
+              diagramKey={key}
+              nodes={data.nodes}
+              edges={data.edges}
+              templates={data.templates}
+              skipsDiagramUpdate={data.skipsDiagramUpdate || false}
+              onDiagramEvent={this.handleDiagramEvent}
+              onModelChange={this.handleModelChange}
+            />
+          </DiagramSnapshotter>
         </div>
       );
     } else {
       return (
         <div className={classes.root}>
-          {this.state.error && <Snackbar data-testid="error-snackbar" open={this.state.error.openSnackBar} onClose={this.handleClose}>
-            <Alert classes={{root: classes.alert}} onClose={this.handleClose} severity="error">
-              {this.state.error.errorMessage}
-            </Alert>
-          </Snackbar>}
+          {this.state.error && (
+            <Snackbar
+              data-testid="error-snackbar"
+              open={this.state.error.openSnackBar}
+              onClose={this.handleClose}
+            >
+              <Alert classes={{ root: classes.alert }} onClose={this.handleClose} severity="error">
+                {this.state.error.errorMessage}
+              </Alert>
+            </Snackbar>
+          )}
           <TabContext value={this.state.activeChild.toString()}>
             <TabList
               classes={{ root: classes.tabs }}
@@ -280,18 +295,25 @@ class App extends React.Component<AppProps, AppState> {
             </TabList>
             {this.state.diagrams.map((data, index) => {
               const key = data.templates ? "custom" : "";
+              const active = this.state.activeChild === index;
               return (
-                <TabPanel classes={{ root: classes.tabPanel }} value={index.toString()} key={index}>
-                  <DiagramWrapper
-                    diagramKey={key}
-                    nodes={data.nodes}
-                    edges={data.edges}
-                    templates={data.templates}
-                    skipsDiagramUpdate={data.skipsDiagramUpdate || false}
-                    onDiagramEvent={this.handleDiagramEvent}
-                    onModelChange={this.handleModelChange}
-                  />
-                </TabPanel>
+                <DiagramSnapshotter active={active} name={data.templates?.diagramLabel}>
+                  <TabPanel
+                    classes={{ root: classes.tabPanel }}
+                    value={index.toString()}
+                    key={index}
+                  >
+                    <DiagramWrapper
+                      diagramKey={key}
+                      nodes={data.nodes}
+                      edges={data.edges}
+                      templates={data.templates}
+                      skipsDiagramUpdate={data.skipsDiagramUpdate || false}
+                      onDiagramEvent={this.handleDiagramEvent}
+                      onModelChange={this.handleModelChange}
+                    />
+                  </TabPanel>
+                </DiagramSnapshotter>
               );
             })}
           </TabContext>

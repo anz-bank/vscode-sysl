@@ -1,10 +1,8 @@
 import { expect } from "chai";
-import { CommandPluginClient } from "./client";
+import { ExampleClient } from "./example/example_client";
 
 suite("plugin client", () => {
-  const client = new CommandPluginClient("test", "Test", {
-    run: { command: "extension/protocol/example/bin/example" },
-  });
+  const client = new ExampleClient({ debug: false });
 
   test("construct", async () => {
     expect(client).to.be.not.null;

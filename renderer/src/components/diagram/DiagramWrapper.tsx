@@ -1,7 +1,3 @@
-/*
- *  Copyright (C) 1998-2021 by Northwoods Software Corporation. All Rights Reserved.
- */
-
 import * as React from "react";
 import * as go from "gojs";
 import { ReactDiagram } from "gojs-react";
@@ -10,7 +6,7 @@ import "./Diagram.css";
 import DiagramTemplate from "./DiagramTemplates";
 import { TemplateData } from "./DiagramTypes";
 
-interface DiagramProps {
+export interface DiagramProps {
   nodes: Array<go.ObjectData>;
   edges: Array<go.ObjectData>;
   templates?: TemplateData;

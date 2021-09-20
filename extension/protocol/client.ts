@@ -108,6 +108,9 @@ export class CommandPluginClient implements PluginClient {
     const response = await this.spawn(run.command, run.args || [], {
       input: JSON.stringify(request),
     });
+    if (!response) {
+      throw new Error("no response");
+    }
     const out = JSON.parse(response.toString());
     if (this.debug) {
       this.logger.log(id, "response", JSON.stringify(out, null, 2));
@@ -124,7 +127,7 @@ export class CommandPluginClient implements PluginClient {
     options?: SpawnSyncOptionsWithBufferEncoding
   ): Promise<Buffer> {
     const child = spawnSync(command, args, options);
-    if (child.stderr.length) {
+    if (child.stderr?.length) {
       console.debug(child.stderr.toString());
     }
     return child.stdout;

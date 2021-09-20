@@ -12,12 +12,23 @@ jobs:
         with:
           go-version: 1.16
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
       - name: Check out code
         uses: actions/checkout@v2
 
+      - run: yarn install
+      - name: Build protocol artifacts
+        run: yarn schema
+      - name: Build plugins
+        run: yarn plugins
+
       - name: Ensure no changes
         working-directory: extension/plugins
-        run: make -B plugins && make check-clean
+        run: make check-clean
 
       - name: Run tests
         working-directory: extension/plugins

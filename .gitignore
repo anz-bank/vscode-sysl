@@ -7,3 +7,4 @@ node_modules
 *.vsix
 *error.log
 /main.js*
+/sysl

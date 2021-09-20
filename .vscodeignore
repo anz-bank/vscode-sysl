@@ -4,8 +4,10 @@
 **/tsconfig.json
 *.log
 go.*
-tmp*
+**/*.go
+**/tmp*
 tslint*.json
+sysl
 
 node_modules/**
 test-resources/**
@@ -14,3 +16,5 @@ renderer/**
 !renderer/build
 extension/plugins/**
 !extension/plugins/**/*.arraiz
+**/protocol/example/**
+extension/protocol/plugin.schema.json

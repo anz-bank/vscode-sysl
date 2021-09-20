@@ -1,6 +1,6 @@
-import { act } from "react-dom/test-utils";
 import { render, screen } from "@testing-library/react";
-import '@testing-library/jest-dom';
+import "@testing-library/jest-dom";
+import { act } from "react-dom/test-utils";
 import { Diagram, Size } from "gojs";
 
 import App from "./App";
@@ -55,16 +55,13 @@ describe("rendering the app", () => {
     expect(diagram.nodes.count).toEqual(2);
     expect(diagram.links.count).toEqual(1);
     act(() => {
-      window.dispatchEvent(
-        modelEvent(null,
-        {errorMsg: "an error occurred"})
-      );
+      window.dispatchEvent(modelEvent(null, { errorMsg: "an error occurred" }));
     });
     // expect diagram to not have been updated
     expect(diagram.nodes.count).toEqual(2);
     expect(diagram.links.count).toEqual(1);
     // expect error snackbar to be visible
-    expect(screen.getByTestId('error-snackbar')).toBeVisible();
+    expect(screen.getByTestId("error-snackbar")).toBeVisible();
   });
 
   it("receives message with no model", async () => {
@@ -74,15 +71,13 @@ describe("rendering the app", () => {
     expect(diagram.nodes.count).toEqual(2);
     expect(diagram.links.count).toEqual(1);
     act(() => {
-      window.dispatchEvent(
-        modelEvent(null)
-      );
+      window.dispatchEvent(modelEvent(null));
     });
     // expect diagram to not have been updated
     expect(diagram.nodes.count).toEqual(2);
     expect(diagram.links.count).toEqual(1);
     // expect error snackbar to be visible
-    expect(screen.getByTestId('error-snackbar')).toBeVisible();
+    expect(screen.getByTestId("error-snackbar")).toBeVisible();
   });
 
   it("receives message model with no nodes or edges", async () => {
@@ -93,17 +88,19 @@ describe("rendering the app", () => {
     expect(diagram.links.count).toEqual(1);
     act(() => {
       window.dispatchEvent(
-        modelEvent([{
-          a: [],
-          b: [],
-        },])
+        modelEvent([
+          {
+            a: [],
+            b: [],
+          },
+        ])
       );
     });
     // expect diagram to not have been updated
     expect(diagram.nodes.count).toEqual(2);
     expect(diagram.links.count).toEqual(1);
     // expect error snackbar to be visible
-    expect(screen.getByTestId('error-snackbar')).toBeVisible();
+    expect(screen.getByTestId("error-snackbar")).toBeVisible();
   });
 });
 
@@ -134,7 +131,7 @@ function modelEvent(model: any, error?: any) {
     data: {
       type: "render",
       model,
-      error
+      error,
     },
   });
 }

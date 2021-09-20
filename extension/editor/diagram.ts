@@ -21,6 +21,7 @@ import { panelManager } from "./panel_manager";
 import { FileLogger } from "./file_logger";
 import { PluginManager } from "../plugins/manager";
 import { PluginLocator } from "../plugins/locator";
+import { parseSnapshotEvent, SnapshotEvent, snapshotEventType } from "./snapshot";
 
 /**
  * Initializes the interactive diagram web view and handles sending and receiving events.
@@ -36,6 +37,7 @@ export class SyslGoJsDiagramEditorProvider implements CustomTextEditorProvider {
     const editorCommands: CustomEditorCommandMap = {
       "sysl.diagram.toggleComponentTree": () => postToActive("toggleComponentTree"),
       "sysl.diagram.toggleDescriptionPane": () => postToActive("toggleDescriptionPane"),
+      "sysl.diagram.snapshot": () => postToActive("snapshotDiagram"),
     };
     for (let key in editorCommands) {
       context.subscriptions.push(commands.registerCommand(key, editorCommands[key]));
@@ -43,8 +45,6 @@ export class SyslGoJsDiagramEditorProvider implements CustomTextEditorProvider {
 
     return providerRegistration;
   }
-
-  static readonly viewType = "sysl.gojsDiagram";
 
   constructor(private readonly context: ExtensionContext) {}
 
@@ -105,19 +105,33 @@ export class SyslGoJsDiagramEditorProvider implements CustomTextEditorProvider {
       }
     }
 
-    async function handleDiagramChange(e: any): Promise<void> {
-      console.debug("event from diagram", e);
-      switch (e.type) {
+    /**
+     * Handles a snapshot event by writing the snapshot to disk and notifying the user of the path.
+     * Returns the path.
+     */
+    async function saveSnapshot(event: SnapshotEvent): Promise<Uri> {
+      const snapshot = parseSnapshotEvent(event, document.uri);
+      await workspace.fs.writeFile(snapshot.path, snapshot.data);
+
+      const snapshotDir = rootRelativePath(Uri.joinPath(snapshot.path, ".."));
+      const info = `Snapshot saved to ${path.basename(snapshot.path.fsPath)} in ${snapshotDir}`;
+      window.showInformationMessage(info);
+      return snapshot.path;
+    }
+
+    async function handleDiagramChange(event: any): Promise<void> {
+      console.debug("event from diagram", event);
+      switch (event.type) {
         case "diagramModelChange":
-          console.log("diagramModelChange", e.delta);
+          console.log("diagramModelChange", event.delta);
           await plugins.onChange({
             change: {
               source: "DIAGRAM",
               action: "MODIFY",
               filePath,
               detail: {
-                model: e.model,
-                delta: e.delta,
+                model: event.model,
+                delta: event.delta,
               },
             },
             context: await buildContext(document, sysl),
@@ -128,6 +142,9 @@ export class SyslGoJsDiagramEditorProvider implements CustomTextEditorProvider {
           //   const app = proto.apps?.[e.target];
           //   app && revealApp(app, window.visibleTextEditors);
           // }
+          break;
+        case snapshotEventType:
+          await saveSnapshot(event as SnapshotEvent);
           break;
       }
     }
@@ -225,4 +242,19 @@ type RendererModel = {
 
 function getDiagrams(res: OnChangeResponse): RendererModel[] {
   return filter(res.renderDiagram?.map((r) => r.content as any as RendererModel));
+}
+
+/**
+ * Returns the path to uri relative to the workspace folder containing it.
+ *
+ * The relative path includes a leading {@code /} representing the workspace folder.
+ *
+ * If uri is not in the workspace, returns the full filesystem path.
+ */
+function rootRelativePath(uri: Uri): string {
+  const wsFolder = workspace.getWorkspaceFolder(uri);
+  if (wsFolder) {
+    return path.join(wsFolder.name, uri.fsPath.slice(wsFolder.uri.fsPath.length));
+  }
+  return uri.fsPath;
 }

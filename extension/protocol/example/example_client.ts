@@ -1,12 +1,10 @@
-import { CommandPluginClient, PluginClientOptions, ServerOptions } from "../client";
+import path from "path";
+import { CommandPluginClient, PluginClientOptions } from "../client";
+
+const pluginPath = path.join(__dirname, "example_plugin.js");
 
 export class ExampleClient extends CommandPluginClient {
-  constructor(
-    id: string,
-    name: string,
-    serverOptions: ServerOptions,
-    clientOptions: PluginClientOptions = {}
-  ) {
-    super(id, name, serverOptions, clientOptions);
+  constructor(clientOptions: PluginClientOptions = {}) {
+    super("example", "Example", { run: { command: "node", args: [pluginPath] } }, clientOptions);
   }
 }

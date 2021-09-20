@@ -7,6 +7,7 @@ import retry from "p-retry";
 import {
   commands,
   ConfigurationTarget,
+  GlobPattern,
   Position,
   TextDocument,
   TextEditor,
@@ -72,6 +73,11 @@ export class Fixtures {
     await workspace.fs.delete(Uri.file(path.resolve(this.fixturesRoot, rmPath)), {
       recursive: true,
     });
+  }
+
+  /** Returns an array of files matching the search pattern(s). */
+  async find(include: GlobPattern, exclude?: GlobPattern): Promise<Uri[]> {
+    return await workspace.findFiles(include, exclude);
   }
 }
 
