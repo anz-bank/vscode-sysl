@@ -1,11 +1,21 @@
 import { act } from "react-dom/test-utils";
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import '@testing-library/jest-dom';
 import { Diagram, Size } from "gojs";
 
 import App from "./App";
 
 describe("rendering the app", () => {
   let diagram: Diagram;
+  const basicModelEvent = modelEvent([
+    {
+      nodes: [
+        { key: "a", label: "a" },
+        { key: "b", label: "b" },
+      ],
+      edges: [{ key: "a->b", from: "a", to: "b" }],
+    },
+  ]);
 
   beforeEach(() => {
     // use Jest's fake timers to ensure Diagram.delayInitialization is called in time.
@@ -32,20 +42,68 @@ describe("rendering the app", () => {
 
   it("receives messages", async () => {
     act(() => {
-      window.dispatchEvent(
-        modelEvent([
-          {
-            nodes: [
-              { key: "a", label: "a" },
-              { key: "b", label: "b" },
-            ],
-            edges: [{ key: "a->b", from: "a", to: "b" }],
-          },
-        ])
-      );
+      window.dispatchEvent(basicModelEvent);
     });
     expect(diagram.nodes.count).toEqual(2);
     expect(diagram.links.count).toEqual(1);
+  });
+
+  it("receives an error", async () => {
+    act(() => {
+      window.dispatchEvent(basicModelEvent);
+    });
+    expect(diagram.nodes.count).toEqual(2);
+    expect(diagram.links.count).toEqual(1);
+    act(() => {
+      window.dispatchEvent(
+        modelEvent(null,
+        {errorMsg: "an error occurred"})
+      );
+    });
+    // expect diagram to not have been updated
+    expect(diagram.nodes.count).toEqual(2);
+    expect(diagram.links.count).toEqual(1);
+    // expect error snackbar to be visible
+    expect(screen.getByTestId('error-snackbar')).toBeVisible();
+  });
+
+  it("receives message with no model", async () => {
+    act(() => {
+      window.dispatchEvent(basicModelEvent);
+    });
+    expect(diagram.nodes.count).toEqual(2);
+    expect(diagram.links.count).toEqual(1);
+    act(() => {
+      window.dispatchEvent(
+        modelEvent(null)
+      );
+    });
+    // expect diagram to not have been updated
+    expect(diagram.nodes.count).toEqual(2);
+    expect(diagram.links.count).toEqual(1);
+    // expect error snackbar to be visible
+    expect(screen.getByTestId('error-snackbar')).toBeVisible();
+  });
+
+  it("receives message model with no nodes or edges", async () => {
+    act(() => {
+      window.dispatchEvent(basicModelEvent);
+    });
+    expect(diagram.nodes.count).toEqual(2);
+    expect(diagram.links.count).toEqual(1);
+    act(() => {
+      window.dispatchEvent(
+        modelEvent([{
+          a: [],
+          b: [],
+        },])
+      );
+    });
+    // expect diagram to not have been updated
+    expect(diagram.nodes.count).toEqual(2);
+    expect(diagram.links.count).toEqual(1);
+    // expect error snackbar to be visible
+    expect(screen.getByTestId('error-snackbar')).toBeVisible();
   });
 });
 
@@ -71,11 +129,12 @@ function initializeDiagramDom(container: Element): Diagram {
 }
 
 /** Construct a render message to update the app model. */
-function modelEvent(model: any) {
+function modelEvent(model: any, error?: any) {
   return new MessageEvent("message", {
     data: {
       type: "render",
       model,
+      error
     },
   });
 }

@@ -6,6 +6,8 @@ import { pick } from "lodash";
 import { withStyles } from "@material-ui/styles";
 import Tab from "@material-ui/core/Tab";
 import { TabPanel, TabList, TabContext } from "@material-ui/lab";
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
 
 import { vscode } from "./components/vscode/VsCode";
 import { DiagramData } from "./components/diagram/DiagramTypes";
@@ -15,14 +17,26 @@ import { GoJSIndex, shouldNotifyChange, updateState } from "./components/diagram
 type AppState = {
   diagrams: DiagramData[];
   activeChild: number;
+  error? : {
+    openSnackBar: boolean;
+    errorMessage: string | null;
+  }
 };
 
 const initialState: AppState = {
   activeChild: 0,
   diagrams: [],
+  error: {
+    openSnackBar: false,
+    errorMessage: null
+  }
 };
 
-const styles = () => ({
+interface StyleObject {
+  [key: string]: any;
+}
+
+const styles: StyleObject = () => ({
   root: {
     flexGrow: 1,
     display: "flex",
@@ -42,6 +56,9 @@ const styles = () => ({
     flexGrow: 1,
     height: "100vh",
   },
+  alert: {
+    whiteSpace: "pre-wrap"
+  }
 });
 
 interface AppProps {
@@ -52,8 +69,19 @@ type ParentMessageEvent = {
   data: {
     type: string;
     model: DiagramData[];
+    error?: {[key: string]: any};
   };
 };
+
+function Alert(props: AlertProps) {
+  return <MuiAlert elevation={6} {...props} />;
+}
+
+function isDiagramData(model: DiagramData[]) {
+  const hasNodesAndEdges = (obj: any) => 
+    (obj.hasOwnProperty("nodes") && obj.hasOwnProperty("edges"));
+  return (model.every(hasNodesAndEdges));
+}
 
 class App extends React.Component<AppProps, AppState> {
   private gojsIndexes: GoJSIndex[];
@@ -81,26 +109,72 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   /**
+   * Updates state to show error in snackbar.
+   * @param error received from extension
+   */
+  public showError = (error: {[key: string]: any}, action?: string) => {
+    let errorText = '';
+    switch (action) {
+      case "render":
+        errorText = `The diagram could not be rendered because the following error occurred:\n\n`;
+        break;
+      default:
+        errorText = `The following error occurred:\n\n`;
+    }
+    if(error.errorId) {
+      errorText = errorText.concat(error.errorId.toString()+": ");
+    }
+    errorText = errorText.concat(error.errorMsg);
+
+    this.setState(
+      {error: {openSnackBar: true, errorMessage: errorText}},
+      () => { vscode.setState(this.state)}
+    );
+  }
+
+  /**
+   * Handles close event of error snackbar.
+   */
+  public handleClose = (event?: React.SyntheticEvent, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    this.setState({error: {openSnackBar: false, errorMessage: null}}, () => { vscode.setState(this.state)});
+  }
+
+  /**
    * Handle messages sent from the extension to the webview.
    */
   public handleParentMessage(event: ParentMessageEvent) {
     const message = event.data;
-    switch (message.type) {
-      case "render":
-        console.log("received render message", message.model);
-
-        this.setState(
-          produce((draft: AppState) => {
-            draft.diagrams = message.model.map((d) => ({ ...d, resetsDiagram: true }));
-            this.gojsIndexes = draft.diagrams.map(
-              ({ nodes, edges }) => new GoJSIndex({ nodes, edges })
+    if (message.error) {
+      this.showError(message.error, message.type);
+    } else if (!message.model) {
+      this.showError({errorMsg: "data object not found/undefined"}, message.type);
+    } else if (!isDiagramData(message.model)) {
+      this.showError({errorMsg: "data object is missing nodes and/or edges"}, message.type);
+    } else {
+      try {
+        switch (message.type) {
+          case "render":
+            console.log("received render message", message.model);
+            this.setState(
+              produce((draft: AppState) => {
+                draft.error = {openSnackBar: false, errorMessage: null};
+                draft.diagrams = message.model.map((d) => ({ ...d, resetsDiagram: true }));
+                this.gojsIndexes = draft.diagrams.map(
+                  ({ nodes, edges }) => new GoJSIndex({ nodes, edges })
+                );
+              }),
+              () => {
+                vscode.setState(this.state);
+              }
             );
-          }),
-          () => {
-            vscode.setState(this.state);
-          }
-        );
-        break;
+            break;
+        }
+      } catch (e) {
+        this.showError({errorMsg: e}, message.type);
+      }
     }
   }
 
@@ -162,6 +236,11 @@ class App extends React.Component<AppProps, AppState> {
       const key = data.templates ? "custom" : "";
       return (
         <div className={classes.root}>
+          {this.state.error && <Snackbar data-testid="error-snackbar" open={this.state.error.openSnackBar} onClose={this.handleClose}>
+            <Alert classes={{root: classes.alert}} onClose={this.handleClose} severity="error">
+              {this.state.error.errorMessage}
+            </Alert>
+          </Snackbar>}
           <DiagramWrapper
             diagramKey={key}
             nodes={data.nodes}
@@ -176,6 +255,11 @@ class App extends React.Component<AppProps, AppState> {
     } else {
       return (
         <div className={classes.root}>
+          {this.state.error && <Snackbar data-testid="error-snackbar" open={this.state.error.openSnackBar} onClose={this.handleClose}>
+            <Alert classes={{root: classes.alert}} onClose={this.handleClose} severity="error">
+              {this.state.error.errorMessage}
+            </Alert>
+          </Snackbar>}
           <TabContext value={this.state.activeChild.toString()}>
             <TabList
               classes={{ root: classes.tabs }}
