@@ -89,6 +89,14 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+### 0.7.1
+
+- Add command/button to save a snapshot of the current diagram as an SVG.
+
+### 0.6.0
+
+- Display error messages in the diagram renderer if something goes wrong with rendering.
+
 ### 0.5.1
 
 - Fix dependency version.

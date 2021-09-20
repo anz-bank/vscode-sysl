@@ -4,7 +4,7 @@
   "description": "Write Sysl specs easily with instant visual feedback.",
   "author": "ANZ Bank",
   "publisher": "anz-bank",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -105,6 +105,7 @@
     ]
   },
   "scripts": {
+    "vscode:prepublish": "yarn build",
     "esbuild-base": "esbuild ./extension/main.ts --bundle --outfile=out/main.js --external:vscode --external:electron --format=cjs --platform=node",
     "esbuild": "npm run esbuild-base -- --sourcemap",
     "esbuild-prod": "npm run esbuild-base -- --minify",
