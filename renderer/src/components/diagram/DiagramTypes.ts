@@ -84,4 +84,6 @@ export interface TemplateTextBlock {
   stroke?: string;
   stretch?: boolean;
   segmentOffset?: { [key: string]: number };
+  overflow?: go.EnumValue;
+  maxLines?: number;
 }

@@ -50,7 +50,7 @@ export default function DiagramTemplate(props?: TemplateData) {
       new go.Binding("fill", "bgColor"),
       new go.Binding("stroke", "strokeColor")
     ),
-    $(go.TextBlock, { margin: 10 }, new go.Binding("text", "label").makeTwoWay()),
+    getTextBlockStyle({ margin: "10", label: "label"}),
     new go.Binding("location", "location", go.Point.parse).makeTwoWay(stringifyPoint)
   );
 
@@ -80,7 +80,7 @@ export default function DiagramTemplate(props?: TemplateData) {
       ),
       $(go.Placeholder, { padding: 32 })
     ),
-    $(go.TextBlock, new go.Binding("text", "label")),
+    getTextBlockStyle({label: "label"}),
     new go.Binding("location", "location", go.Point.parse).makeTwoWay(stringifyPoint)
   );
 
@@ -273,8 +273,10 @@ function getTextBlockStyle(text: TemplateTextBlock): go.TextBlock {
     {
       textAlign: text.align ?? "center",
       verticalAlignment: go.Spot.Center,
+      overflow: text.overflow ?? go.TextBlock.OverflowEllipsis,
+      maxLines: text.maxLines ?? 1,
+      font: text.font ?? ""
     },
-    { font: text.font ?? "" },
     text.segmentOffset
       ? { segmentOffset: new go.Point(text.segmentOffset.x, text.segmentOffset.y) }
       : {},
