@@ -9,6 +9,7 @@ import {
   WebviewPanel,
   Webview,
   commands,
+  ProgressLocation,
 } from "vscode";
 import { CustomEditorCommandMap, customViewType, syslBinaryPath } from "../constants";
 import path, { join } from "path";
@@ -92,17 +93,30 @@ export class SyslGoJsDiagramEditorProvider implements CustomTextEditorProvider {
     }
 
     async function handleSourceSave(e: any): Promise<void> {
-      if (e.uri.toString() === document.uri.toString()) {
-        const results = await plugins.onChange({
-          change: {
-            source: "TEXT",
-            action: "SAVE_FILE",
-            filePath,
-          },
-          context: await buildContext(document, sysl),
+      window.withProgress({
+        location: ProgressLocation.Notification
+      }, async (progress) => {
+        if (e.uri.toString() !== document.uri.toString()) {
+          return;
+        }
+
+        progress.report({ message: "Updating diagrams..." });
+        return new Promise<void>((resolve) => {
+          setTimeout(async () => {
+            const results = await plugins.onChange({
+              change: {
+                source: "TEXT",
+                action: "SAVE_FILE",
+                filePath,
+              },
+              context: await buildContext(document, sysl),
+            });
+            progress.report({ message: "Rendering diagrams..." });
+            await updateWebview(flatten(results.map(getDiagrams)));
+            resolve();
+          }, 1);
         });
-        await updateWebview(flatten(results.map(getDiagrams)));
-      }
+      });
     }
 
     /**
@@ -154,19 +168,9 @@ export class SyslGoJsDiagramEditorProvider implements CustomTextEditorProvider {
       workspace.onDidSaveTextDocument(handleSourceSave),
       webviewPanel.webview.onDidReceiveMessage(handleDiagramChange),
     ];
-
+    
     // Request the first render.
-    // TODO: Invoke a more precise function.
-    const requestRender = async () =>
-      plugins.onChange({
-        change: {
-          source: "TEXT",
-          action: "SAVE_FILE",
-          filePath,
-        },
-        context: await buildContext(document, sysl),
-      });
-    start.then(requestRender).then((results) => updateWebview(flatten(results.map(getDiagrams))));
+    start.then(() => handleSourceSave({uri: document.uri.toString()}));
 
     // Make sure we get rid of the listener when our editor is closed.
     webviewPanel.onDidDispose(() => {

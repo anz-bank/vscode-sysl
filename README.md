@@ -89,6 +89,14 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+### 0.9.0
+
+- Display progress indicator when updating the webview.
+
+### 0.8.0
+
+- Update default styles for diagram text.
+
 ### 0.7.1
 
 - Add command/button to save a snapshot of the current diagram as an SVG.
