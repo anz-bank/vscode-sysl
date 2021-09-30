@@ -152,6 +152,7 @@ export class SyslGoJsDiagramEditorProvider implements CustomTextEditorProvider {
           });
           break;
         case "select":
+          console.log(event.selectedData.current);
           // if (window.visibleTextEditors) {
           //   const app = proto.apps?.[e.target];
           //   app && revealApp(app, window.visibleTextEditors);
@@ -233,6 +234,7 @@ async function buildContext(document: TextDocument, sysl: Sysl): Promise<Context
 
 // TODO: Reuse types from renderer.
 type RendererModel = {
+  type?: { [key: string]: any };
   nodes: any[];
   edges: any[];
   templates?: {

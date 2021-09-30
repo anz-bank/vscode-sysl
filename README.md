@@ -89,6 +89,10 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+### 0.10.0
+
+- Publish diagram selection event to extension.
+
 ### 0.9.0
 
 - Display progress indicator when updating the webview.

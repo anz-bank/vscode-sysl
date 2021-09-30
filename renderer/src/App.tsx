@@ -1,5 +1,6 @@
 import * as React from "react";
 import * as go from "gojs";
+import _ from "lodash";
 import { produce } from "immer";
 import { pick } from "lodash";
 
@@ -17,6 +18,7 @@ import { DiagramSnapshotter } from "./components/diagram/SnapshottingDiagram";
 
 type AppState = {
   diagrams: DiagramData[];
+  selectedData: DiagramData | null;
   activeChild: number;
   error?: {
     openSnackBar: boolean;
@@ -26,6 +28,7 @@ type AppState = {
 
 const initialState: AppState = {
   activeChild: 0,
+  selectedData: null,
   diagrams: [],
   error: {
     openSnackBar: false,
@@ -74,6 +77,15 @@ type ParentMessageEvent = {
   };
 };
 
+type SelectionMessageEvent = {
+  type: string;
+  selectedData: {
+    current: DiagramData | null,
+    previous: DiagramData | null
+  };
+  error?: { [key: string]: any };
+}
+
 function Alert(props: AlertProps) {
   return <MuiAlert elevation={6} {...props} />;
 }
@@ -81,6 +93,31 @@ function Alert(props: AlertProps) {
 function isDiagramData(model: DiagramData[]) {
   const hasNodesAndEdges = (obj: any) => obj.hasOwnProperty("nodes") && obj.hasOwnProperty("edges");
   return model.every(hasNodesAndEdges);
+}
+
+/**
+ * Returns the associated DiagramData for a list of GoJS Parts.
+ */
+function getDiagramData(data: go.Part[], diagram: DiagramData): DiagramData | null {
+  
+  let nodes: string[] = [];
+  let edges: string[] = [];
+
+  data.forEach((obj: go.ObjectData) => {
+    if (obj instanceof go.Node) {
+      obj.key && nodes.push(obj.key.toString());
+    } else if (obj instanceof go.Link) {
+      obj.key && edges.push(obj.key.toString());
+    }
+  });
+
+  const diagramData: DiagramData = {
+    nodes: _(diagram.nodes).keyBy('key').at(nodes).value(),
+    edges: _(diagram.edges).keyBy('key').at(edges).value(),
+    type: diagram.type
+  };
+
+  return diagramData;
 }
 
 class App extends React.Component<AppProps, AppState> {
@@ -185,7 +222,22 @@ class App extends React.Component<AppProps, AppState> {
    * @param e a GoJS DiagramEvent
    */
   public handleDiagramEvent(e: go.DiagramEvent) {
-    // TODO: Publish selection change events to the extension.
+    switch(e.name) {
+      case "ChangedSelection":
+        const selection = getDiagramData(e.subject.toArray(), this.state.diagrams[this.state.activeChild]);
+        const message: SelectionMessageEvent = {
+          type: "select",
+          selectedData: {
+            current: selection,
+            previous: this.state.selectedData
+          }
+        }
+        vscode.postMessage(message);
+        this.setState({selectedData: selection});
+        break;
+      default:
+        break;
+    }
   }
 
   /**

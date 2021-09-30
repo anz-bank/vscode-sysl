@@ -1,4 +1,5 @@
 export interface DiagramData {
+  type?: { [key: string]: any };
   nodes: Node[];
   edges: Edge[];
   templates?: TemplateData;
