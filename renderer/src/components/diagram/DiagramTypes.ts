@@ -14,7 +14,6 @@ export interface Node {
   category?: string;
   group?: string;
   isGroup?: boolean;
-  data?: { [key: string]: any };
 }
 
 export interface Edge {

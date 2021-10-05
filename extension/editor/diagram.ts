@@ -93,30 +93,33 @@ export class SyslGoJsDiagramEditorProvider implements CustomTextEditorProvider {
     }
 
     async function handleSourceSave(e: any): Promise<void> {
-      window.withProgress({
-        location: ProgressLocation.Notification
-      }, async (progress) => {
-        if (e.uri.toString() !== document.uri.toString()) {
-          return;
-        }
+      window.withProgress(
+        {
+          location: ProgressLocation.Notification,
+        },
+        async (progress) => {
+          if (e.uri.toString() !== document.uri.toString()) {
+            return;
+          }
 
-        progress.report({ message: "Updating diagrams..." });
-        return new Promise<void>((resolve) => {
-          setTimeout(async () => {
-            const results = await plugins.onChange({
-              change: {
-                source: "TEXT",
-                action: "SAVE_FILE",
-                filePath,
-              },
-              context: await buildContext(document, sysl),
-            });
-            progress.report({ message: "Rendering diagrams..." });
-            await updateWebview(flatten(results.map(getDiagrams)));
-            resolve();
-          }, 1);
-        });
-      });
+          progress.report({ message: "Updating diagrams..." });
+          return new Promise<void>((resolve) => {
+            setTimeout(async () => {
+              const results = await plugins.onChange({
+                change: {
+                  source: "TEXT",
+                  action: "SAVE_FILE",
+                  filePath,
+                },
+                context: await buildContext(document, sysl),
+              });
+              progress.report({ message: "Rendering diagrams..." });
+              await updateWebview(flatten(results.map(getDiagrams)));
+              resolve();
+            }, 1);
+          });
+        }
+      );
     }
 
     /**
@@ -152,7 +155,6 @@ export class SyslGoJsDiagramEditorProvider implements CustomTextEditorProvider {
           });
           break;
         case "select":
-          console.log(event.selectedData.current);
           // if (window.visibleTextEditors) {
           //   const app = proto.apps?.[e.target];
           //   app && revealApp(app, window.visibleTextEditors);
@@ -169,9 +171,9 @@ export class SyslGoJsDiagramEditorProvider implements CustomTextEditorProvider {
       workspace.onDidSaveTextDocument(handleSourceSave),
       webviewPanel.webview.onDidReceiveMessage(handleDiagramChange),
     ];
-    
+
     // Request the first render.
-    start.then(() => handleSourceSave({uri: document.uri.toString()}));
+    start.then(() => handleSourceSave({ uri: document.uri.toString() }));
 
     // Make sure we get rid of the listener when our editor is closed.
     webviewPanel.onDidDispose(() => {

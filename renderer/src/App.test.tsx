@@ -1,26 +1,29 @@
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { act } from "react-dom/test-utils";
-import { Diagram, GraphLinksModel, Size, Part } from "gojs";
+import { Diagram, Size, Part } from "gojs";
 import { vscode } from "./components/vscode/VsCode";
 
 import App from "./App";
 
 describe("rendering the app", () => {
   let diagram: Diagram;
-  const basicModelEvent = modelEvent([{
-    nodes: [
-      { key: "a", label: "a" },
-      { key: "b", label: "b" },
-    ],
-    edges: [{ key: "a->b", from: "a", to: "b" }],
-  }]);
+  const basicModelEvent = modelEvent([
+    {
+      nodes: [
+        { key: "a", label: "a" },
+        { key: "b", label: "b" },
+      ],
+      edges: [{ key: "a->b", from: "a", to: "b" }],
+    },
+  ]);
 
   beforeEach(() => {
     // use Jest's fake timers to ensure Diagram.delayInitialization is called in time.
     jest.useFakeTimers();
     act(() => {
       const { container } = render(<App />);
+      window.dispatchEvent(modelEvent([{ nodes: [], edges: [] }]));
       jest.runOnlyPendingTimers();
       diagram = initializeDiagramDom(container);
     });
@@ -105,22 +108,29 @@ describe("rendering the app", () => {
 
 describe("selection event", () => {
   let diagram: Diagram;
-  const basicModelEvent = modelEvent([{
-    nodes: [
-      { key: "a", label: "a" },
-      { key: "b", label: "b" },
-    ],
-    edges: [{ key: "a->b", from: "a", to: "b" }],
-  }]);
+  const basicModelEvent = modelEvent([
+    {
+      nodes: [
+        { key: "a", label: "a" },
+        { key: "b", label: "b" },
+      ],
+      edges: [{ key: "a->b", from: "a", to: "b" }],
+    },
+  ]);
 
   beforeEach(() => {
     // use Jest's fake timers to ensure Diagram.delayInitialization is called in time.
     jest.useFakeTimers();
+    vscode.postMessage = jest.fn();
     act(() => {
       const { container } = render(<App />);
       jest.runOnlyPendingTimers();
+      window.dispatchEvent(basicModelEvent);
       diagram = initializeDiagramDom(container);
     });
+    const nodeAPart = diagram.findNodeForKey("a") as Part;
+    const linkPart = diagram.findLinkForKey("a->b") as Part;
+    diagram.selectCollection([nodeAPart, linkPart]); // multiple selection
   });
 
   afterEach(() => {
@@ -132,27 +142,22 @@ describe("selection event", () => {
   });
 
   it("postMessage to extension on selection", async () => {
-    act(() => {
-      window.dispatchEvent(basicModelEvent);
+    expect(vscode.postMessage).toHaveBeenCalledWith({
+      type: "select",
+      selectedData: {
+        current: {
+          nodes: [{ key: "a", label: "a" }],
+          edges: [{ key: "a->b", from: "a", to: "b" }],
+        },
+        previous: null,
+      },
     });
-    vscode.postMessage = jest.fn();
-    const nodeAPart = diagram.findNodeForKey('a') as Part;
-    const linkPart = diagram.findLinkForKey('a->b') as Part;
-    diagram.selectCollection([nodeAPart, linkPart]); // multiple selection
-    expect(vscode.postMessage).toHaveBeenCalledWith(
-      {
-        type: "select",
-        selectedData: {
-          current: {
-            nodes: [ { key: "a", label: "a" }],
-            edges: [{ key: "a->b", from: "a", to: "b" }]
-          },
-          previous: null
-        }
-      }
-    );
   });
 
+  it("selection details visible on right panel", async () => {
+    expect(screen.queryByTestId("a")).not.toBeNull();
+    expect(screen.queryByTestId("a->b")).not.toBeNull();
+  });
 });
 
 /** Tweak the DOM to make the diagram rendering consistent during tests. */

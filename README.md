@@ -89,6 +89,10 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+### 0.11.0
+
+- View details of selected diagram elements in a side panel.
+
 ### 0.10.0
 
 - Publish diagram selection event to extension.
