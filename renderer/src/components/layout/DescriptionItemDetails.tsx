@@ -30,7 +30,7 @@ export default function DescriptionItemDetails(props: any) {
 
   return (
     <>
-      <ListItemButton data-testid={props.item.key} onClick={handleClick}>
+      <ListItemButton data-testid={"selected_" + props.item.key} onClick={handleClick}>
         <ListItemIcon
           sx={{
             minWidth: "auto",
@@ -94,7 +94,8 @@ export default function DescriptionItemDetails(props: any) {
       >
         {Object.keys(props.item).map((key) => {
           return ignoreAttributes.includes(key.toLowerCase()) ||
-            key.toLowerCase().includes("color") ? null : (
+            key.toLowerCase().includes("color") ||
+            props.item[key]?.toString().trim().length < 1 ? null : (
             <>
               <Typography
                 sx={{

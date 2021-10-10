@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { Simulate } from "react-dom/test-utils";
 import "@testing-library/jest-dom";
 import { act } from "react-dom/test-utils";
 import { Diagram, Size, Part } from "gojs";
@@ -6,7 +7,7 @@ import { vscode } from "./components/vscode/VsCode";
 
 import App from "./App";
 
-describe("rendering the app", () => {
+describe("App test", () => {
   let diagram: Diagram;
   const basicModelEvent = modelEvent([
     {
@@ -37,126 +38,133 @@ describe("rendering the app", () => {
     jest.clearAllMocks();
   });
 
-  it("contains a diagram", () => {
-    expect(diagram.nodes.count).toEqual(0);
-    expect(diagram.links.count).toEqual(0);
+  describe("rendering the app", () => {
+    it("contains a diagram", () => {
+      expect(diagram.nodes.count).toEqual(0);
+      expect(diagram.links.count).toEqual(0);
+    });
+
+    it("receives messages", async () => {
+      act(() => {
+        window.dispatchEvent(basicModelEvent);
+      });
+      expect(diagram.nodes.count).toEqual(2);
+      expect(diagram.links.count).toEqual(1);
+    });
+
+    it("receives an error", async () => {
+      act(() => {
+        window.dispatchEvent(basicModelEvent);
+      });
+      expect(diagram.nodes.count).toEqual(2);
+      expect(diagram.links.count).toEqual(1);
+      act(() => {
+        window.dispatchEvent(modelEvent(null, { errorMsg: "an error occurred" }));
+      });
+      // expect diagram to not have been updated
+      expect(diagram.nodes.count).toEqual(2);
+      expect(diagram.links.count).toEqual(1);
+      // expect error snackbar to be visible
+      expect(screen.getByTestId("error-snackbar")).toBeVisible();
+    });
+
+    it("receives message with no model", async () => {
+      act(() => {
+        window.dispatchEvent(basicModelEvent);
+      });
+      expect(diagram.nodes.count).toEqual(2);
+      expect(diagram.links.count).toEqual(1);
+      act(() => {
+        window.dispatchEvent(modelEvent(null));
+      });
+      // expect diagram to not have been updated
+      expect(diagram.nodes.count).toEqual(2);
+      expect(diagram.links.count).toEqual(1);
+      // expect error snackbar to be visible
+      expect(screen.getByTestId("error-snackbar")).toBeVisible();
+    });
+
+    it("receives message model with no nodes or edges", async () => {
+      act(() => {
+        window.dispatchEvent(basicModelEvent);
+      });
+      expect(diagram.nodes.count).toEqual(2);
+      expect(diagram.links.count).toEqual(1);
+      act(() => {
+        window.dispatchEvent(
+          modelEvent([
+            {
+              a: [],
+              b: [],
+            },
+          ])
+        );
+      });
+      // expect diagram to not have been updated
+      expect(diagram.nodes.count).toEqual(2);
+      expect(diagram.links.count).toEqual(1);
+      // expect error snackbar to be visible
+      expect(screen.getByTestId("error-snackbar")).toBeVisible();
+    });
   });
 
-  it("receives messages", async () => {
-    act(() => {
-      window.dispatchEvent(basicModelEvent);
+  describe("selection event", () => {
+    beforeEach(() => {
+      vscode.postMessage = jest.fn();
+      act(() => {
+        window.dispatchEvent(basicModelEvent);
+      });
+      const nodeAPart = diagram.findNodeForKey("a") as Part;
+      const linkPart = diagram.findLinkForKey("a->b") as Part;
+      diagram.selectCollection([nodeAPart, linkPart]); // multiple selection
     });
-    expect(diagram.nodes.count).toEqual(2);
-    expect(diagram.links.count).toEqual(1);
-  });
 
-  it("receives an error", async () => {
-    act(() => {
-      window.dispatchEvent(basicModelEvent);
-    });
-    expect(diagram.nodes.count).toEqual(2);
-    expect(diagram.links.count).toEqual(1);
-    act(() => {
-      window.dispatchEvent(modelEvent(null, { errorMsg: "an error occurred" }));
-    });
-    // expect diagram to not have been updated
-    expect(diagram.nodes.count).toEqual(2);
-    expect(diagram.links.count).toEqual(1);
-    // expect error snackbar to be visible
-    expect(screen.getByTestId("error-snackbar")).toBeVisible();
-  });
-
-  it("receives message with no model", async () => {
-    act(() => {
-      window.dispatchEvent(basicModelEvent);
-    });
-    expect(diagram.nodes.count).toEqual(2);
-    expect(diagram.links.count).toEqual(1);
-    act(() => {
-      window.dispatchEvent(modelEvent(null));
-    });
-    // expect diagram to not have been updated
-    expect(diagram.nodes.count).toEqual(2);
-    expect(diagram.links.count).toEqual(1);
-    // expect error snackbar to be visible
-    expect(screen.getByTestId("error-snackbar")).toBeVisible();
-  });
-
-  it("receives message model with no nodes or edges", async () => {
-    act(() => {
-      window.dispatchEvent(basicModelEvent);
-    });
-    expect(diagram.nodes.count).toEqual(2);
-    expect(diagram.links.count).toEqual(1);
-    act(() => {
-      window.dispatchEvent(
-        modelEvent([
-          {
-            a: [],
-            b: [],
+    it("postMessage to extension on selection", async () => {
+      expect(vscode.postMessage).toHaveBeenCalledWith({
+        type: "select",
+        selectedData: {
+          current: {
+            nodes: [{ key: "a", label: "a" }],
+            edges: [{ key: "a->b", from: "a", to: "b" }],
           },
-        ])
-      );
-    });
-    // expect diagram to not have been updated
-    expect(diagram.nodes.count).toEqual(2);
-    expect(diagram.links.count).toEqual(1);
-    // expect error snackbar to be visible
-    expect(screen.getByTestId("error-snackbar")).toBeVisible();
-  });
-});
-
-describe("selection event", () => {
-  let diagram: Diagram;
-  const basicModelEvent = modelEvent([
-    {
-      nodes: [
-        { key: "a", label: "a" },
-        { key: "b", label: "b" },
-      ],
-      edges: [{ key: "a->b", from: "a", to: "b" }],
-    },
-  ]);
-
-  beforeEach(() => {
-    // use Jest's fake timers to ensure Diagram.delayInitialization is called in time.
-    jest.useFakeTimers();
-    vscode.postMessage = jest.fn();
-    act(() => {
-      const { container } = render(<App />);
-      jest.runOnlyPendingTimers();
-      window.dispatchEvent(basicModelEvent);
-      diagram = initializeDiagramDom(container);
-    });
-    const nodeAPart = diagram.findNodeForKey("a") as Part;
-    const linkPart = diagram.findLinkForKey("a->b") as Part;
-    diagram.selectCollection([nodeAPart, linkPart]); // multiple selection
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
-  afterAll(() => {
-    jest.clearAllMocks();
-  });
-
-  it("postMessage to extension on selection", async () => {
-    expect(vscode.postMessage).toHaveBeenCalledWith({
-      type: "select",
-      selectedData: {
-        current: {
-          nodes: [{ key: "a", label: "a" }],
-          edges: [{ key: "a->b", from: "a", to: "b" }],
+          previous: null,
         },
-        previous: null,
-      },
+      });
+    });
+
+    it("selection details visible on right panel", async () => {
+      expect(screen.queryByTestId("selected_a")).not.toBeNull();
+      expect(screen.queryByTestId("selected_a->b")).not.toBeNull();
     });
   });
 
-  it("selection details visible on right panel", async () => {
-    expect(screen.queryByTestId("a")).not.toBeNull();
-    expect(screen.queryByTestId("a->b")).not.toBeNull();
+  describe("component tree", () => {
+    beforeEach(() => {
+      act(() => {
+        window.dispatchEvent(basicModelEvent);
+      });
+    });
+
+    it("diagram hierarchy displays nodes", async () => {
+      expect(screen.queryByTestId("a")).not.toBeNull();
+      expect(screen.queryByTestId("b")).not.toBeNull();
+    });
+
+    it("selected node in diagram is selected in tree", async () => {
+      const nodeBPart = diagram.findNodeForKey("b") as Part;
+      expect(screen.queryByTestId("b")!.parentNode).not.toHaveClass("Mui-selected");
+      diagram.select(nodeBPart);
+      expect(screen.queryByTestId("b")!.parentNode).toHaveClass("Mui-selected");
+    });
+
+    it("selected node in tree is selected in diagram", async () => {
+      const elem = screen.queryByTestId("a")!;
+      expect(elem.parentNode).not.toHaveClass("Mui-selected");
+      Simulate.click(elem);
+      expect(elem.parentNode).toHaveClass("Mui-selected");
+      const nodeAPart = diagram.findNodeForKey("a") as Part;
+      expect(diagram.selection.has(nodeAPart)).toBe(true);
+    });
   });
 });
 

@@ -111,7 +111,7 @@ function getDiagramData(data: go.Part[], diagram: DiagramData): DiagramData | nu
   return diagramData;
 }
 
-class App extends React.Component<AppProps, AppState> {
+class App extends React.PureComponent<AppProps, AppState> {
   private gojsIndexes: GoJSIndex[];
 
   constructor(props: AppProps) {
@@ -128,6 +128,7 @@ class App extends React.Component<AppProps, AppState> {
     this.handleParentMessage = this.handleParentMessage.bind(this);
     this.handleTabChange = this.handleTabChange.bind(this);
     this.handleCloseError = this.handleCloseError.bind(this);
+    this.setSelectedData = this.setSelectedData.bind(this);
   }
 
   public componentDidMount() {
@@ -136,6 +137,15 @@ class App extends React.Component<AppProps, AppState> {
 
   public componentWillUnmount() {
     window.removeEventListener("message", this.handleParentMessage);
+  }
+
+  /**
+   * Sets state from selection(s) in component tree.
+   */
+  public setSelectedData(selection: DiagramData): void {
+    this.setState({ selectedData: selection }, () => {
+      vscode.setState(this.state);
+    });
   }
 
   /**
@@ -304,6 +314,8 @@ class App extends React.Component<AppProps, AppState> {
 
     const appComponent = (
       <LayoutWrapper
+        activeNodes={this.state.diagrams[this.state.activeChild]?.nodes}
+        onSelectionChanged={this.setSelectedData}
         handleTabChange={this.handleTabChange}
         selectedData={this.state.selectedData}
         diagramLabels={this.state.diagrams.map(
@@ -314,6 +326,7 @@ class App extends React.Component<AppProps, AppState> {
           {errorMessage}
           {
             <MainContainer
+              selectedData={this.state.selectedData}
               classes={classes}
               diagrams={this.state.diagrams}
               activeChild={this.state.activeChild}

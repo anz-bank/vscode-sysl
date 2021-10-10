@@ -3,11 +3,14 @@ import { Box, Grid, AppBar, Toolbar, Button, Tab } from "@mui/material";
 import { AccountTree, Description } from "@mui/icons-material";
 import { TabList } from "@material-ui/lab";
 
-import { DiagramData } from "../diagram/DiagramTypes";
+import { DiagramData, Node } from "../diagram/DiagramTypes";
 import DescriptionPane from "./DescriptionPane";
+import ComponentTree from "./ComponentTree";
 
 type PropType = {
+  activeNodes: Node[];
   handleTabChange: (event: React.ChangeEvent<{}>, value: string) => void;
+  onSelectionChanged: (selections: DiagramData) => void;
   diagramLabels: string[];
   children: React.ReactNode;
   selectedData: DiagramData | null;
@@ -58,7 +61,6 @@ export default function LayoutWrapper(props: PropType) {
                   alignItems: "center",
                   fontSize: 8,
                   color: "rgba(0, 0, 0, 0.54)",
-                  visibility: "hidden",
                 }}
               >
                 <AccountTree />
@@ -122,7 +124,15 @@ export default function LayoutWrapper(props: PropType) {
         selectedData={props.selectedData}
         toggleVisibility={toggleSidePanel.bind(null, "rightPanel")}
       >
-        {props.children}
+        <ComponentTree
+          open={state.leftPanel.open}
+          selectedData={props.selectedData}
+          onSelectionChanged={props.onSelectionChanged}
+          activeNodes={props.activeNodes}
+          toggleVisibility={toggleSidePanel.bind(null, "leftPanel")}
+        >
+          {props.children}
+        </ComponentTree>
       </DescriptionPane>
     </>
   );

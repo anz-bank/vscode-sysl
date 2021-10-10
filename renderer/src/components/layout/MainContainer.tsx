@@ -11,6 +11,7 @@ type PropType = {
   activeChild: number;
   handleDiagramEvent: (e: go.DiagramEvent) => void;
   handleModelChange: (delta: go.IncrementalData) => void;
+  selectedData: DiagramData | null;
 };
 class MainContainer extends React.Component<PropType> {
   public render() {
@@ -27,6 +28,7 @@ class MainContainer extends React.Component<PropType> {
             >
               <DiagramSnapshotter active={active} name={data.templates?.diagramLabel}>
                 <DiagramWrapper
+                  selectedData={this.props.selectedData}
                   diagramKey={key}
                   nodes={data.nodes}
                   edges={data.edges}

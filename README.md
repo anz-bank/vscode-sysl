@@ -89,6 +89,10 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+### 0.12.0
+
+- View diagram hierarchy in a side panel.
+
 ### 0.11.0
 
 - View details of selected diagram elements in a side panel.

@@ -4,7 +4,9 @@ import { ReactDiagram } from "gojs-react";
 
 import "./Diagram.css";
 import DiagramTemplate from "./DiagramTemplates";
-import { TemplateData } from "./DiagramTypes";
+import { DiagramData, TemplateData } from "./DiagramTypes";
+
+import _ from "lodash";
 
 export interface DiagramProps {
   nodes: Array<go.ObjectData>;
@@ -14,6 +16,7 @@ export interface DiagramProps {
   diagramKey: string;
   onDiagramEvent: (e: go.DiagramEvent) => void;
   onModelChange: (e: go.IncrementalData) => void;
+  selectedData: DiagramData | null;
 }
 
 export class DiagramWrapper extends React.Component<DiagramProps, {}> {
@@ -37,6 +40,7 @@ export class DiagramWrapper extends React.Component<DiagramProps, {}> {
     const diagram = this.diagramRef.current.getDiagram();
     if (diagram instanceof go.Diagram) {
       diagram.addDiagramListener("ChangedSelection", this.props.onDiagramEvent);
+      diagram.addDiagramListener("Modified", this.props.onDiagramEvent);
     }
   }
 
@@ -48,6 +52,33 @@ export class DiagramWrapper extends React.Component<DiagramProps, {}> {
     const diagram = this.diagramRef.current.getDiagram();
     if (diagram instanceof go.Diagram) {
       diagram.removeDiagramListener("ChangedSelection", this.props.onDiagramEvent);
+      diagram.removeDiagramListener("Modified", this.props.onDiagramEvent);
+    }
+  }
+
+  /**
+   * Update diagram selection and highlight if selected data has changed in app.
+   */
+  public componentDidUpdate(prevProps: DiagramProps) {
+    if (
+      !this.diagramRef.current ||
+      !this.props.selectedData ||
+      _.isEqual(prevProps.selectedData, this.props.selectedData)
+    ) {
+      return;
+    }
+    const diagram = this.diagramRef.current.getDiagram();
+    if (diagram instanceof go.Diagram) {
+      const selectedNodes = this.props.selectedData.nodes?.map(
+        (node) => diagram.findNodeForKey(node.key) as go.Part
+      );
+      const selectedEdges = this.props.selectedData.edges?.map(
+        (edge) => diagram.findLinkForKey(edge.key) as go.Part
+      );
+      const selection = selectedNodes.concat(selectedEdges).filter((elem) => elem);
+
+      diagram.selectCollection(selection);
+      diagram.highlightCollection(selection);
     }
   }
 
