@@ -285,6 +285,7 @@ class App extends React.PureComponent<AppProps, AppState> {
     this.setState(
       produce((draft: AppState) => {
         draft.activeChild = parseInt(newValue);
+        draft.selectedData = null;
       })
     );
   }

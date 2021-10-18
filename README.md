@@ -89,6 +89,11 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+### 0.13.0
+
+- Fix selection behaviour:
+  - Selections made in one tab are deselected when the tab is changed
+
 ### 0.12.0
 
 - View diagram hierarchy in a side panel.
