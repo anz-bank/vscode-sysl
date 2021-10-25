@@ -14,9 +14,9 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
   open?: boolean;
 }>(({ open }) => ({
   flexGrow: 1,
-  marginLeft: -drawerWidth,
+  marginLeft: 0,
   ...(open && {
-    marginLeft: 0,
+    marginLeft: drawerWidth,
   }),
 }));
 

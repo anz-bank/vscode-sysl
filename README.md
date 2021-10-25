@@ -89,10 +89,14 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+### 0.14.0
+
+- Fix horizontal scroll behaviour when diagram is zoomed in.
+
 ### 0.13.0
 
 - Fix selection behaviour:
-  - Selections made in one tab are deselected when the tab is changed
+  - Selections made in one tab are deselected when the tab is changed.
 
 ### 0.12.0
 
