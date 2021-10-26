@@ -463,6 +463,9 @@
         "margin": {
           "type": "string"
         },
+        "maxLines": {
+          "type": "integer"
+        },
         "stroke": {
           "type": "string"
         },

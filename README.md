@@ -89,6 +89,10 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+### 0.15.0
+
+- Allow plugins to specify maximum lines of text
+
 ### 0.14.0
 
 - Fix horizontal scroll behaviour when diagram is zoomed in.

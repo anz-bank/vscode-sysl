@@ -235,6 +235,7 @@ export interface TemplateTextBlock {
   font?: string;
   label?: string;
   margin?: string;
+  maxLines?: number;
   stroke?: string;
   stretch?: boolean;
   segmentOffset?: {

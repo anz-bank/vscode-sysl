@@ -426,6 +426,9 @@ type TemplateTextBlock struct {
 	// Margin corresponds to the JSON schema field "margin".
 	Margin *string `json:"margin,omitempty"`
 
+	// MaxLines corresponds to the JSON schema field "maxLines".
+	MaxLines *int `json:"maxLines,omitempty"`
+
 	// SegmentOffset corresponds to the JSON schema field "segmentOffset".
 	SegmentOffset TemplateTextBlockSegmentOffset `json:"segmentOffset,omitempty"`
 

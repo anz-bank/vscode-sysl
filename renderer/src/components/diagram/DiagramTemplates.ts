@@ -273,6 +273,7 @@ function getTextBlockStyle(text: TemplateTextBlock): go.TextBlock {
     {
       textAlign: text.align ?? "center",
       verticalAlignment: go.Spot.Center,
+      alignment: go.Spot.Center,
       overflow: text.overflow ?? go.TextBlock.OverflowEllipsis,
       maxLines: text.maxLines ?? 1,
       font: text.font ?? "",
