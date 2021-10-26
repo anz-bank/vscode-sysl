@@ -81,6 +81,7 @@ export default function DiagramTemplate(props?: TemplateData) {
       $(go.Placeholder, { padding: 32 })
     ),
     getTextBlockStyle({ label: "label" }),
+    new go.Binding("avoidable", "expanded", (e) => !e),
     new go.Binding("location", "location", go.Point.parse).makeTwoWay(stringifyPoint)
   );
 
@@ -91,7 +92,8 @@ export default function DiagramTemplate(props?: TemplateData) {
     go.Link,
     {
       routing: go.Link.AvoidsNodes,
-      curve: go.Link.JumpOver,
+      curve: go.Link.JumpGap,
+      corner: 10
     },
     new go.Binding("isLayoutPositioned", "true"),
     $(go.Shape, new go.Binding("stroke", "color")),
@@ -144,6 +146,7 @@ function getCustomGroupTemplate(groupTemplate: TemplateGroupData): go.Group {
   return $(
     go.Group,
     "Position",
+    new go.Binding("avoidable", "expanded", (e) => !e),
     new go.Binding("isSubGraphExpanded", "expanded").makeTwoWay(),
     new go.Binding("location", "location", go.Point.parse).makeTwoWay(stringifyPoint),
     groupTemplate.shadow ? getShadowStyle(groupTemplate.shadow) : {},
