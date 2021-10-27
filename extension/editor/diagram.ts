@@ -13,7 +13,7 @@ import {
 } from "vscode";
 import { CustomEditorCommandMap, customViewType, syslBinaryPath } from "../constants";
 import path, { join } from "path";
-import { filter, flatten } from "lodash";
+import { filter, flatten, reject } from "lodash";
 import { checkSysl, getOrDownloadSysl } from "../tools/sysl_download";
 import { Context, OnChangeResponse } from "../protocol/plugin";
 import { Sysl } from "../tools/sysl";
@@ -47,7 +47,7 @@ export class SyslGoJsDiagramEditorProvider implements CustomTextEditorProvider {
     return providerRegistration;
   }
 
-  constructor(private readonly context: ExtensionContext) {}
+  constructor(private readonly context: ExtensionContext) { }
 
   /** Initializes a new webview panel for a Sysl spec. */
   public async resolveCustomTextEditor(
@@ -103,21 +103,30 @@ export class SyslGoJsDiagramEditorProvider implements CustomTextEditorProvider {
           }
 
           progress.report({ message: "Updating diagrams..." });
-          return new Promise<void>((resolve) => {
-            setTimeout(async () => {
-              const results = await plugins.onChange({
-                change: {
-                  source: "TEXT",
-                  action: "SAVE_FILE",
-                  filePath,
-                },
-                context: await buildContext(document, sysl),
-              });
-              progress.report({ message: "Rendering diagrams..." });
-              await updateWebview(flatten(results.map(getDiagrams)));
-              resolve();
-            }, 1);
-          });
+
+          try {
+            await new Promise<void>((resolve, reject) => {
+              setTimeout(async () => {
+                try {
+                  const results = await plugins.onChange({
+                    change: {
+                      source: "TEXT",
+                      action: "SAVE_FILE",
+                      filePath,
+                    },
+                    context: await buildContext(document, sysl),
+                  });
+                  progress.report({ message: "Rendering diagrams..." });
+                  await updateWebview(flatten(results.map(getDiagrams)));
+                  resolve();
+                } catch (e) {
+                  reject(e)
+                }
+              }, 1);
+            });
+          } catch (e) {
+            window.showErrorMessage("Error updating diagrams");
+          }
         }
       );
     }
@@ -227,11 +236,15 @@ function getNonce(): string {
 
 async function buildContext(document: TextDocument, sysl: Sysl): Promise<Context> {
   const filePath = document.uri.fsPath;
-  return {
-    filePath,
-    module: (await sysl.protobuf(filePath)).toString("base64"),
-    syslRoot: workspace.getWorkspaceFolder(document.uri)?.uri.fsPath,
-  };
+  try {
+    return {
+      filePath,
+      module: (await sysl.protobuf(filePath)).toString("base64"),
+      syslRoot: workspace.getWorkspaceFolder(document.uri)?.uri.fsPath,
+    };
+  } catch (e) {
+    throw e;
+  }
 }
 
 // TODO: Reuse types from renderer.

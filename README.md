@@ -89,13 +89,17 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+### 0.17.0
+
+- Display Sysl syntax error messages to the user.
+
 ### 0.16.0
 
-- Improved link routing to avoid nodes and expanded groups
+- Improved link routing to avoid nodes and expanded groups.
 
 ### 0.15.0
 
-- Allow plugins to specify maximum lines of text
+- Allow plugins to specify maximum lines of text.
 
 ### 0.14.0
 
