@@ -116,6 +116,10 @@
         "settings": {
           "description": "The state of relevant settings in the client.",
           "$ref": "#/definitions/Settings"
+        },
+        "viewId": {
+          "description": "The ID of the view where the change occurred.",
+          "type": "string"
         }
       }
     },

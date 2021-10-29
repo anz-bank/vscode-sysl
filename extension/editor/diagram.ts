@@ -47,7 +47,7 @@ export class SyslGoJsDiagramEditorProvider implements CustomTextEditorProvider {
     return providerRegistration;
   }
 
-  constructor(private readonly context: ExtensionContext) { }
+  constructor(private readonly context: ExtensionContext) {}
 
   /** Initializes a new webview panel for a Sysl spec. */
   public async resolveCustomTextEditor(
@@ -120,7 +120,7 @@ export class SyslGoJsDiagramEditorProvider implements CustomTextEditorProvider {
                   await updateWebview(flatten(results.map(getDiagrams)));
                   resolve();
                 } catch (e) {
-                  reject(e)
+                  reject(e);
                 }
               }, 1);
             });
@@ -148,8 +148,9 @@ export class SyslGoJsDiagramEditorProvider implements CustomTextEditorProvider {
     async function handleDiagramChange(event: any): Promise<void> {
       console.debug("event from diagram", event);
       switch (event.type) {
-        case "diagramModelChange":
+        case "diagramModelChange": {
           console.log("diagramModelChange", event.delta);
+          const context = await buildContext(document, sysl);
           await plugins.onChange({
             change: {
               source: "DIAGRAM",
@@ -160,9 +161,10 @@ export class SyslGoJsDiagramEditorProvider implements CustomTextEditorProvider {
                 delta: event.delta,
               },
             },
-            context: await buildContext(document, sysl),
+            context: { ...context, viewId: event.viewId },
           });
           break;
+        }
         case "select":
           // if (window.visibleTextEditors) {
           //   const app = proto.apps?.[e.target];
@@ -262,7 +264,7 @@ type RendererModel = {
 };
 
 function getDiagrams(res: OnChangeResponse): RendererModel[] {
-  return filter(res.renderDiagram?.map((r) => r.content as any as RendererModel));
+  return filter(res.renderDiagram?.map((r) => ({ ...r.content, type: r.type }))) as RendererModel[];
 }
 
 /**

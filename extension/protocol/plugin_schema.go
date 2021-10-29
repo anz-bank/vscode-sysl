@@ -141,6 +141,9 @@ type Context struct {
 
 	// The path to the Sysl root.
 	SyslRoot *string `json:"syslRoot,omitempty"`
+
+	// The ID of the view where the change occurred.
+	ViewId *string `json:"viewId,omitempty"`
 }
 
 type DiagramCapabilities struct {

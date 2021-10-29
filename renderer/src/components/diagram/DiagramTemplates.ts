@@ -93,7 +93,7 @@ export default function DiagramTemplate(props?: TemplateData) {
     {
       routing: go.Link.AvoidsNodes,
       curve: go.Link.JumpGap,
-      corner: 10
+      corner: 10,
     },
     new go.Binding("isLayoutPositioned", "true"),
     $(go.Shape, new go.Binding("stroke", "color")),

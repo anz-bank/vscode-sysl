@@ -266,10 +266,12 @@ class App extends React.PureComponent<AppProps, AppState> {
         vscode.setState(this.state);
 
         if (notify) {
+          const data = this.state.diagrams[this.state.activeChild];
           vscode.postMessage({
             type: "diagramModelChange",
             delta,
-            model: pick(this.state.diagrams[this.state.activeChild], "nodes", "edges"),
+            model: pick(data, "nodes", "edges"),
+            viewId: data.type?.id,
           });
         }
       }

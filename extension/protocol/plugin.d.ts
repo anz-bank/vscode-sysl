@@ -67,6 +67,10 @@ export interface Context {
   settings?: {
     [k: string]: unknown;
   };
+  /**
+   * The ID of the view where the change occurred.
+   */
+  viewId?: string;
   [k: string]: unknown;
 }
 /**

@@ -89,6 +89,10 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+### 0.18.0
+
+- Include `viewId` in diagram change events from the renderer, and pass it through to plugins as change context.
+
 ### 0.17.0
 
 - Display Sysl syntax error messages to the user.
