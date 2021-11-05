@@ -11,10 +11,7 @@ export const syslBinaryPath = "sysl.tool.binaryPath";
 export type TextEditorCommand = "sysl.renderDiagram";
 
 /** ID of a command to execute from a Sysl diagram custom editor. */
-export type CustomEditorCommand =
-  | "sysl.diagram.snapshot"
-  | "sysl.diagram.toggleComponentTree"
-  | "sysl.diagram.toggleDescriptionPane";
+export type CustomEditorCommand = "sysl.diagram.snapshot";
 
 /** Map of text editor commands to handlers to ensure handling of all cases. */
 export type TextEditorCommandMap = { [key in TextEditorCommand]: (...args: any[]) => any };

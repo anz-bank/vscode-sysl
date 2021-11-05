@@ -4,7 +4,7 @@
   "description": "Write Sysl specs easily with instant visual feedback.",
   "author": "ANZ Bank",
   "publisher": "anz-bank",
-  "version": "0.18.0",
+  "version": "0.19.0",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -28,11 +28,6 @@
   "main": "./out/main.js",
   "contributes": {
     "commands": [
-      {
-        "command": "sysl.tools.installSyslLsp",
-        "title": "Install Language Server",
-        "category": "Sysl"
-      },
       {
         "command": "sysl.renderDiagram",
         "title": "Render Diagram",
@@ -87,7 +82,7 @@
         "sysl.tool.binaryPath": {
           "type": "string",
           "default": "",
-          "description": "Path to the Sysl binary to use for Sysl operations."
+          "description": "Path to the Sysl binary to use for Sysl operations. If empty, the Sysl extension will download and manage its own Sysl binary.\n\nSee https://sysl.io/docs/installation for installation instructions."
         }
       }
     },
@@ -95,6 +90,26 @@
       {
         "viewType": "sysl.gojsDiagram",
         "displayName": "Sysl Diagram",
+        "selector": [
+          {
+            "filenamePattern": "*.sysl"
+          }
+        ],
+        "priority": "option"
+      },
+      {
+        "viewType": "sysl.htmlView",
+        "displayName": "HTML View",
+        "selector": [
+          {
+            "filenamePattern": "*.sysl"
+          }
+        ],
+        "priority": "option"
+      },
+      {
+        "viewType": "sysl.multiView",
+        "displayName": "Multi View",
         "selector": [
           {
             "filenamePattern": "*.sysl"
@@ -124,7 +139,7 @@
     "test": "yarn test-unit && yarn test-ui",
     "test-ui": "node out/test/runTest",
     "test-unit": "ts-node extension/test/runUnitTest",
-    "test-watch": "nodemon --watch 'extension/**' --ext 'ts,json' --exec 'ts-node extension/test/runUnitTest'"
+    "test-watch": "nodemon --watch 'extension/**' --ext 'ts,json,sysl' --exec 'ts-node extension/test/runUnitTest'"
   },
   "devDependencies": {
     "@types/chai": "^4.2.21",
@@ -132,6 +147,8 @@
     "@types/mocha": "^9.0.0",
     "@types/mock-fs": "^4.13.1",
     "@types/node": "^14.17.5",
+    "@types/semver": "^7.3.9",
+    "@types/sinon-chai": "^3.2.5",
     "@types/vscode": "^1.52.0",
     "@typescript-eslint/eslint-plugin": "^2.26.0",
     "@typescript-eslint/parser": "^2.26.0",
@@ -150,6 +167,8 @@
     "prettier": "^2.3.2",
     "replace": "^1.2.1",
     "sinon": "^11.1.2",
+    "sinon-chai": "^3.7.0",
+    "ts-mocha": "^8.0.0",
     "ts-node": "^10.2.1",
     "ts-protoc-gen": "^0.15.0",
     "typescript": "^4.3.5",
@@ -160,6 +179,9 @@
   },
   "dependencies": {
     "lodash": "^4.17.21",
-    "vscode-languageserver-protocol": "^3.16.0"
+    "semver": "^7.3.5",
+    "vscode-languageserver": "^7.0.0",
+    "vscode-languageserver-protocol": "^3.16.0",
+    "vscode-languageserver-textdocument": "^1.0.1"
   }
 }

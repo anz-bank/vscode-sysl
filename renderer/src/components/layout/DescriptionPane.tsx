@@ -6,18 +6,6 @@ import { ChevronRight, Description } from "@mui/icons-material";
 import { Node, Edge } from "../diagram/DiagramTypes";
 import DescriptionItemDetails from "./DescriptionItemDetails";
 
-const drawerWidth = 200;
-
-const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
-  open?: boolean;
-}>(({ open }) => ({
-  flexGrow: 1,
-  marginRight: -drawerWidth,
-  ...(open && {
-    marginRight: 0,
-  }),
-}));
-
 const DrawerHeader = styled("div")(() => ({
   display: "flex",
   alignItems: "center",
@@ -29,6 +17,7 @@ const drawerHeaderStyle = {
 };
 
 export default function DescriptionPane(props: any) {
+  const drawerWidth = props.drawerWidth || 200;
   const selectionLength = props.selectedData
     ? props.selectedData.nodes.length + props.selectedData.edges.length
     : 0;
@@ -36,7 +25,6 @@ export default function DescriptionPane(props: any) {
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <Main open={props.open}>{props.children}</Main>
       <Drawer
         sx={{
           width: drawerWidth,

@@ -13,28 +13,36 @@ Accelerate your Sysl spec development with rich language features and interactiv
 ├── package.json        # Manifest for the complete extension
 ├── extension           # VS Code integration points
 │   ├── editor          # Custom editor binding for the renderer
-│   ├── lsp             # Implementation of the LSP client, including server download
-│   ├── plugins         # Built-in Sysl renderers
-|   │   └── integration # The integration diagram renderer
+│   ├── lsp             # Code relating to the Language Server Protocol
+|   │   ├── client      # Implementation of the Sysl language client (calls `sysl lsp`)
+|   │   └── server      # Template for building simple LSP servers
+│   ├── plugins         # Logic for Sysl extension plugins, binding the client to servers
+|   │   ├── erd         # Built-in entity-relationship diagram plugin
+|   │   ├── examples    # Example plugin implementations
+|   │   └── integration # Built-in integration diagram plugin
+│   ├── protocol        # Schema and generated code for legacy plugin protocol
 │   ├── syntax          # Configuration for syntax highlighting
 │   ├── test            # Tests for the extension
 |   │   ├── fixtures    # Source files for testing
 |   │   └── ui          # End-to-end UI test cases
-│   ├── tools           # Wrappers for finding and using external programs (especially Sysl)
-│   ├── transform       # Implement mappings from a Sysl source Document to a editor view model
+│   ├── tools           # Logic for working with external programs (especially Sysl)
 │   ├── constants.ts    # Names used by the extension declared in package.json
 │   └── main.ts         # Extension entry point
 │
-└── renderer                # React app to render custom views for the extension
-    ├── build               # Build output (the extension loads runtime JS/CSS from here)
-    ├── src                 # React app source code
-    │   ├── components      # Components that comprise the app
-    │   │   └── Diagram.tsx # Renders the diagram model in GoJS
-    │   ├── index.css       # Root styling
-    │   ├── index.ts        # Document root
-    │   └── App.tsx         # React app container
-    ├── craco.config.js     # Additional config for the create-react-app build
-    └── package.json        # Manifest for the React app
+└── renderer            # React app to render custom views for the extension
+    ├── build           # Build output (the extension loads runtime JS/CSS from here)
+    ├── src             # React app source code
+    │   ├── components  # Components that comprise the app
+    │   │   ├── diagram # GoJS diagram rendering
+    │   │   ├── html    # HTML page rendering
+    │   │   ├── layout  # Containers of other components
+    │   │   ├── views   # Types for the renderer to work with view abstractions
+    │   │   └── vscode  # Abstraction of VS Code bindings
+    │   ├── index.css   # Root styling
+    │   ├── index.ts    # Document root
+    │   └── App.tsx     # React app container
+    ├── craco.config.js # Additional config for the create-react-app build
+    └── package.json    # Manifest for the React app
 
 ```
 
@@ -58,10 +66,9 @@ Visualize a specification as an interactive diagram in real time.
 
 ### Commands
 
-| Command                     | Description                                                                                                            |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `sysl.renderDiagram`        | Renders the current Sysl spec as an interactive diagram in a custom editor.                                            |
-| `sysl.tools.installSyslLsp` | Initiates a process to install the Sysl Language Server, which provides Sysl language features such as autocompletion. |
+| Command              | Description                                                                 |
+| -------------------- | --------------------------------------------------------------------------- |
+| `sysl.renderDiagram` | Renders the current Sysl spec as an interactive diagram in a custom editor. |
 
 ## Requirements
 
@@ -88,6 +95,16 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 ---
 
 ## Release Notes
+
+### 0.19.0
+
+- Introduce new architecture for extension plugins.
+  - Plugins are now designed around the [LSP protocol](https://microsoft.github.io/language-server-protocol/). Each plugin can be implemented as an LSP language server, meaning it can provide the full set of text-based language features, as well as drawing diagrams.
+  - Both LSP language server plugins and old-style plugins (Sysl transforms and generic binaries) share a common `PluginClient` class. The old-style plugins will likely be deprecated once it is sufficiently straightforward to build LSP servers.
+  - Introduce `View` abstraction for non-text display features on the client (e.g. diagrams, HTML pages). The new `MultiView` class aggregates child `View`s under tabs within a single custom editor webview.
+- Bump minimum Sysl binary version to v0.465.0.
+  - Replace the standalone Sysl LSP with the version built into the new Sysl binary.
+  - Accept Sysl source on stdin so `sysl protobuf` and `sysl transform` can work with unsaved specs.
 
 ### 0.18.0
 

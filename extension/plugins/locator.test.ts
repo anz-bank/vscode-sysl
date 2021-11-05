@@ -1,9 +1,8 @@
 import { expect } from "chai";
 import path from "path";
-import { CommandPluginClient } from "../protocol/client";
 import { Sysl } from "../tools/sysl";
-import { SyslTransformPluginClient } from "../transform/transform_plugin";
 import { PluginLocator } from "./locator";
+import { CommandPluginConfig, LspPluginConfig, TransformPluginConfig } from "./plugin_config";
 
 const mock = require("mock-fs");
 
@@ -20,40 +19,21 @@ suite("plugins", () => {
   });
 
   suite("locator", () => {
-    suite("builtin", () => {
-      test("none", async () => {
-        mock({ "root/extension/plugin.arraiz": "" });
-        const plugins = await PluginLocator.builtinDiagramRenderers(sysl, "root");
-
-        expect(plugins).to.have.length(0);
+    test("builtin", async () => {
+      mock({
+        "root/extension/plugins/integration": {
+          "integration_model_plugin.arraiz": "",
+          "integration_model_plugin.arrai": "",
+        },
       });
+      const plugins = await PluginLocator.builtin(sysl, "root");
 
-      test("single", async () => {
-        mock({ "root/extension/plugins/integration/integration_model_plugin.arraiz": "" });
-        const plugins = cast<SyslTransformPluginClient[]>(
-          await PluginLocator.builtinDiagramRenderers(sysl, "root")
-        );
-
-        expect(plugins.map((p) => p.scriptPath)).to.deep.equal([
-          path.normalize("root/extension/plugins/integration/integration_model_plugin.arraiz"),
-        ]);
-      });
-
-      test("single with siblings", async () => {
-        mock({
-          "root/extension/plugins/integration": {
-            "integration_model_plugin.arraiz": "",
-            "integration_model_plugin.arrai": "",
-          },
-        });
-        const plugins = cast<SyslTransformPluginClient[]>(
-          await PluginLocator.builtinDiagramRenderers(sysl, "root")
-        );
-
-        expect(plugins.map((p) => p.scriptPath)).to.deep.equal([
-          path.normalize("root/extension/plugins/integration/integration_model_plugin.arraiz"),
-        ]);
-      });
+      expect((plugins[0] as TransformPluginConfig).transform.scriptPath).to.equal(
+        path.normalize("root/extension/plugins/integration/integration_model_plugin.arraiz")
+      );
+      expect((plugins[1] as LspPluginConfig).lsp.scriptPath).to.equal(
+        path.normalize("root/out/plugins/erd/index.js")
+      );
     });
 
     suite("local", async () => {
@@ -66,11 +46,11 @@ suite("plugins", () => {
 
       test("single", async () => {
         mock({ "workspace/.sysl/plugins/foo.arraiz": "" });
-        const plugins = cast<CommandPluginClient[]>(
+        const plugins = cast<CommandPluginConfig[]>(
           await PluginLocator.localPlugins(sysl, ["workspace"])
         );
 
-        expect(plugins.map((p) => p.serverOptions.run.command)).to.deep.equal([
+        expect(plugins.map((p) => p.command.runOptions.command)).to.deep.equal([
           path.normalize("workspace/.sysl/plugins/foo.arraiz"),
         ]);
       });
@@ -81,11 +61,11 @@ suite("plugins", () => {
           "workspace/.sysl/plugins/bar.arraiz": "",
           "workspace/.sysl/plugins/baz.arraiz": "",
         });
-        const plugins = cast<CommandPluginClient[]>(
+        const plugins = cast<CommandPluginConfig[]>(
           await PluginLocator.localPlugins(sysl, ["workspace"])
         );
 
-        expect(plugins.map((p) => p.serverOptions.run.command)).to.deep.equal([
+        expect(plugins.map((p) => p.command.runOptions.command)).to.deep.equal([
           path.normalize("workspace/.sysl/plugins/bar.arraiz"),
           path.normalize("workspace/.sysl/plugins/baz.arraiz"),
           path.normalize("workspace/.sysl/plugins/foo.arraiz"),

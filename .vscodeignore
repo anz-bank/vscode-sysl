@@ -13,8 +13,10 @@ node_modules/**
 test-resources/**
 extension/test/**
 renderer/**
-!renderer/build
+# TODO: Link and include sourcemap for main.js
+!renderer/build/static/js/main.js
+!renderer/build/static/css/main.css
 extension/plugins/**
 !extension/plugins/**/*.arraiz
-**/protocol/example/**
+!extension/plugins/erd
 extension/protocol/plugin.schema.json

@@ -16,7 +16,7 @@ export async function run(): Promise<void> {
   await ensureSysl(root);
 
   return new Promise((c, e) => {
-    glob("**/**.test.js", { cwd: testsRoot }, (err, files) => {
+    glob("**/plugins.test.js", { cwd: testsRoot }, (err, files) => {
       if (err) {
         return e(err);
       }

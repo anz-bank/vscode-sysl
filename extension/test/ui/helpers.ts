@@ -13,12 +13,11 @@ import {
   TextEditor,
   Uri,
   Webview,
-  window,
   workspace,
 } from "vscode";
 import { checkSysl } from "../../tools/sysl_download";
-import { DiagramModel } from "../../transform/mapper";
-import { PanelManager } from "../../editor/panel_manager";
+import { CustomEditorManager } from "../../editor/custom_editors";
+import { DiagramModel } from "../../views/diagram/model";
 
 export class Input {
   /** Returns the position of the end of the document in editor. */
@@ -31,6 +30,15 @@ export class Input {
   /** Returns the definition of an app with nothing but a name. */
   static emptyApp(name: string): string {
     return `${name}:\n    ...\n`;
+  }
+
+  /** Inserts content into editor at position. Resolves to {@code true} if the edit was applied. */
+  static async into(editor: TextEditor, content: string, position?: Position): Promise<boolean> {
+    return await editor.edit((builder) => {
+      position ??= Input.atEnd(editor);
+      console.log(`inserting "${content}" at`, position);
+      builder.insert(position, content);
+    });
   }
 }
 
@@ -187,7 +195,8 @@ export class Diagram {
   /** Renders a diagram of the active document and waits to load and focus the webview. */
   async render(): Promise<void> {
     await commands.executeCommand("sysl.renderDiagram");
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await allSettled();
   }
 
   /**
@@ -195,41 +204,47 @@ export class Diagram {
    * focus the webview.
    */
   async renderFull(): Promise<void> {
-    await Promise.all([commands.executeCommand("sysl.renderDiagram"), this.maximize()]);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await this.render();
+    await this.maximize();
   }
 
   /**
    * Closes other tabs and panes, and waits to load and focus the webview.
    */
   async maximize(): Promise<void> {
-    await Promise.all([
-      commands.executeCommand("workbench.action.closeSidebar"),
-      this.closeOthers(),
-      new Promise((resolve) => setTimeout(resolve, 3000)),
-    ]);
+    await this.closeOthers();
+    await commands.executeCommand("workbench.action.closeSidebar");
+    await new Promise((resolve) => setTimeout(resolve, 3000));
   }
 
-  /** Closes all text editors, leaving only custom editors. */
+  /** Closes all non-active editors. */
   async closeOthers(): Promise<void> {
-    // TODO: Replace deprecated hide() function with async command-driven logic.
-    window.visibleTextEditors.forEach((ed) => ed.hide());
+    await commands.executeCommand("workbench.action.closeOtherEditors");
+    await commands.executeCommand("workbench.action.closeEditorsInOtherGroups");
     // Allow some time to refresh the layout.
     await sleep(500);
   }
 
   /** Fetches the data rendered in the active GoJS diagram. */
-  async getData(timeout: number = 5000): Promise<DiagramModel> {
-    return this.getFromWebview("__test__gojs", timeout);
+  async getData(timeout?: number): Promise<DiagramModel> {
+    console.log("fetching data from current diagram");
+    return (await this.getFromWebview("__test__gojs", {}, timeout)).diagram;
   }
 
   /** Fetches an SVG rendering of the active GoJS diagram. */
-  async getScreenshot(timeout: number = 5000): Promise<string> {
-    return this.getFromWebview("__test__gojs_svg", timeout);
+  async getScreenshot(timeout?: number): Promise<string> {
+    console.log("taking screenshot of current diagram");
+    return (await this.getFromWebview("__test__gojs_svg", {}, timeout)).diagram;
+  }
+
+  /** Selects a view tab by label in the renderer. */
+  async selectTab(label: string, timeout?: number): Promise<boolean> {
+    console.log(`selecting tab with label "${label}"`);
+    return (await this.getFromWebview("__test__selectTab", { label }, timeout)).status;
   }
 
   /** Fetches an SVG rendering of the active GoJS diagram. */
-  async getFromWebview(eventType: string, timeout: number = 5000): Promise<any> {
+  async getFromWebview(eventType: string, payload: any = {}, timeout: number = 5000): Promise<any> {
     const callbackTimeout = 1000;
     const run = async () => {
       const webview: Webview = getActiveWebview()!;
@@ -237,16 +252,16 @@ export class Diagram {
         let callbackTimeoutHandle;
         const listener = webview.onDidReceiveMessage((e: MessageEvent) => {
           if (e.type === eventType) {
-            resolve((e as any).diagram);
+            resolve(e);
+            clearTimeout(callbackTimeoutHandle);
+            listener.dispose();
           }
-          clearTimeout(callbackTimeoutHandle);
-          listener.dispose();
         });
         callbackTimeoutHandle = setTimeout(() => {
           reject(new Error(`timeout waiting for ${eventType} response`));
           listener.dispose();
         }, callbackTimeout);
-        webview.postMessage({ type: eventType });
+        webview.postMessage({ ...payload, type: eventType });
       });
     };
     return retry(run, { maxRetryTime: timeout });
@@ -271,13 +286,18 @@ export class Tools {
 
 /** Returns the active webview, or undefined if there isn't one. */
 export function getActiveWebview(): Webview | undefined {
-  const manager = (global as any).__test__.panelManager as PanelManager;
-  return manager.getActivePanel()?.webview;
+  const manager = (global as any).__test__.customEditorManager as CustomEditorManager;
+  return manager.activeCustomEditor?.webviewPanel.webview;
 }
 
 /** Pauses the test execution for some time while the UI processes. */
 export function sleep(timeMs: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, timeMs));
+}
+
+/** Returns a promise that resolves once all child processes have finished. */
+export async function allSettled(): Promise<void> {
+  await (global as any).__executor__.allSettled();
 }
 
 /** Returns a filename representing a given test. Parent tests/suites are encoded as directories. */

@@ -29,6 +29,9 @@ export class DiagramWrapper extends React.Component<DiagramProps, {}> {
   constructor(props: DiagramProps) {
     super(props);
     this.diagramRef = React.createRef();
+
+    go.Diagram.licenseKey =
+      "73f944e1b46531b700ca0d2b113f69ed1bb37f3b9ed71ef4595541f2ef0c6d173089ee7c01d68b9782fc1afb1978c4ddd4cc6c2a9e1b016be333d3d844e485ffe53277e1435d448eb6132096c9fc2af3ac7963e2c1b474a2c5788dede8af";
   }
 
   /**

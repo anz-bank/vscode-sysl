@@ -8,18 +8,6 @@ import TreeView from "@mui/lab/TreeView";
 import { CustomTreeItem } from "./CustomTreeItem";
 import _ from "lodash";
 
-const drawerWidth = 200;
-
-const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
-  open?: boolean;
-}>(({ open }) => ({
-  flexGrow: 1,
-  marginLeft: 0,
-  ...(open && {
-    marginLeft: drawerWidth,
-  }),
-}));
-
 const DrawerHeader = styled("div")(() => ({
   display: "flex",
   alignItems: "center",
@@ -38,11 +26,7 @@ const useStyles = makeStyles({
   },
   box: { display: "flex" },
   drawer: {
-    width: drawerWidth,
     flexShrink: 0,
-    "& .MuiDrawer-paper": {
-      width: drawerWidth,
-    },
   },
   treeview: {
     overflowX: "hidden",
@@ -61,6 +45,8 @@ const useStyles = makeStyles({
 });
 
 export default function ComponentTree(props: any) {
+  const drawerWidth = props.drawerWidth || 200;
+
   const [nodes, setNodes] = useState(props.activeNodes);
   const classes = useStyles();
 
@@ -116,6 +102,14 @@ export default function ComponentTree(props: any) {
       <CssBaseline />
       <Drawer
         classes={{ root: classes.drawer }}
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          "& .MuiDrawer-paper": {
+            width: drawerWidth,
+            boxSizing: "border-box",
+          },
+        }}
         variant="persistent"
         anchor="left"
         open={props.open}
@@ -142,7 +136,6 @@ export default function ComponentTree(props: any) {
           {nodes && constructGrouping(JSON.parse(JSON.stringify(nodes))).children?.map(treeNode)}
         </TreeView>
       </Drawer>
-      <Main open={props.open}>{props.children}</Main>
     </Box>
   );
 }

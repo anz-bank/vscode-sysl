@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as go from "gojs";
-import _ from "lodash";
+import _, { sortBy } from "lodash";
 import { produce } from "immer";
 import { pick } from "lodash";
 
@@ -15,11 +15,22 @@ import { GoJSIndex, shouldNotifyChange, updateState } from "./components/diagram
 
 import LayoutWrapper from "./components/layout/LayoutWrapper";
 import MainContainer from "./components/layout/MainContainer";
+import { HtmlModel } from "./components/html/HtmlModel";
+import {
+  stringToViewKey,
+  ViewItem,
+  ViewKey,
+  viewKeyToString,
+  ViewModel,
+} from "./components/views/types";
 
 type AppState = {
-  diagrams: DiagramData[];
-  selectedData: DiagramData | null;
-  activeChild: number;
+  viewData: {
+    diagrams: { [key: string]: DiagramData };
+    htmlDocs: { [key: string]: HtmlModel };
+  };
+  selectedData: { [key: string]: DiagramData | null };
+  activeChild: string;
   error?: {
     openSnackBar: boolean;
     errorMessage: string | null;
@@ -27,9 +38,12 @@ type AppState = {
 };
 
 const initialState: AppState = {
-  activeChild: 0,
-  selectedData: null,
-  diagrams: [],
+  activeChild: "",
+  selectedData: {},
+  viewData: {
+    diagrams: {},
+    htmlDocs: {},
+  },
   error: {
     openSnackBar: false,
     errorMessage: null,
@@ -44,8 +58,6 @@ const styles: StyleObject = () => ({
   root: {
     flexGrow: 1,
     display: "flex",
-    height: "100%",
-    width: "100%",
   },
   alert: {
     whiteSpace: "pre-wrap",
@@ -53,7 +65,6 @@ const styles: StyleObject = () => ({
   tabPanel: {
     padding: 0,
     flexGrow: 1,
-    height: "100vh",
   },
 });
 
@@ -64,7 +75,14 @@ interface AppProps {
 type ParentMessageEvent = {
   data: {
     type: string;
-    model: DiagramData[];
+    model: (DiagramData | HtmlModel | any) & {
+      meta?: {
+        key: string;
+        kind: string;
+        label?: string;
+        lastUpdated?: string;
+      };
+    };
     error?: { [key: string]: any };
   };
 };
@@ -82,9 +100,9 @@ function Alert(props: AlertProps) {
   return <MuiAlert elevation={6} {...props} />;
 }
 
-function isDiagramData(model: DiagramData[]) {
-  const hasNodesAndEdges = (obj: any) => obj.hasOwnProperty("nodes") && obj.hasOwnProperty("edges");
-  return model.every(hasNodesAndEdges);
+function isDiagramData(model: DiagramData) {
+  const hasNodesOrEdges = (obj: any) => "nodes" in obj || "edges" in obj;
+  return hasNodesOrEdges(model);
 }
 
 /**
@@ -112,15 +130,15 @@ function getDiagramData(data: go.Part[], diagram: DiagramData): DiagramData | nu
 }
 
 class App extends React.PureComponent<AppProps, AppState> {
-  private gojsIndexes: GoJSIndex[];
+  private gojsIndexes: { [key: string]: GoJSIndex } = {};
 
   constructor(props: AppProps) {
     super(props);
 
     this.state = vscode.getState() || initialState;
-    this.gojsIndexes = this.state.diagrams.map(
-      ({ nodes, edges }) => new GoJSIndex({ nodes, edges })
-    );
+    _.each(this.state.viewData.diagrams, ({ nodes, edges }, k) => {
+      this.gojsIndexes[k] = new GoJSIndex({ nodes, edges });
+    });
 
     // bind handler methods
     this.handleDiagramEvent = this.handleDiagramEvent.bind(this);
@@ -133,6 +151,9 @@ class App extends React.PureComponent<AppProps, AppState> {
 
   public componentDidMount() {
     window.addEventListener("message", this.handleParentMessage);
+
+    // Notify the parent that a view was present at mounting time (e.g. loaded from previous state).
+    this.forEachView(({ key, model }) => vscode.postMessage({ type: "view/didOpen", key, model }));
   }
 
   public componentWillUnmount() {
@@ -143,20 +164,28 @@ class App extends React.PureComponent<AppProps, AppState> {
    * Sets state from selection(s) in component tree.
    */
   public setSelectedData(selection: DiagramData): void {
-    this.setState({ selectedData: selection }, () => {
-      vscode.setState(this.state);
-    });
+    this.setState(
+      produce((draft: AppState) => {
+        draft.selectedData[draft.activeChild] = selection;
+      }),
+      () => {
+        vscode.setState(this.state);
+        console.log("new state", this.state);
+      }
+    );
   }
 
   /**
    * Updates state to show error in snackbar.
    * @param error received from extension
    */
-  public showError(error: { [key: string]: any }, action?: string) {
+  public showError(error: { [key: string]: any }, action?: string, kind?: string) {
     let errorText = "";
     switch (action) {
       case "render":
-        errorText = `The diagram could not be rendered because the following error occurred:\n\n`;
+        errorText = `The ${
+          kind ?? ""
+        } view could not be rendered because the following error occurred:\n\n`;
         break;
       default:
         errorText = `The following error occurred:\n\n`;
@@ -187,35 +216,84 @@ class App extends React.PureComponent<AppProps, AppState> {
    * Handle messages sent from the extension to the webview.
    */
   public handleParentMessage(event: ParentMessageEvent) {
-    const message = event.data;
-    if (message.error) {
-      this.showError(message.error, message.type);
-    } else if (!message.model) {
-      this.showError({ errorMsg: "data object not found/undefined" }, message.type);
-    } else if (!isDiagramData(message.model)) {
-      this.showError({ errorMsg: "data object is missing nodes and/or edges" }, message.type);
-    } else {
-      try {
-        switch (message.type) {
-          case "render":
-            console.log("received render message", message.model);
-            this.setState(
-              produce((draft: AppState) => {
-                draft.error = { openSnackBar: false, errorMessage: null };
-                draft.diagrams = message.model.map((d) => ({ ...d, resetsDiagram: true }));
-                this.gojsIndexes = draft.diagrams.map(
-                  ({ nodes, edges }) => new GoJSIndex({ nodes, edges })
-                );
-              }),
-              () => {
-                vscode.setState(this.state);
-              }
-            );
-            break;
-        }
-      } catch (e) {
-        this.showError({ errorMsg: e }, message.type);
+    console.log("received message from parent", event.data);
+    const { type, model, error } = event.data;
+    const meta = model?.meta ?? {};
+    if (error) {
+      this.showError(error, type, meta.kind);
+      return;
+    }
+    try {
+      switch (type) {
+        case "render":
+          model.label = meta.label;
+          const keyString = viewKeyToString(meta.key);
+
+          if (meta.kind === "diagram") {
+            if (!isDiagramData(model)) {
+              const errorMsg = "data object is missing nodes and/or edges";
+              this.showError({ errorMsg }, type, meta.kind);
+            } else {
+              this.setState(
+                produce((draft: AppState) => {
+                  draft.error = { openSnackBar: false, errorMessage: null };
+                  draft.viewData.diagrams[keyString] = { ...model, resetsDiagram: true };
+                  Object.entries(draft.viewData.diagrams).forEach(
+                    ([k, { nodes, edges }]) =>
+                      (this.gojsIndexes[k] = new GoJSIndex({ nodes, edges }))
+                  );
+                  if (!draft.activeChild) {
+                    // setting the active tab to the first diagram by default
+                    draft.activeChild = keyString;
+                  }
+                }),
+                () => {
+                  vscode.setState(this.state);
+                  console.log("new state", this.state);
+                }
+              );
+            }
+          } else {
+            if (!model.content) {
+              this.showError({ errorMsg: "data object is missing content" }, type, meta.kind);
+            } else {
+              this.setState(
+                produce((draft: AppState) => {
+                  draft.error = { openSnackBar: false, errorMessage: null };
+                  draft.viewData.htmlDocs[keyString] = model;
+                  // setting the active tab to the first tab by default if no diagrams yet
+                  if (!draft.activeChild) {
+                    draft.activeChild = keyString;
+                  }
+                }),
+                () => {
+                  vscode.setState(this.state);
+                  console.log("new state", this.state);
+                }
+              );
+            }
+          }
+          break;
+        case "update":
+          console.log("received update message", event.data);
+          if (meta.kind === "diagram") {
+            if (!isDiagramData(model)) {
+              const errorMsg = "data object is missing nodes and/or edges";
+              this.showError({ errorMsg }, type, meta.kind);
+            } else {
+              console.log("no errors, need to update diagram model now");
+            }
+          } else {
+            if (!model.content) {
+              this.showError({ errorMsg: "data object is missing content" }, type, meta.kind);
+            } else {
+              console.log("no errors, need to update html");
+            }
+          }
+          break;
       }
+    } catch (e) {
+      this.showError({ errorMsg: e }, type, meta.kind);
     }
   }
 
@@ -229,19 +307,25 @@ class App extends React.PureComponent<AppProps, AppState> {
       case "ChangedSelection":
         const selection = getDiagramData(
           e.subject.toArray(),
-          this.state.diagrams[this.state.activeChild]
+          this.state.viewData.diagrams[this.state.activeChild]
         );
         const message: SelectionMessageEvent = {
           type: "select",
           selectedData: {
             current: selection,
-            previous: this.state.selectedData,
+            previous: this.state.selectedData[this.state.activeChild] ?? null,
           },
         };
         vscode.postMessage(message);
-        this.setState({ selectedData: selection }, () => {
-          vscode.setState(this.state);
-        });
+        this.setState(
+          produce((draft: AppState) => {
+            draft.selectedData[draft.activeChild] = selection;
+          }),
+          () => {
+            vscode.setState(this.state);
+            console.log("new state", this.state);
+          }
+        );
         break;
       default:
         break;
@@ -260,15 +344,16 @@ class App extends React.PureComponent<AppProps, AppState> {
 
     this.setState(
       produce((draft: AppState) => {
-        updateState(index, draft.diagrams[this.state.activeChild], delta);
+        updateState(index, draft.viewData.diagrams[this.state.activeChild], delta);
       }),
       () => {
         vscode.setState(this.state);
 
         if (notify) {
-          const data = this.state.diagrams[this.state.activeChild];
+          const data = this.state.viewData.diagrams[this.state.activeChild];
           vscode.postMessage({
-            type: "diagramModelChange",
+            type: "view/didChange",
+            key: stringToViewKey(this.state.activeChild),
             delta,
             model: pick(data, "nodes", "edges"),
             viewId: data.type?.id,
@@ -283,11 +368,17 @@ class App extends React.PureComponent<AppProps, AppState> {
    * @param event The change event.
    * @param newValue The index of the new active tab as a string.
    */
-  public handleTabChange(event: React.ChangeEvent<{}>, newValue: string) {
+  public handleTabChange(_: React.ChangeEvent<{}>, newValue: string) {
+    vscode.postMessage({
+      type: "view changed",
+      viewData: {
+        current: newValue,
+        previous: this.state.activeChild,
+      },
+    });
     this.setState(
       produce((draft: AppState) => {
-        draft.activeChild = parseInt(newValue);
-        draft.selectedData = null;
+        draft.activeChild = newValue;
       })
     );
   }
@@ -315,33 +406,57 @@ class App extends React.PureComponent<AppProps, AppState> {
       </>
     );
 
-    const appComponent = (
-      <LayoutWrapper
-        activeNodes={this.state.diagrams[this.state.activeChild]?.nodes}
-        onSelectionChanged={this.setSelectedData}
-        handleTabChange={this.handleTabChange}
-        selectedData={this.state.selectedData}
-        diagramLabels={this.state.diagrams.map(
-          (data, index) => data.templates?.diagramLabel ?? `Diagram ${index + 1}`
-        )}
-      >
-        <div className={classes.root}>
-          {errorMessage}
-          {
-            <MainContainer
-              selectedData={this.state.selectedData}
-              classes={classes}
-              diagrams={this.state.diagrams}
-              activeChild={this.state.activeChild}
-              handleDiagramEvent={this.handleDiagramEvent}
-              handleModelChange={this.handleModelChange}
-            />
-          }
-        </div>
-      </LayoutWrapper>
+    let tabLabels: [string, string][] = [];
+    this.forEachView(({ keyUri, model, index }) =>
+      tabLabels.push([keyUri, model.meta?.label ?? `View ${index}`])
     );
+    tabLabels = sortBy(tabLabels, "[1]");
 
-    return <TabContext value={this.state.activeChild.toString()}>{appComponent}</TabContext>;
+    return (
+      <TabContext value={this.state.activeChild.toString()}>
+        <LayoutWrapper
+          activeNodes={this.state.viewData.diagrams[this.state.activeChild]?.nodes}
+          onSelectionChanged={this.setSelectedData}
+          handleTabChange={this.handleTabChange}
+          selectedData={this.state.selectedData[this.state.activeChild]}
+          tabLabels={tabLabels}
+        >
+          <div className={classes.root}>
+            {errorMessage}
+            {
+              <MainContainer
+                selectedData={this.state.selectedData[this.state.activeChild]}
+                classes={classes}
+                data={this.state.viewData}
+                activeChild={this.state.activeChild}
+                handleDiagramEvent={this.handleDiagramEvent}
+                handleModelChange={this.handleModelChange}
+              />
+            }
+          </div>
+        </LayoutWrapper>
+      </TabContext>
+    );
+  }
+
+  // TODO: Replace the viewData map with something more iterable.
+  private forEachView(
+    f: (view: { key: ViewKey; keyUri: string; model: ViewModel; index: number }) => void
+  ) {
+    let i = 1;
+    _.each(this.state.viewData.diagrams, (model, key) => {
+      f({ keyUri: key, key: stringToViewKey(key), model, index: i++ });
+    });
+    _.each(this.state.viewData.htmlDocs, (model, key) => {
+      f({ keyUri: key, key: stringToViewKey(key), model, index: i++ });
+    });
+  }
+
+  /** Returns an array of items describing the current views. */
+  private getViewItems(): ViewItem[] {
+    const items: ViewItem[] = [];
+    this.forEachView(({ key, model }) => items.push({ key, model }));
+    return items;
   }
 }
 

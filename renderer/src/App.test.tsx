@@ -7,24 +7,43 @@ import { vscode } from "./components/vscode/VsCode";
 
 import App from "./App";
 
+const key = { docUri: "file:///test.sysl", pluginId: "test", viewId: "test" };
+
 describe("App test", () => {
   let diagram: Diagram;
-  const basicModelEvent = modelEvent([
-    {
+  const basicModelEvent = modelEvent({
+    model: {
       nodes: [
         { key: "a", label: "a" },
         { key: "b", label: "b" },
       ],
       edges: [{ key: "a->b", from: "a", to: "b" }],
+      meta: {
+        kind: "diagram",
+        label: "Test Diagram",
+        key,
+      },
     },
-  ]);
+  });
 
   beforeEach(() => {
     // use Jest's fake timers to ensure Diagram.delayInitialization is called in time.
     jest.useFakeTimers();
     act(() => {
       const { container } = render(<App />);
-      window.dispatchEvent(modelEvent([{ nodes: [], edges: [] }]));
+      window.dispatchEvent(
+        modelEvent({
+          model: {
+            nodes: [],
+            edges: [],
+            meta: {
+              key,
+              kind: "diagram",
+              label: "Test Diagram",
+            },
+          },
+        })
+      );
       jest.runOnlyPendingTimers();
       diagram = initializeDiagramDom(container);
     });
@@ -50,6 +69,23 @@ describe("App test", () => {
       });
       expect(diagram.nodes.count).toEqual(2);
       expect(diagram.links.count).toEqual(1);
+    });
+
+    it.skip("renders an HTML document in a separate tab", async () => {
+      const content = "test html content";
+      act(() => {
+        window.dispatchEvent(
+          modelEvent({
+            model: {
+              meta: { key: { ...key, viewId: "html" }, kind: "html", label: "html tab" },
+              content,
+            },
+          })
+        );
+      });
+      expect(screen.getAllByRole("tab").length).toEqual(2);
+      screen.getByText("html tab").click();
+      expect(screen.getByTestId("html_view")).toBeVisible();
     });
 
     it("receives an error", async () => {
@@ -92,12 +128,17 @@ describe("App test", () => {
       expect(diagram.links.count).toEqual(1);
       act(() => {
         window.dispatchEvent(
-          modelEvent([
-            {
+          modelEvent({
+            model: {
               a: [],
               b: [],
+              meta: {
+                key,
+                kind: "diagram",
+                label: "Test Diagram",
+              },
             },
-          ])
+          })
         );
       });
       // expect diagram to not have been updated
@@ -194,7 +235,7 @@ function modelEvent(model: any, error?: any) {
   return new MessageEvent("message", {
     data: {
       type: "render",
-      model,
+      ...model,
       error,
     },
   });

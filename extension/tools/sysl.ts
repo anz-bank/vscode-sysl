@@ -1,19 +1,22 @@
-import {
-  execSync,
-  ExecSyncOptionsWithBufferEncoding,
-  spawnSync,
-  SpawnSyncOptionsWithBufferEncoding,
-} from "child_process";
 import path from "path";
 import { truncate } from "lodash";
+import { SemVer, coerce } from "semver";
+import { defaultLogger, Logger } from "./logging";
+import { spawnBuffer } from "./spawn";
+
+/** The possible Sysl protobuf representations. */
+export type ProtobufMode = "json" | "pb" | "textpb";
 
 /** A wrapper around a Sysl executable to perform operations on sources. */
 export class Sysl {
   /** The path to the Sysl executable to use. */
   public readonly path: string;
 
-  constructor(path: string) {
-    this.path = path.replace(/ /g, `\\ `);
+  private readonly logger: Logger;
+
+  constructor(path: string, options?: { logger?: Logger }) {
+    this.path = path;
+    this.logger = options?.logger ?? defaultLogger;
   }
 
   /**
@@ -25,45 +28,83 @@ export class Sysl {
     return process.env.SYSL_DEBUG !== "off" || false;
   }
 
-  /** Returns a protobuf message representing the compiled content of doc. */
-  public async protobufForDoc(source: string): Promise<any> {
-    const result = this.spawnSync(this.path, ["protobuf", "--mode=json"], { input: source });
-    return JSON.parse(result);
+  /** Returns a protobuf message representing the compiled content of source. */
+  public async protobufModuleFromSource(source: string, sourcePath: string): Promise<any> {
+    const buffer = await this.protobufFromSource(source, sourcePath, "json");
+    return JSON.parse(buffer.toString("utf-8"));
   }
 
   /** Returns a protobuf message representing the compiled content of the spec at modelPath. */
-  public async protobuf(modelPath: string): Promise<Buffer> {
-    const cwd = path.dirname(modelPath);
-    const command = `${this.path} protobuf --mode=pb ${path.basename(modelPath)}`;
-    return this.execSync(command, { cwd });
+  public async protobuf(modelPath: string, mode: ProtobufMode = "json"): Promise<Buffer> {
+    const args = ["protobuf", `--mode=${mode}`, path.basename(modelPath)];
+    return spawnBuffer(this.path, args, { cwd: path.dirname(modelPath) });
   }
 
-  /** Returns a JSON object representing the compiled content of the spec at modelPath. */
-  public async protobufJson(modelPath: string): Promise<any> {
-    const cwd = path.dirname(modelPath);
-    const command = `${this.path} protobuf --mode=json ${path.basename(modelPath)}`;
-    return JSON.parse(this.execSync(command, { cwd }).toString());
+  /** Returns a protobuf message representing the compiled content of source. */
+  public async protobufFromSource(
+    source: string,
+    sourcePath: string,
+    mode: ProtobufMode = "json"
+  ): Promise<Buffer> {
+    const args = ["protobuf", `--mode=${mode}`];
+    const options = { input: this.toStdin(sourcePath, source) };
+
+    const optionsStr = { ...options, input: truncate(options.input?.toString()) };
+    this.logger.log("protobuf spawn:", this.path, ...(args ?? []), optionsStr);
+
+    const result = await spawnBuffer(this.path, args, options);
+
+    this.logger.log("protobuf complete:", this.path, ...(args ?? []), truncate(result.toString()));
+
+    return result;
   }
 
   /** Returns the output of sysl transform on a model using a script. */
-  public async transform(modelPath: string, scriptPath: string): Promise<string> {
-    const opts = { cwd: path.dirname(modelPath), timeout: 50000 };
-    const cmd = `${this.path} transform ${path.basename(modelPath)} --script=${scriptPath}`;
-    return this.execSync(cmd, opts).toString();
+  public async transformSource(
+    modelPath: string,
+    scriptPath: string,
+    syslSource: string
+  ): Promise<string> {
+    return (await this.transformSourceBuffer(modelPath, scriptPath, syslSource)).toString("utf-8");
   }
 
-  private execSync(cmd: string, opts: ExecSyncOptionsWithBufferEncoding): Buffer {
-    console.debug("sysl exec:", cmd, opts);
-    return execSync(cmd, opts);
+  /** Returns the output of sysl transform on a model using a script. */
+  public async transformSourceBuffer(
+    modelPath: string,
+    scriptPath: string,
+    syslSource: string
+  ): Promise<Buffer> {
+    const options = {
+      cwd: path.dirname(modelPath),
+      input: this.toStdin(modelPath, syslSource),
+      timeout: 50000,
+    };
+    const args = ["transform", `--script=${scriptPath}`];
+
+    const optionsStr = { ...options, input: truncate(options.input?.toString()) };
+    this.logger.log("transform spawn:", this.path, ...(args ?? []), optionsStr);
+
+    const result = await spawnBuffer(this.path, args, options);
+
+    this.logger.log("transform complete:", this.path, ...(args ?? []), truncate(result.toString()));
+
+    return result;
   }
 
-  private spawnSync(
-    command: string,
-    args?: ReadonlyArray<string>,
-    options?: SpawnSyncOptionsWithBufferEncoding
-  ): string {
-    const optionsStr = { ...options, input: truncate(options?.input?.toString()) };
-    console.debug("sysl spawn:", command, optionsStr);
-    return spawnSync(command, args, options).stdout.toString("utf-8");
+  /** Returns the version of Sysl, or undefined if the version cannot be determined. */
+  public async version(): Promise<string | undefined> {
+    const info = (await spawnBuffer(this.path, ["info"])).toString("utf-8");
+    return info.match(/Version\s*:\s*[^v]*(v[^\r\n]+)/)?.[1];
+  }
+
+  /** Returns the semantic version of Sysl extracted from the version code in info output. */
+  public async semver(): Promise<SemVer | null | undefined> {
+    const version = await this.version();
+    return coerce(version);
+  }
+
+  /** Returns the string to pass to stdin for Sysl to process the content at path. */
+  private toStdin(path: string, content: string): string {
+    return JSON.stringify([{ path, content }]);
   }
 }

@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { Test } from "mocha";
 import path from "path";
 import { commands, TextDocument, TextEditor, window } from "vscode";
-import { Diagram, Fixtures, Input, Screenshot, sleep } from "./helpers";
+import { allSettled, Diagram, Fixtures, Input, Screenshot, sleep } from "./helpers";
 
 /**
  * Test that diagram rendering plugins are detected and invoked by the extension.
@@ -25,83 +25,53 @@ suite("plugins", function () {
   let editor: TextEditor;
 
   setup(async function () {
-    await fixtures.mkdir(".sysl/diagram_renderers");
-
     resetFixtures = fixtures.prepare(["simple.sysl"]);
 
     doc = await fixtures.open("simple.sysl");
     editor = await window.showTextDocument(doc, 1, false);
     // Allow the extension time to get registered.
-    await sleep(500);
+    await sleep(5000);
   });
 
   teardown(async function () {
     await commands.executeCommand("workbench.action.closeAllEditors");
-    await fixtures.rm(".sysl/diagram_renderers");
     await resetFixtures();
   });
 
-  suiteTeardown(async function () {
-    await fixtures.rm(".sysl");
-  });
-
-  suite("diagram renderers", async function () {
-    suite("builtin integration diagram plugin", async function () {
-      test("initial render", async function () {
-        await diagram.renderFull();
-
-        const data = await diagram.getData();
-        expect(data.nodes).to.have.length(1);
-        expect(data.edges).to.be.empty;
-
-        assertScreenshots && (await screenshot.compareExpectWriteAndRestore(this.test as Test));
-      });
-
-      test("after edit", async function () {
-        await diagram.render();
-
-        await editor.edit((builder) => {
-          builder.insert(Input.atEnd(editor), Input.emptyApp("Foo"));
-        });
-        await commands.executeCommand("workbench.action.files.save");
-        await sleep(2000);
-
-        await diagram.maximize();
-
-        const data = await diagram.getData();
-        expect(data.nodes).to.have.length(2);
-        expect(data.edges).to.be.empty;
-
-        assertScreenshots && (await screenshot.compareExpectWriteAndRestore(this.test as Test));
-      });
-    });
-
-    test("single local plugin", async function () {
-      await fixtures.cp(
-        "../diagram_renderers/test_plugin_2.arrai",
-        ".sysl/diagram_renderers/test_plugin_2.arrai"
-      );
-
+  suite("builtin", async function () {
+    test("initial render", async function () {
       await diagram.renderFull();
+      await diagram.selectTab("Integration");
 
       const data = await diagram.getData();
-      expect(data.nodes).to.have.length(4);
-      expect(data.edges).to.have.length(3);
+      expect(data.nodes).to.have.length(1);
+      expect(data.edges).to.be.empty;
 
       assertScreenshots && (await screenshot.compareExpectWriteAndRestore(this.test as Test));
     });
 
-    test("multiple local plugins", async function () {
-      await fixtures.cp(
-        "../diagram_renderers/test_plugin.arrai",
-        ".sysl/diagram_renderers/test_plugin.arrai"
-      );
-      await fixtures.cp(
-        "../diagram_renderers/test_plugin_2.arrai",
-        ".sysl/diagram_renderers/test_plugin_2.arrai"
-      );
+    test("after edit", async function () {
+      await diagram.render();
+      await diagram.selectTab("Integration");
 
+      await Input.into(editor, Input.emptyApp("Foo"));
+      await commands.executeCommand("workbench.action.files.save");
+
+      await diagram.maximize();
+      await allSettled();
+
+      const data = await diagram.getData();
+      expect(data.nodes).to.have.length(2);
+      expect(data.edges).to.be.empty;
+
+      assertScreenshots && (await screenshot.compareExpectWriteAndRestore(this.test as Test));
+    });
+  });
+
+  suite("local diagram renderer", async function () {
+    test("initial render", async function () {
       await diagram.renderFull();
+      await diagram.selectTab("test_plugin");
 
       const data = await diagram.getData();
       expect(data.nodes).to.have.length(3);

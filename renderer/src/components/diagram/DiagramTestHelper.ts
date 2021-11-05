@@ -19,6 +19,7 @@ interface DiagramElement extends Element {
 export function handleTestDataRequest(event: MessageEvent): void {
   const test_getDiagramData = "__test__gojs";
   const test_getDiagramScreenshot = "__test__gojs_svg";
+  const test_selectTab = "__test__selectTab";
 
   switch (event.data.type) {
     case test_getDiagramData:
@@ -28,10 +29,15 @@ export function handleTestDataRequest(event: MessageEvent): void {
       });
       break;
     case test_getDiagramScreenshot:
-      //@ts-ignore
       vscode.postMessage({
         type: test_getDiagramScreenshot,
         diagram: getScreenshot(),
+      });
+      break;
+    case test_selectTab:
+      vscode.postMessage({
+        type: test_selectTab,
+        status: selectTab(event.data.label),
       });
       break;
     default:
@@ -55,6 +61,18 @@ function getScreenshot(): string | undefined {
     return undefined;
   }
   return diagram.makeSvg().outerHTML;
+}
+
+/** Selects a view tab by label. */
+function selectTab(label: string): boolean {
+  const el = Array.from(document.querySelectorAll("[role=tab]")).find(
+    (el) => el.textContent === label
+  ) as HTMLElement;
+  if (el) {
+    el.click();
+    return true;
+  }
+  return false;
 }
 
 function getDiagram(): Diagram | undefined {

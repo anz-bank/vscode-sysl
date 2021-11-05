@@ -2,7 +2,7 @@
   "edges": [
     {
       "from": "A :: B1",
-      "id": "A :: B1-A :: B2",
+      "key": "A :: B1-A :: B2",
       "label": null,
       "to": "A :: B2",
       "visible": true

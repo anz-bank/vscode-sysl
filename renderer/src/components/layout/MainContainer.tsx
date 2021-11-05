@@ -4,11 +4,15 @@ import { TabPanel } from "@material-ui/lab";
 import { DiagramData } from "../diagram/DiagramTypes";
 import { DiagramWrapper } from "../diagram/DiagramWrapper";
 import { DiagramSnapshotter } from "../diagram/SnapshottingDiagram";
+import { HtmlModel } from "../html/HtmlModel";
 
 type PropType = {
   classes: any;
-  diagrams: DiagramData[];
-  activeChild: number;
+  data: {
+    diagrams: { [key: string]: DiagramData };
+    htmlDocs: { [key: string]: HtmlModel };
+  };
+  activeChild: string;
   handleDiagramEvent: (e: go.DiagramEvent) => void;
   handleModelChange: (delta: go.IncrementalData) => void;
   selectedData: DiagramData | null;
@@ -17,14 +21,16 @@ class MainContainer extends React.Component<PropType> {
   public render() {
     return (
       <>
-        {this.props.diagrams.map((data, index) => {
+        {Object.keys(this.props.data.diagrams).map((k) => {
+          const data = this.props.data.diagrams[k];
           const key = data.templates ? "custom" : "";
-          const active = this.props.activeChild === index;
+          const active = this.props.activeChild === k;
           return (
             <TabPanel
               classes={{ root: this.props.classes.tabPanel }}
-              value={index.toString()}
-              key={index}
+              value={k}
+              key={k}
+              data-testid={k}
             >
               <DiagramSnapshotter active={active} name={data.templates?.diagramLabel}>
                 <DiagramWrapper
@@ -38,6 +44,26 @@ class MainContainer extends React.Component<PropType> {
                   onModelChange={this.props.handleModelChange}
                 />
               </DiagramSnapshotter>
+            </TabPanel>
+          );
+        })}
+        {Object.keys(this.props.data.htmlDocs).map((k) => {
+          return (
+            <TabPanel
+              classes={{ root: this.props.classes.tabPanel }}
+              value={k}
+              key={k}
+              data-testid={k}
+            >
+              <iframe
+                title={k}
+                srcDoc={this.props.data.htmlDocs[k].content}
+                style={{
+                  height: "100%",
+                  width: "100%",
+                  border: 0,
+                }}
+              />
             </TabPanel>
           );
         })}

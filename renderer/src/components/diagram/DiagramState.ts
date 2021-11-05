@@ -45,8 +45,8 @@ export class GoJSIndex {
  */
 export function shouldNotifyChange(index: GoJSIndex, delta: go.IncrementalData) {
   const justSet =
-    delta.insertedNodeKeys?.length === index.mapNodeKeyIdx.size &&
-    delta.insertedLinkKeys?.length === index.mapLinkKeyIdx.size;
+    (delta.insertedNodeKeys?.length ?? 0) === index.mapNodeKeyIdx.size &&
+    (delta.insertedLinkKeys?.length ?? 0) === index.mapLinkKeyIdx.size;
   return !justSet;
 }
 

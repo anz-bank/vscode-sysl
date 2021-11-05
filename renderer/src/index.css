@@ -1,6 +1,10 @@
 body {
   margin: 0;
   padding: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
   background-color: white;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
     "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
@@ -18,6 +22,12 @@ canvas {
 
 #root {
   display: flex;
-  flex-flow: column nowrap;
-  height: 100%;
+  flex-grow: 1;
+  flex-direction: column;
+}
+
+.gshDisplay {
+  border-color: #cc7dc9;
+  font-size: 11px;
+  margin-bottom: 6px;
 }

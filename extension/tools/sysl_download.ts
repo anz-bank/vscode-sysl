@@ -1,11 +1,16 @@
-import { execSync } from "child_process";
 import download from "download";
 import fs from "fs";
 import got from "got";
 import path from "path";
 import { promisify } from "util";
-
+import { coerce } from "semver";
 import { Sysl } from "./sysl";
+import { spawnBuffer } from "./spawn";
+
+/** The minimum supported version of the Sysl binary. */
+export const minVersion = "0.466.0";
+/** The minimum supported version of the Sysl binary as a semantic version. */
+export const minSemver = coerce(minVersion)!;
 
 /**
  * Returns an instance of {@link Sysl} to perform Sysl operations (e.g. parsing).
@@ -53,9 +58,14 @@ export async function localSysl(dir: string): Promise<Sysl> {
  */
 export async function checkSysl(syslPath: string): Promise<Sysl> {
   try {
-    execSync(`${syslPath} info`); // throws error if not found
+    await spawnBuffer(syslPath, ["info"]); // throws error if not found
     console.debug(`sysl found at ${syslPath}`);
-    return new Sysl(syslPath);
+    const sysl = new Sysl(syslPath);
+    const semver = (await sysl.semver())!;
+    if (semver.compare(minSemver) < 0) {
+      throw new Error(`Sysl version ${semver} less then minimum version ${minSemver}`);
+    }
+    return sysl;
   } catch (e) {
     throw new Error(`sysl not available at ${syslPath}`);
   }
@@ -68,7 +78,7 @@ export async function downloadSysl(dir: string): Promise<Sysl> {
 
   try {
     await promisify(fs.mkdir)(dir);
-  } catch (e) {
+  } catch (e: any) {
     if (e.code === "EEXIST") {
       // Ignore error on mkdir for existing dir.
     }
@@ -109,10 +119,15 @@ async function getSyslDownloadUrl(): Promise<string> {
   } catch (e) {
     // Request to GitHub API for latest URL may fail for avoidable reasons, e.g. rate limiting.
     // Fall back on known-good version for now.
-    const version = "0.439.0";
+    const version = minVersion;
     const format = process.platform === "win32" ? "zip" : "tar.gz";
     const url = `https://github.com/anz-bank/sysl/releases/download/v${version}/sysl_${version}_${platform}.${format}`;
     console.log("failed to get latest Sysl download URL, falling back to", url, "\nCause:", e);
     return url;
   }
 }
+
+/** Error messages relating to Sysl downloading and availability. */
+export const errorMessage = {
+  syslUnavailable: `Unable to locate or download Sysl binary (requires v${minSemver.version} or higher).`,
+};

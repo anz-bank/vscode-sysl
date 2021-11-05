@@ -1,4 +1,6 @@
-export interface DiagramData {
+import { ViewModel } from "../views/types";
+
+export interface DiagramData extends ViewModel {
   type?: { [key: string]: any };
   nodes: Node[];
   edges: Edge[];

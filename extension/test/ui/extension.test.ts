@@ -27,8 +27,6 @@ suite("contributions", () => {
     const cmds = await commands.getCommands();
     const expectCommandPresent = (cmd: string) => expect(cmds).contains(cmd);
 
-    expectCommandPresent(constants.installSyslLspCommand);
-
     // Use CommandMap types to check all commands are present.
     const textCommands: constants.TextEditorCommandMap = {
       "sysl.renderDiagram": () => {},
@@ -36,8 +34,6 @@ suite("contributions", () => {
     Object.keys(textCommands).forEach(expectCommandPresent);
 
     const diagramCommands: constants.CustomEditorCommandMap = {
-      "sysl.diagram.toggleComponentTree": () => {},
-      "sysl.diagram.toggleDescriptionPane": () => {},
       "sysl.diagram.snapshot": () => {},
     };
     Object.keys(diagramCommands).forEach(expectCommandPresent);
