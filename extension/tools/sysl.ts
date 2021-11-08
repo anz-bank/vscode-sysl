@@ -37,7 +37,7 @@ export class Sysl {
   /** Returns a protobuf message representing the compiled content of the spec at modelPath. */
   public async protobuf(modelPath: string, mode: ProtobufMode = "json"): Promise<Buffer> {
     const args = ["protobuf", `--mode=${mode}`, path.basename(modelPath)];
-    return spawnBuffer(this.path, args, { cwd: path.dirname(modelPath) });
+    return spawnBuffer(this.path, args);
   }
 
   /** Returns a protobuf message representing the compiled content of source. */
@@ -47,12 +47,12 @@ export class Sysl {
     mode: ProtobufMode = "json"
   ): Promise<Buffer> {
     const args = ["protobuf", `--mode=${mode}`];
-    const options = { input: this.toStdin(sourcePath, source) };
+    const input = this.toStdin(sourcePath, source);
 
-    const optionsStr = { ...options, input: truncate(options.input?.toString()) };
+    const optionsStr = { input: truncate(input.toString()) };
     this.logger.log("protobuf spawn:", this.path, ...(args ?? []), optionsStr);
 
-    const result = await spawnBuffer(this.path, args, options);
+    const result = await spawnBuffer(this.path, args, { input });
 
     this.logger.log("protobuf complete:", this.path, ...(args ?? []), truncate(result.toString()));
 
@@ -75,13 +75,12 @@ export class Sysl {
     syslSource: string
   ): Promise<Buffer> {
     const options = {
-      cwd: path.dirname(modelPath),
       input: this.toStdin(modelPath, syslSource),
       timeout: 50000,
     };
     const args = ["transform", `--script=${scriptPath}`];
 
-    const optionsStr = { ...options, input: truncate(options.input?.toString()) };
+    const optionsStr = { ...options, input: truncate(options.input.toString()) };
     this.logger.log("transform spawn:", this.path, ...(args ?? []), optionsStr);
 
     const result = await spawnBuffer(this.path, args, options);

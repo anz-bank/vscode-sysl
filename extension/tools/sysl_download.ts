@@ -8,7 +8,7 @@ import { Sysl } from "./sysl";
 import { spawnBuffer } from "./spawn";
 
 /** The minimum supported version of the Sysl binary. */
-export const minVersion = "0.466.0";
+export const minVersion = "0.468.0";
 /** The minimum supported version of the Sysl binary as a semantic version. */
 export const minSemver = coerce(minVersion)!;
 
