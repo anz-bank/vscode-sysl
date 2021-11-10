@@ -96,7 +96,7 @@ export default function DescriptionItemDetails(props: any) {
           return ignoreAttributes.includes(key.toLowerCase()) ||
             key.toLowerCase().includes("color") ||
             props.item[key]?.toString().trim().length < 1 ? null : (
-            <>
+            <div key={key}>
               <Typography
                 sx={{
                   fontWeight: "light",
@@ -123,7 +123,7 @@ export default function DescriptionItemDetails(props: any) {
                 {props.item[key]}
               </Typography>
               <br />
-            </>
+            </div>
           );
         })}
       </Collapse>

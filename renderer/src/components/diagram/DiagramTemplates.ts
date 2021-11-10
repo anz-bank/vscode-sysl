@@ -215,7 +215,8 @@ function getCustomLinkTemplate(linkTemplate: TemplateEdgeData): go.Link {
     },
     getShapeStyle(linkTemplate.pathShape ?? {}),
     linkTemplate.arrowShape ? getShapeStyle(linkTemplate.arrowShape) : {},
-    linkTemplate.text ? getTextBlockStyle(linkTemplate.text) : {}
+    linkTemplate.text ? getTextBlockStyle(linkTemplate.text) : {},
+    new go.Binding("visible", "visible")
   );
 }
 

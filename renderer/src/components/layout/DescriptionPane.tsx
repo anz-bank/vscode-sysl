@@ -79,10 +79,10 @@ export default function DescriptionPane(props: any) {
         {props.selectedData && selectionLength > 0 ? (
           <List component="div" disablePadding>
             {props.selectedData.nodes.map((node: Node) => {
-              return <DescriptionItemDetails type="node" item={node} />;
+              return <DescriptionItemDetails key={node.key} type="node" item={node} />;
             })}
             {props.selectedData.edges.map((edge: Edge) => {
-              return <DescriptionItemDetails type="edge" item={edge} />;
+              return <DescriptionItemDetails key={edge.key} type="edge" item={edge} />;
             })}
           </List>
         ) : (

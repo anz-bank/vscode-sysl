@@ -19,6 +19,25 @@ export interface DiagramProps {
   selectedData: DiagramData | null;
 }
 
+/**
+ * Collapse similar links (with same labels and between the same two nodes)
+ * into a single link, retaining group information
+ */
+function collapseLinks(links: Array<go.ObjectData>): Array<go.ObjectData> {
+  let collapsedLinks: go.ObjectData = {};
+  let hiddenLinks: Array<go.ObjectData> = [];
+  _.forEach(links, (l) => {
+    let key = l.from + l.to + (l.label ?? '');
+    if (key in collapsedLinks) {
+      l.group && collapsedLinks[key].groups.push(l.group);
+      hiddenLinks.push({...l, visible: false});
+    } else {
+      collapsedLinks[key] = { ...l, visible: true, groups: l.group ? [l.group] : []}
+    }
+  });
+  return Object.values(collapsedLinks).concat(hiddenLinks);
+}
+
 export class DiagramWrapper extends React.Component<DiagramProps, {}> {
   /**
    * Ref to keep a reference to the Diagram component, which provides access to the GoJS diagram via getDiagram().
@@ -93,7 +112,7 @@ export class DiagramWrapper extends React.Component<DiagramProps, {}> {
         divClassName="diagram-component"
         initDiagram={() => DiagramTemplate(this.props?.templates)}
         nodeDataArray={this.props.nodes}
-        linkDataArray={this.props.edges}
+        linkDataArray={collapseLinks(this.props.edges)}
         onModelChange={this.props.onModelChange}
         skipsDiagramUpdate={this.props.skipsDiagramUpdate}
       />

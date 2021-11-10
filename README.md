@@ -96,6 +96,10 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+### 0.21.0
+
+- Collapse links based on label, source and destination.
+
 ### 0.19.0
 
 - Introduce new architecture for extension plugins.
