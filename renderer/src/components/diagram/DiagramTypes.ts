@@ -16,6 +16,7 @@ export interface Node {
   category?: string;
   group?: string;
   isGroup?: boolean;
+  opacity?: number;
 }
 
 export interface Edge {
@@ -23,6 +24,7 @@ export interface Edge {
   from?: string;
   to?: string;
   category?: string;
+  opacity?: number;
 }
 export interface TemplateData {
   diagramLabel: string;

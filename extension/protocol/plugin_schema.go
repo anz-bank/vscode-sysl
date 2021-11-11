@@ -316,6 +316,9 @@ type TemplateEdgeData struct {
 	// Corner corresponds to the JSON schema field "corner".
 	Corner *int `json:"corner,omitempty"`
 
+	// Opacity corresponds to the JSON schema field "opacity".
+	Opacity *string `json:"opacity,omitempty"`
+
 	// PathShape corresponds to the JSON schema field "pathShape".
 	PathShape *TemplateShape `json:"pathShape,omitempty"`
 
@@ -337,6 +340,9 @@ type TemplateGroupData struct {
 type TemplateLayoutData map[string]interface{}
 
 type TemplateNodeData struct {
+	// Opacity corresponds to the JSON schema field "opacity".
+	Opacity *string `json:"opacity,omitempty"`
+
 	// Sections corresponds to the JSON schema field "sections".
 	Sections []TemplateSectionData `json:"sections,omitempty"`
 

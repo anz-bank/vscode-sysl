@@ -343,7 +343,8 @@
           "items": {
             "$ref": "#/definitions/TemplateSectionData"
           }
-        }
+        },
+        "opacity": { "type": "string"}
       }
     },
 
@@ -374,7 +375,8 @@
         },
         "pathShape": { "$ref": "#/definitions/TemplateShape" },
         "arrowShape": { "$ref": "#/definitions/TemplateShape" },
-        "text": { "$ref": "#/definitions/TemplateTextBlock" }
+        "text": { "$ref": "#/definitions/TemplateTextBlock" },
+        "opacity": { "type": "string"}
       }
     },
 

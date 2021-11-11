@@ -131,7 +131,12 @@ function getCustomNodeTemplate(nodeTemplate: TemplateNodeData): go.Node {
     go.Node,
     "Auto",
     nodeTemplate.shadow ? getShadowStyle(nodeTemplate.shadow) : {},
-    $(go.Panel, "Horizontal", nodeTemplate.sections ? getSectionStyles(nodeTemplate.sections) : {}),
+    $(
+      go.Panel,
+      "Horizontal",
+      nodeTemplate.sections ? getSectionStyles(nodeTemplate.sections) : {},
+      new go.Binding("opacity", "opacity")
+    ),
     new go.Binding("location", "location", go.Point.parse).makeTwoWay(stringifyPoint)
   );
 }
@@ -216,6 +221,7 @@ function getCustomLinkTemplate(linkTemplate: TemplateEdgeData): go.Link {
     getShapeStyle(linkTemplate.pathShape ?? {}),
     linkTemplate.arrowShape ? getShapeStyle(linkTemplate.arrowShape) : {},
     linkTemplate.text ? getTextBlockStyle(linkTemplate.text) : {},
+    new go.Binding("opacity", "opacity"),
     new go.Binding("visible", "visible")
   );
 }

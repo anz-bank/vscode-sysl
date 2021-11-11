@@ -197,6 +197,7 @@ export interface TemplateLayoutData {
 export interface TemplateNodeData {
   shadow?: TemplateShadowData;
   sections?: TemplateSectionData[];
+  opacity?: string;
   [k: string]: unknown;
 }
 export interface TemplateShadowData {
@@ -258,5 +259,6 @@ export interface TemplateEdgeData {
   pathShape?: TemplateShape;
   arrowShape?: TemplateShape;
   text?: TemplateTextBlock;
+  opacity?: string;
   [k: string]: unknown;
 }
