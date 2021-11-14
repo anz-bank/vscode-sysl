@@ -1,12 +1,8 @@
 import path from "path";
 import { URI } from "vscode-uri";
 
-/** The type of an event indicating that it's a diagram snapshot. */
-export const snapshotEventType = "diagramSnapshot";
-
 /** Event for a snapshot taken in the renderer. */
 export interface SnapshotEvent {
-  type: typeof snapshotEventType;
   name?: string;
   data: string;
 }
@@ -30,4 +26,10 @@ export function parseSnapshotEvent(event: SnapshotEvent, modelUri: URI): Snapsho
     path: URI.file(filepath),
     data: Buffer.from(event.data),
   };
+}
+
+/** Takes snapshots of content. */
+export interface Snapshotter {
+  /** Saves a snapshot and returns the URI of the output. */
+  save(event: SnapshotEvent): Promise<URI>;
 }

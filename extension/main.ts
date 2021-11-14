@@ -1,5 +1,14 @@
-import { commands, ExtensionContext, window, workspace } from "vscode";
+import {
+  commands,
+  ExtensionContext,
+  ProgressLocation,
+  TextDocument,
+  window,
+  workspace,
+} from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
+import path from "path";
+import { fromPairs } from "lodash";
 
 import { syslBinaryPath } from "./constants";
 import { buildClient } from "./lsp/client/sysl";
@@ -11,6 +20,8 @@ import { viewRegistry } from "./views";
 import { CustomEditorMultiViewFactory } from "./views/multi/factory_vscode";
 import { VsCodeEvents } from "./plugins/events_vscode";
 import { PluginClientOptions } from "./plugins/types";
+import { Disposable } from "./views/types";
+import { URI } from "vscode-uri";
 
 /** The language client, created in {@link activate}, to be cleaned up in {@link deactivate}. */
 let client: LanguageClient;
@@ -37,6 +48,9 @@ export async function activate(context: ExtensionContext) {
 
   pluginEngine = await buildPluginEngine(context, sysl);
   await pluginEngine.activate();
+
+  registerActions();
+  watchAuxFiles();
 
   const output = window.createOutputChannel("Sysl");
   output.appendLine(`Registered ${pluginEngine.plugins.length} plugins`);
@@ -70,6 +84,54 @@ async function buildPluginEngine(context: ExtensionContext, sysl: Sysl): Promise
     workspaceDirs,
     events,
     options,
+  });
+}
+
+function registerActions() {
+  commands.registerCommand("sysl.action.list", () => {
+    const actions = (global as any).actions;
+    const toLabel = (a) => (a.category ? `${a.category}: ` : "") + a.title;
+    const nameToId: { [key: string]: string } = fromPairs(
+      actions.map((a) => [toLabel(a), a.action])
+    );
+
+    window.showQuickPick(Object.keys(nameToId)).then((name) => {
+      if (!name || !nameToId[name]) {
+        return;
+      }
+      const id = nameToId[name];
+      window.withProgress({ location: ProgressLocation.Notification, title: name }, () =>
+        commands.executeCommand(id, {
+          uri: window.activeTextEditor?.document.uri.toString(),
+        })
+      );
+    });
+  });
+}
+
+/**
+ * Ensures that all open Sysl files also have their auxiliary files opened.
+ *
+ * This is a bit of a hack to ensure the contents of the auxiliary files are available to the LSP
+ * plugin servers via the regular text sync channels. In reality the plugins should either be told
+ * what auxiliary files exist in some way, or they should be able to request them on demand.
+ */
+function watchAuxFiles(): Disposable {
+  const isRegularSpec = (doc: TextDocument) =>
+    /\.sysl$/.test(doc.uri.fsPath) && !/\.\w+\.sysl$/.test(doc.uri.fsPath);
+
+  const findAuxs = (doc: TextDocument): Thenable<URI[]> =>
+    workspace.findFiles(doc.uri.fsPath.replace(/\.sysl$/, ".*.sysl"));
+
+  // Open auxiliary files for each already-open file.
+  workspace.textDocuments.filter(isRegularSpec).map(async (doc) => {
+    (await findAuxs(doc)).map((uri) => workspace.openTextDocument(uri.fsPath));
+  });
+  // Open auxiliary files for each newly-opened file.
+  return workspace.onDidOpenTextDocument(async (doc) => {
+    if (isRegularSpec(doc)) {
+      (await findAuxs(doc)).map((uri) => workspace.openTextDocument(uri.fsPath));
+    }
   });
 }
 

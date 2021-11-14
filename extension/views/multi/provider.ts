@@ -1,4 +1,5 @@
 import {
+  commands,
   CustomTextEditorProvider,
   Disposable,
   ExtensionContext,
@@ -10,6 +11,7 @@ import { CustomEditor, customEditorManager } from "../../editor/custom_editors";
 import { WebMultiView } from "./views";
 import { views } from "..";
 import { multiviewType } from ".";
+import { WorkspaceSnapshotter } from "../../editor/snapshot-vscode";
 
 /**
  * Renders multiple child DocumentViews, each as a frame inside the webview.
@@ -21,6 +23,11 @@ export class MultiDocumentViewEditorProvider implements CustomTextEditorProvider
     const provider = new MultiDocumentViewEditorProvider(context.extensionUri.fsPath);
     const type = multiviewType;
     const providerRegistration = window.registerCustomEditorProvider(type, provider);
+
+    const postToActive = (type: string) =>
+      customEditorManager.activeCustomEditor?.webviewPanel.webview.postMessage({ type });
+    commands.registerCommand("sysl.diagram.snapshot", () => postToActive("view/snapshot"));
+
     return providerRegistration;
   }
 
@@ -36,7 +43,12 @@ export class MultiDocumentViewEditorProvider implements CustomTextEditorProvider
     customEditorManager.addEditor(editor);
 
     webviewPanel.webview.options = { enableScripts: true };
-    const multiview = new WebMultiView(document.uri, webviewPanel.webview, this.basePath);
+    const multiview = new WebMultiView(
+      document.uri,
+      webviewPanel.webview,
+      this.basePath,
+      new WorkspaceSnapshotter()
+    );
     views.acceptOpenMultiView(document.uri, multiview);
 
     webviewPanel.onDidDispose(() => {

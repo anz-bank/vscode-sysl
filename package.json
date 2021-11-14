@@ -4,7 +4,7 @@
   "description": "Write Sysl specs easily with instant visual feedback.",
   "author": "ANZ Bank",
   "publisher": "anz-bank",
-  "version": "0.22.0",
+  "version": "0.23.0",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -23,7 +23,7 @@
   },
   "activationEvents": [
     "onLanguage:sysl",
-    "onCustomEditor:sysl.gojsDiagram"
+    "onCustomEditor:sysl.multiView"
   ],
   "main": "./out/main.js",
   "contributes": {
@@ -39,19 +39,30 @@
         "title": "Save Diagram Snapshot",
         "category": "Sysl",
         "icon": "$(device-camera)"
+      },
+      {
+        "command": "sysl.action.list",
+        "title": "List Actions",
+        "category": "Sysl",
+        "icon": "$(run)"
       }
     ],
     "menus": {
       "editor/title": [
         {
-          "when": "resourceExtname == .sysl && activeCustomEditorId != 'sysl.gojsDiagram'",
+          "when": "resourceExtname == .sysl && activeCustomEditorId != 'sysl.multiView'",
           "command": "sysl.renderDiagram",
           "group": "navigation@1"
         },
         {
-          "when": "activeCustomEditorId == 'sysl.gojsDiagram'",
-          "command": "sysl.diagram.snapshot",
+          "when": "resourceExtname == .sysl && activeCustomEditorId != 'sysl.multiView'",
+          "command": "sysl.action.list",
           "group": "navigation@1"
+        },
+        {
+          "when": "activeCustomEditorId == 'sysl.multiView'",
+          "command": "sysl.diagram.snapshot",
+          "group": "navigation@2"
         }
       ]
     },
@@ -88,28 +99,8 @@
     },
     "customEditors": [
       {
-        "viewType": "sysl.gojsDiagram",
-        "displayName": "Sysl Diagram",
-        "selector": [
-          {
-            "filenamePattern": "*.sysl"
-          }
-        ],
-        "priority": "option"
-      },
-      {
-        "viewType": "sysl.htmlView",
-        "displayName": "HTML View",
-        "selector": [
-          {
-            "filenamePattern": "*.sysl"
-          }
-        ],
-        "priority": "option"
-      },
-      {
         "viewType": "sysl.multiView",
-        "displayName": "Multi View",
+        "displayName": "Sysl Diagram",
         "selector": [
           {
             "filenamePattern": "*.sysl"

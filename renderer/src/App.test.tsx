@@ -166,7 +166,7 @@ describe("App test", () => {
         selectedData: {
           current: {
             nodes: [{ key: "a", label: "a" }],
-            edges: [{ key: "a->b", from: "a", to: "b" , groups: [], visible: true}],
+            edges: [{ key: "a->b", from: "a", to: "b", groups: [], visible: true }],
           },
           previous: null,
         },

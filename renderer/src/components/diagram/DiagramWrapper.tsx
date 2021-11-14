@@ -27,12 +27,12 @@ function collapseLinks(links: Array<go.ObjectData>): Array<go.ObjectData> {
   let collapsedLinks: go.ObjectData = {};
   let hiddenLinks: Array<go.ObjectData> = [];
   _.forEach(links, (l) => {
-    let key = l.from + l.to + (l.label ?? '');
+    let key = l.from + l.to + (l.label ?? "");
     if (key in collapsedLinks) {
       l.group && collapsedLinks[key].groups.push(l.group);
-      hiddenLinks.push({...l, visible: false});
+      hiddenLinks.push({ ...l, visible: false });
     } else {
-      collapsedLinks[key] = { ...l, visible: true, groups: l.group ? [l.group] : []}
+      collapsedLinks[key] = { ...l, visible: true, groups: l.group ? [l.group] : [] };
     }
   });
   return Object.values(collapsedLinks).concat(hiddenLinks);

@@ -1,6 +1,6 @@
 import { URI } from "vscode-uri";
 import { expect } from "chai";
-import { parseSnapshotEvent, SnapshotEvent, snapshotEventType } from "./snapshot";
+import { parseSnapshotEvent, SnapshotEvent } from "./snapshot";
 import path from "path";
 
 suite("snapshot", () => {
@@ -8,7 +8,7 @@ suite("snapshot", () => {
     const modelUri = URI.file(path.join(__dirname, "test.sysl"));
 
     test("no diagram name", () => {
-      const event: SnapshotEvent = { type: snapshotEventType, data: "data" };
+      const event: SnapshotEvent = { data: "data" };
       const out = parseSnapshotEvent(event, modelUri);
 
       const { dir, base } = path.parse(out.path.fsPath);
@@ -19,7 +19,7 @@ suite("snapshot", () => {
     });
 
     test("with diagram name", () => {
-      const event: SnapshotEvent = { type: snapshotEventType, data: "data", name: "Foo Bar" };
+      const event: SnapshotEvent = { data: "data", name: "Foo Bar" };
       const out = parseSnapshotEvent(event, modelUri);
 
       const { dir, base } = path.parse(out.path.fsPath);

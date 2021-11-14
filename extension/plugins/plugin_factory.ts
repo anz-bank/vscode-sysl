@@ -11,6 +11,7 @@ import { Events, PluginClient } from "./types";
 
 /** Creates plugin clients based on config objects. */
 export class PluginFactory {
+  private nextInspectPort = 6051;
   constructor(private readonly events: Events) {}
 
   create(config: PluginConfig): PluginClient {
@@ -26,7 +27,9 @@ export class PluginFactory {
   }
 
   createLsp(config: LspPluginConfig): PluginClient {
-    return new LspPluginClient(config.lsp.scriptPath, this.events);
+    return new LspPluginClient(config.lsp.scriptPath, this.events, {
+      inspectPort: this.nextInspectPort++,
+    });
   }
 
   createTransform(config: TransformPluginConfig): PluginClient {

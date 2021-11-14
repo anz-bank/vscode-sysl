@@ -1,6 +1,7 @@
 import { each, set } from "lodash";
 import { URI } from "vscode-uri";
 import { views } from "..";
+import { SnapshotEvent, Snapshotter } from "../../editor/snapshot";
 import { ViewKey, viewKeyToString } from "../key";
 import { View, SurfaceView, ViewModel, ViewModelDelta, ViewSurface } from "../types";
 import { WebViewSurface } from "../web/views";
@@ -62,7 +63,12 @@ export abstract class AbstractMultiView implements MultiView {
 export class WebMultiView extends AbstractMultiView {
   private readonly surface: WebViewSurface<MultiModel<any>, any>;
 
-  constructor(uri: URI, webview: Webview, private readonly basePath: string) {
+  constructor(
+    uri: URI,
+    webview: Webview,
+    private readonly basePath: string,
+    private readonly snapshotter?: Snapshotter
+  ) {
     super(uri);
     this.surface = new WebViewSurface(webview);
     this.initializeWebview(webview);
@@ -130,6 +136,9 @@ export class WebMultiView extends AbstractMultiView {
           view && views.acceptChangeView(view, e.delta, e.model);
           break;
         }
+        case "view/snapshot":
+          this.snapshotter?.save(e as SnapshotEvent);
+          break;
       }
     });
   }

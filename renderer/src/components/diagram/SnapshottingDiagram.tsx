@@ -45,9 +45,9 @@ export class DiagramSnapshotter extends React.Component<SnapshotProps, {}> {
   }
 
   private handleSnapshot(event: ParentMessageEvent) {
-    if (this.props.active !== false && event.data.type === "snapshotDiagram") {
+    if (this.props.active !== false && event.data.type === "view/snapshot") {
       vscode.postMessage({
-        type: "diagramSnapshot",
+        type: "view/snapshot",
         data: getScreenshot(),
         name: this.props.name,
       });

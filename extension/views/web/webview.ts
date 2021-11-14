@@ -17,7 +17,8 @@ export type WebviewEvent =
   | ViewsDidCloseMessage
   | ViewDidChangeMessage
   | ViewsDidOpenMessage
-  | ViewsDidCloseMessage;
+  | ViewsDidCloseMessage
+  | ViewSnapshotMessage;
 
 /** Signals that a view was opened. */
 export interface ViewsDidOpenMessage {
@@ -50,4 +51,11 @@ export interface ViewsDidShowMessage {
 export interface ViewsDidHideMessage {
   type: "view/didHide";
   key: ViewKey;
+}
+
+/** Request that the current view is saved as a snapshot. */
+export interface ViewSnapshotMessage {
+  type: "view/snapshot";
+  name?: string;
+  data: string;
 }

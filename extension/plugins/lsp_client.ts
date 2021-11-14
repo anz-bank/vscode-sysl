@@ -17,6 +17,28 @@ import { LspPluginClientRouter } from "./lsp_client_router";
 import { Document, Events, PluginClient } from "./types";
 import { TextDocument as LspTextDocument } from "vscode-languageserver-textdocument";
 
+export interface LspPluginClientConfig {
+  inspectPort?: number;
+}
+
+// TODO: Store somewhere non-global.
+(global as any).actions = [];
+
+/**
+ * Represents the ability to perform actions.
+ */
+class ActionsFeature implements StaticFeature {
+  fillClientCapabilities(capabilities: ClientCapabilities): void {
+    set(capabilities, "experimental.actions", { sysl: "yes" });
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  initialize(c: ServerCapabilities<any>, d: DocumentSelector | undefined): void {
+    const actions = c.experimental?.actions ?? [];
+    (global as any).actions.push(...actions);
+  }
+  dispose(): void {}
+}
+
 /**
  * Represents the ability to render views.
  */
@@ -48,11 +70,16 @@ export class LspPluginClient implements PluginClient, Disposable {
   private readonly subscriptions: Disposable[] = [];
   private readonly router: LspPluginClientRouter;
 
-  constructor(private readonly _scriptPath: string, private readonly events: Events) {
+  constructor(
+    private readonly _scriptPath: string,
+    private readonly events: Events,
+    config?: LspPluginClientConfig
+  ) {
     this.id = path.basename(path.dirname(_scriptPath));
     const name = `Sysl Plugin: ${this.id}`;
     const run = { module: this.scriptPath, transport: TransportKind.ipc };
-    const debugOptions = { execArgv: ["--nolazy", "--inspect=6051"] };
+    const inspectPort = config?.inspectPort ?? 6051;
+    const debugOptions = { execArgv: ["--nolazy", `--inspect=${inspectPort}`] };
     const serverOptions: ServerOptions = { run, debug: { ...run, options: debugOptions } };
     const lspClientOptions: LanguageClientOptions = {
       documentSelector: [{ scheme: "file", language: "sysl" }],
@@ -61,6 +88,7 @@ export class LspPluginClient implements PluginClient, Disposable {
     const client = new LanguageClient(this.id, name, serverOptions, lspClientOptions);
     this.client = client;
 
+    client.registerFeature(new ActionsFeature());
     client.registerFeature(new DiagramFeature());
     client.registerFeature(new ViewFeature());
 
