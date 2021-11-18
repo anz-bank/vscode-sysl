@@ -87,3 +87,24 @@ export interface Events {
   /** Subscribes {@link listener} to be invoked when a text document is saved. */
   onDidSaveTextDocument(listener: (e: DocumentChangeEvent) => any): Disposable;
 }
+
+export type PluginKind =
+  | "command"
+  | "transform"
+  | "lsp.module"
+  | "lsp.command"
+  | "ref"
+  | "api"
+  | "archive";
+
+export interface PluginManifest {
+  id: string;
+  version: string;
+  kind: PluginKind;
+  entrypoint: string;
+  name?: string;
+}
+
+export interface PluginManifests {
+  plugins: PluginManifest[];
+}

@@ -7,10 +7,9 @@ import {
   workspace,
 } from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
-import path from "path";
 import { fromPairs } from "lodash";
 
-import { syslBinaryPath } from "./constants";
+import { syslBinaryPath, remoteUrl } from "./constants";
 import { buildClient } from "./lsp/client/sysl";
 import { Sysl } from "./tools/sysl";
 import { checkSysl, errorMessage, getOrDownloadSysl } from "./tools/sysl_download";
@@ -54,6 +53,9 @@ export async function activate(context: ExtensionContext) {
 
   const output = window.createOutputChannel("Sysl");
   output.appendLine(`Registered ${pluginEngine.plugins.length} plugins`);
+
+  // TODO: Generalize test instrumentation.
+  (global as any).__test__?.onActivated();
 }
 
 export async function deactivate(): Promise<void> {
@@ -82,6 +84,8 @@ async function buildPluginEngine(context: ExtensionContext, sysl: Sysl): Promise
     sysl,
     extensionPath: context.extensionPath,
     workspaceDirs,
+    remoteUrl,
+    globalStoragePath: context.globalStorageUri.fsPath,
     events,
     options,
   });

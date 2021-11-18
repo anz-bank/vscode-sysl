@@ -132,4 +132,6 @@ export const customEditorManager = new CustomEditorManager();
 
 // Hack to expose the panels to the test framework.
 // Static variables aren't available in CI for some reason.
-(global as any).__test__ = { customEditorManager };
+if ((global as any).__test__) {
+  (global as any).__test__.customEditorManager = customEditorManager;
+}

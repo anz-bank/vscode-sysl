@@ -17,3 +17,6 @@ export type CustomEditorCommand = "sysl.diagram.snapshot";
 export type TextEditorCommandMap = { [key in TextEditorCommand]: (...args: any[]) => any };
 /** Map of diagram editor commands to handlers to ensure handling of all cases. */
 export type CustomEditorCommandMap = { [key in CustomEditorCommand]: (...args: any[]) => any };
+
+/** The remote URL from which to fetch network plugins. */
+export const remoteUrl = "http://go/vscode-sysl-plugins";

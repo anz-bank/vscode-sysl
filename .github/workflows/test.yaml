@@ -30,6 +30,7 @@ jobs:
         with:
           node-version: "14"
       - run: yarn build
+      - run: yarn config set network-timeout 300000
 
       - name: Run test
         if: runner.os == 'Linux'

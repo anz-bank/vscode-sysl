@@ -10,6 +10,8 @@ export type PluginEngineConfig = {
   sysl?: Sysl;
   extensionPath?: string;
   workspaceDirs?: string[];
+  remoteUrl?: string;
+  globalStoragePath?: string;
   options?: PluginClientOptions;
   events: Events;
 };
@@ -28,15 +30,18 @@ export class PluginEngine {
   }
 
   /** Discovers, registers and enables plugins. */
-  async activate(): Promise<any[]> {
-    const configs = await this.locate();
-    this._plugins = this.build(configs);
-    this.plugins.forEach((p) => p.start());
-
-    if (this._plugins.length) {
-      this.disposables.push(this.config.events.register());
+  async activate(): Promise<void> {
+    try {
+      const configs = await this.locate();
+      this._plugins = this.build(configs);
+      this.plugins.forEach((p) => p.start());
+      console.log(`Activating ${this._plugins.length} plugins`);
+      if (this._plugins.length) {
+        this.disposables.push(this.config.events.register());
+      }
+    } catch (e) {
+      console.error(`Error activating plugins: ${e}`);
     }
-    return this.plugins;
   }
 
   deactivate() {
@@ -46,12 +51,20 @@ export class PluginEngine {
 
   /** Locates available plugins and returns a config for each. */
   async locate(): Promise<PluginConfig[]> {
-    const { sysl, extensionPath, workspaceDirs, options } = this.config;
+    const { sysl, extensionPath, workspaceDirs, remoteUrl, globalStoragePath, options } =
+      this.config;
     // TODO: Make more flexible.
-    if (!sysl || !extensionPath || !workspaceDirs || !options) {
-      throw new Error("all config required for plugin location");
+    if (!sysl || !extensionPath || !workspaceDirs || !remoteUrl || !globalStoragePath || !options) {
+      throw new Error("All config required for plugin location");
     }
-    return await PluginLocator.all(sysl, extensionPath, workspaceDirs, options);
+    return await PluginLocator.all(
+      sysl,
+      extensionPath,
+      workspaceDirs,
+      remoteUrl,
+      globalStoragePath,
+      options
+    );
   }
 
   /** Constructs plugin clients for each config. */

@@ -181,6 +181,22 @@
   resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.2.21.tgz#9f35a5643129df132cf3b5c1ec64046ea1af0650"
   integrity sha512-yd+9qKmJxm496BOV9CMNaey8TWsikaZOwMRwPHQIjcOJM9oV+fi9ZMNw3JsVnbEEbo2gRTDnGEBv8pjyn67hNg==
 
+"@types/decompress@*":
+  version "4.2.4"
+  resolved "https://registry.yarnpkg.com/@types/decompress/-/decompress-4.2.4.tgz#dd2715d3ac1f566d03e6e302d1a26ffab59f8c5c"
+  integrity sha512-/C8kTMRTNiNuWGl5nEyKbPiMv6HA+0RbEXzFhFBEzASM6+oa4tJro9b8nj7eRlOFfuLdzUU+DS/GPDlvvzMOhA==
+  dependencies:
+    "@types/node" "*"
+
+"@types/download@^8.0.1":
+  version "8.0.1"
+  resolved "https://registry.yarnpkg.com/@types/download/-/download-8.0.1.tgz#9653e0deb52f1b47f659e8e8be1651c8515bc0a7"
+  integrity sha512-t5DjMD6Y1DxjXtEHl7Kt+nQn9rOmVLYD8p4Swrcc5QpgyqyqR2gXTIK6RwwMnNeFJ+ZIiIW789fQKzCrK7AOFA==
+  dependencies:
+    "@types/decompress" "*"
+    "@types/got" "^8"
+    "@types/node" "*"
+
 "@types/eslint-visitor-keys@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@types/eslint-visitor-keys/-/eslint-visitor-keys-1.0.0.tgz#1ee30d79544ca84d68d4b3cdb0af4f205663dd2d"
@@ -192,6 +208,13 @@
   integrity sha512-w+LsMxKyYQm347Otw+IfBXOv9UWVjpHpCDdbBMt8Kz/xbvCYNjP+0qPh91Km3iKfSRLBB0P7fAMf0KHrPu+MyA==
   dependencies:
     "@types/minimatch" "*"
+    "@types/node" "*"
+
+"@types/got@^8":
+  version "8.3.6"
+  resolved "https://registry.yarnpkg.com/@types/got/-/got-8.3.6.tgz#1d8762605818ae8b1ae320f9d7ca5247b6767da7"
+  integrity sha512-nvLlj+831dhdm4LR2Ly+HTpdLyBaMynoOr6wpIxS19d/bPeHQxFU5XQ6Gp6ohBpxvCWZM1uHQIC2+ySRH1rGrQ==
+  dependencies:
     "@types/node" "*"
 
 "@types/http-cache-semantics@*":

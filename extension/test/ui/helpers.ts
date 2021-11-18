@@ -18,6 +18,7 @@ import {
 import { checkSysl } from "../../tools/sysl_download";
 import { CustomEditorManager } from "../../editor/custom_editors";
 import { DiagramModel } from "../../views/diagram/model";
+import { isUndefined } from "lodash";
 
 export class Input {
   /** Returns the position of the end of the document in editor. */
@@ -53,6 +54,8 @@ export class Fixtures {
 
     return async () => {
       realPaths.forEach((p, i) => fs.writeFileSync(p, fixtureContents[i]));
+      // Wait for the document buffers to be updated.
+      await new Promise((resolve) => setTimeout(resolve, 500));
     };
   }
 
@@ -282,6 +285,30 @@ export class Tools {
         .update("sysl.tool.binaryPath", "./sysl", ConfigurationTarget.Global);
     }
   }
+}
+
+/** Interface between test framework and application code. */
+export interface TestInstrumentation {
+  // Resolves when the extension is activated and ready for testing.
+  isActivated: Promise<void>;
+
+  // Must be invoked by the extension after completing activation.
+  onActivated: () => void;
+}
+
+/** Returns a promise that resolves once the extension is activated. */
+export async function isActivated(): Promise<void> {
+  var promiseResolve;
+  const promise = new Promise<void>((resolve) => {
+    promiseResolve = resolve;
+  });
+
+  const __test__: TestInstrumentation = {
+    onActivated: promiseResolve,
+    isActivated: promise,
+  };
+  (global as any).__test__ = __test__;
+  return promise;
 }
 
 /** Returns the active webview, or undefined if there isn't one. */

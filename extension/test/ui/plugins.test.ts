@@ -2,13 +2,15 @@ import { expect } from "chai";
 import { Test } from "mocha";
 import path from "path";
 import { commands, TextDocument, TextEditor, window } from "vscode";
-import { allSettled, Diagram, Fixtures, Input, Screenshot, sleep } from "./helpers";
+import { allSettled, Diagram, Fixtures, Input, isActivated, Screenshot, sleep } from "./helpers";
 
 /**
  * Test that diagram rendering plugins are detected and invoked by the extension.
  */
 suite("plugins", function () {
-  this.timeout(20000);
+  this.timeout(60000);
+
+  const isReady = isActivated();
 
   // TODO: Enable when screenshot comparisons are reliable.
   const assertScreenshots = false;
@@ -29,8 +31,9 @@ suite("plugins", function () {
 
     doc = await fixtures.open("simple.sysl");
     editor = await window.showTextDocument(doc, 1, false);
-    // Allow the extension time to get registered.
-    await sleep(5000);
+
+    // Wait until the extension activation is complete.
+    await isReady;
   });
 
   teardown(async function () {

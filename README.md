@@ -96,7 +96,12 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
-### 0.22.0
+### 0.24.0
+
+- Allow remote plugins to be discovered via the network.
+- Fix ERD plugin errors.
+
+### 0.23.0
 
 - Add _plugin actions_. LSP plugins can dynamically contribute actions to the extension, analogous to how the extension contributes commands to the client.
   - The "Sysl: List Actions" command displays a quick pick menu, and the select action is invoked via `executeCommand` to be handled by the plugin server.
