@@ -4,7 +4,7 @@
   "description": "Write Sysl specs easily with instant visual feedback.",
   "author": "ANZ Bank",
   "publisher": "anz-bank",
-  "version": "0.24.0",
+  "version": "0.25.0",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -119,7 +119,8 @@
     "prebuild": "yarn install",
     "build": "yarn --cwd renderer build && yarn compile && yarn plugins && yarn esbuild-prod",
     "compile": "tsc",
-    "plugins": "esbuild ./extension/plugins/erd/index.ts --bundle --outfile=out/plugins/erd/index.js --external:vscode --external:electron --format=cjs --platform=node && make -C extension/plugins plugins",
+    "esbuild-erd": "esbuild ./extension/plugins/erd/index.ts --bundle --outfile=out/plugins/erd/index.js --external:vscode --external:electron --format=cjs --platform=node",
+    "plugins": "yarn esbuild-erd && make -C extension/plugins plugins",
     "schema": "yarn schema-ts && yarn schema-go",
     "schema-ts": "json2ts extension/protocol/plugin.schema.json --output extension/protocol/plugin.d.ts && yarn prettier --write extension/protocol/plugin.d.ts",
     "schema-go": "go run github.com/atombender/go-jsonschema/cmd/gojsonschema -p protocol extension/protocol/plugin.schema.json --output extension/protocol/plugin_schema.go",
