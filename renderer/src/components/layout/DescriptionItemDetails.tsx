@@ -6,6 +6,7 @@ import {
   Collapse,
   Typography,
   Divider,
+  Tooltip
 } from "@mui/material";
 import { ExpandLess, ExpandMore, ArrowForward, Label } from "@mui/icons-material";
 
@@ -46,6 +47,7 @@ export default function DescriptionItemDetails(props: any) {
         <ListItemText
           disableTypography
           primary={
+            <Tooltip title={props.item.label as string} placement="left">
             <Typography
               color={textColor}
               sx={{
@@ -59,8 +61,10 @@ export default function DescriptionItemDetails(props: any) {
             >
               {props.item.label}
             </Typography>
+            </Tooltip>
           }
           secondary={
+            <Tooltip title={props.item.key as string} placement="left">
             <Typography
               color={textColor}
               sx={{
@@ -75,6 +79,7 @@ export default function DescriptionItemDetails(props: any) {
             >
               {props.item.key}
             </Typography>
+            </Tooltip>
           }
         />
         {open ? (
@@ -110,18 +115,20 @@ export default function DescriptionItemDetails(props: any) {
               >
                 {key}
               </Typography>
-              <Typography
-                sx={{
-                  lineHeight: 1,
-                  fontSize: "0.7rem",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-                variant="subtitle1"
-              >
-                {props.item[key]}
-              </Typography>
+              <Tooltip title={props.item[key] as string} placement="left">
+                <Typography
+                  sx={{
+                    lineHeight: 1,
+                    fontSize: "0.7rem",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                  variant="subtitle1"
+                >
+                  {props.item[key]}
+                </Typography>
+              </Tooltip>
               <br />
             </div>
           );

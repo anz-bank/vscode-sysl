@@ -79,7 +79,7 @@ export class DiagramWrapper extends React.Component<DiagramProps, {}> {
   }
 
   /**
-   * Update diagram selection and highlight if selected data has changed in app.
+   * Update diagram selection if selected data has changed in app.
    */
   public componentDidUpdate(prevProps: DiagramProps) {
     if (
@@ -91,16 +91,15 @@ export class DiagramWrapper extends React.Component<DiagramProps, {}> {
     }
     const diagram = this.diagramRef.current.getDiagram();
     if (diagram instanceof go.Diagram) {
-      const selectedNodes = this.props.selectedData.nodes?.map(
-        (node) => diagram.findNodeForKey(node.key) as go.Part
+      diagram.startTransaction("selecting parts");
+      diagram.clearHighlighteds();
+      this.props.selectedData.nodes?.forEach(
+        (node) => ((diagram.findNodeForKey(node.key) as go.Part).isSelected = true)
       );
-      const selectedEdges = this.props.selectedData.edges?.map(
-        (edge) => diagram.findLinkForKey(edge.key) as go.Part
+      this.props.selectedData.edges?.forEach(
+        (edge) => ((diagram.findLinkForKey(edge.key) as go.Link).isSelected = true)
       );
-      const selection = selectedNodes.concat(selectedEdges).filter((elem) => elem);
-
-      diagram.selectCollection(selection);
-      diagram.highlightCollection(selection);
+      diagram.commitTransaction("selecting parts");
     }
   }
 

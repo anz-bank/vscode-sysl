@@ -1,8 +1,7 @@
 import * as React from "react";
 import * as go from "gojs";
-import _, { sortBy } from "lodash";
+import _, { sortBy, pick } from "lodash";
 import { produce } from "immer";
-import { pick } from "lodash";
 
 import { withStyles } from "@material-ui/styles";
 import { TabContext } from "@material-ui/lab";
@@ -10,7 +9,7 @@ import { Snackbar } from "@material-ui/core";
 import MuiAlert, { AlertProps } from "@material-ui/lab/Alert";
 
 import { vscode } from "./components/vscode/VsCode";
-import { DiagramData } from "./components/diagram/DiagramTypes";
+import { DiagramData, Edge } from "./components/diagram/DiagramTypes";
 import { GoJSIndex, shouldNotifyChange, updateState } from "./components/diagram/DiagramState";
 
 import LayoutWrapper from "./components/layout/LayoutWrapper";
@@ -63,7 +62,7 @@ const styles: StyleObject = () => ({
     whiteSpace: "pre-wrap",
   },
   tabPanel: {
-    padding: 0,
+    padding: 10,
     flexGrow: 1,
   },
 });
@@ -161,12 +160,26 @@ class App extends React.PureComponent<AppProps, AppState> {
   }
 
   /**
-   * Sets state from selection(s) in component tree.
+   * Sets state from selection(s) in Diagram or Component Tree.
    */
-  public setSelectedData(selection: DiagramData): void {
+  public setSelectedData(selection: DiagramData | null): void {
+    const selectedEdges: Edge[] = [];
+    selection?.edges?.forEach((edge: Edge) => {
+      // select all edges in a link group
+      if (!_.isEmpty(edge.groups)) {
+        const edgesInGroup: Edge[] = this.state.viewData.diagrams[
+          this.state.activeChild
+        ].edges.filter((e) => _.intersection(e.groups, edge.groups).length > 0);
+        selectedEdges.push(...edgesInGroup);
+      } else {
+        selectedEdges.push(edge);
+      }
+    });
     this.setState(
       produce((draft: AppState) => {
-        draft.selectedData[draft.activeChild] = selection;
+        draft.selectedData[draft.activeChild] = selection
+          ? { ...selection, edges: selectedEdges }
+          : null;
       }),
       () => {
         vscode.setState(this.state);
@@ -317,15 +330,7 @@ class App extends React.PureComponent<AppProps, AppState> {
           },
         };
         vscode.postMessage(message);
-        this.setState(
-          produce((draft: AppState) => {
-            draft.selectedData[draft.activeChild] = selection;
-          }),
-          () => {
-            vscode.setState(this.state);
-            console.log("new state", this.state);
-          }
-        );
+        this.setSelectedData(selection);
         break;
       default:
         break;
@@ -344,7 +349,7 @@ class App extends React.PureComponent<AppProps, AppState> {
 
     this.setState(
       produce((draft: AppState) => {
-        updateState(index, draft.viewData.diagrams[this.state.activeChild], delta);
+        updateState(index, draft.viewData.diagrams[draft.activeChild], delta);
       }),
       () => {
         vscode.setState(this.state);

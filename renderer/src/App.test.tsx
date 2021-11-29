@@ -177,6 +177,37 @@ describe("App test", () => {
       expect(screen.queryByTestId("selected_a")).not.toBeNull();
       expect(screen.queryByTestId("selected_a->b")).not.toBeNull();
     });
+
+    it("selecting entire link group when an edge is selected", async () => {
+      act(() => {
+        window.dispatchEvent(
+          modelEvent({
+            model: {
+              nodes: [
+                { key: "a", label: "a" },
+                { key: "b", label: "b" },
+                { key: "c", label: "c" },
+              ],
+              edges: [
+                { key: "a->b", from: "a", to: "b", group: "a->c" },
+                { key: "b->c", from: "b", to: "c", group: "a->c" },
+                { key: "c->a", from: "c", to: "a" },
+              ],
+              meta: {
+                kind: "diagram",
+                label: "Test Diagram",
+                key,
+              },
+            },
+          })
+        );
+      });
+      const linkPart = diagram.findLinkForKey("a->b") as Part;
+      diagram.select(linkPart);
+      expect(screen.queryByTestId("selected_a->b")).not.toBeNull();
+      expect(screen.queryByTestId("selected_b->c")).not.toBeNull();
+      expect(screen.queryByTestId("selected_c->a")).toBeNull();
+    });
   });
 
   describe("component tree", () => {

@@ -48,10 +48,14 @@ export default function ComponentTree(props: any) {
   const drawerWidth = props.drawerWidth || 200;
 
   const [nodes, setNodes] = useState(props.activeNodes);
+  const [expanded, setExpanded] = useState(_.map(
+    _.filter(props.activeNodes, "isGroup"),"key"));
   const classes = useStyles();
 
   useEffect(() => {
     setNodes(props.activeNodes);
+    setExpanded(_.map(
+      _.filter(props.activeNodes, "isGroup"),"key"));
   }, [props.activeNodes]);
 
   const treeNode = (node: any) => (
@@ -74,13 +78,13 @@ export default function ComponentTree(props: any) {
     const groups = _.groupBy(nodeList, (node) => node.group || "root");
     const nodes = _.keyBy(nodeList, "key");
     _.each(_.omit(groups, "root"), function (children, parentId) {
-      nodes[parentId].children = children;
+      nodes[parentId].children = _.sortBy(children, "label");
     });
 
     return {
       key: "components",
       expanded: true,
-      children: groups["root"],
+      children: _.sortBy(groups["root"], "label"),
     };
   };
 
@@ -91,11 +95,6 @@ export default function ComponentTree(props: any) {
     const nodes = _(props.activeNodes).keyBy("key").at(nodeIds).value();
     props.onSelectionChanged({ nodes: nodes, edges: [] });
   }
-
-  // find the nodes that need to be expanded in the tree view by default
-  let expandedNodes = _.filter(nodes, "expanded");
-  let expandedKeys = _.map(expandedNodes, "key");
-  expandedKeys.push("components");
 
   return (
     <Box classes={{ root: classes.box }}>
@@ -128,7 +127,10 @@ export default function ComponentTree(props: any) {
           onNodeSelect={(_: React.SyntheticEvent, nodeIds: Array<string>) =>
             selectionChange(nodeIds)
           }
-          defaultExpanded={expandedKeys}
+          onNodeToggle={(_: React.SyntheticEvent, nodeIds: Array<string>) =>
+            setExpanded(nodeIds)
+          }
+          expanded={expanded}
           selected={props.selectedData?.nodes.map((node: any) => node.key) ?? null}
           defaultCollapseIcon={<ExpandMore />}
           defaultExpandIcon={<ChevronRight />}

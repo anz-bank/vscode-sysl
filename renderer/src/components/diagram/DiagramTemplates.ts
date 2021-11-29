@@ -82,6 +82,7 @@ export default function DiagramTemplate(props?: TemplateData) {
     ),
     getTextBlockStyle({ label: "label" }),
     new go.Binding("avoidable", "expanded", (e) => !e),
+    new go.Binding("isSubGraphExpanded", "expanded").makeTwoWay(),
     new go.Binding("location", "location", go.Point.parse).makeTwoWay(stringifyPoint)
   );
 
@@ -94,6 +95,8 @@ export default function DiagramTemplate(props?: TemplateData) {
       routing: go.Link.AvoidsNodes,
       curve: go.Link.JumpGap,
       corner: 10,
+      fromSpot: go.Spot.AllSides,
+      toSpot: go.Spot.AllSides,
     },
     new go.Binding("isLayoutPositioned", "true"),
     $(go.Shape, new go.Binding("stroke", "color")),

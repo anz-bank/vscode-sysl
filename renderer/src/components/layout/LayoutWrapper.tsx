@@ -6,8 +6,8 @@ import ComponentTree from "./ComponentTree";
 import TopBar from "./TopBar";
 import { makeStyles } from "@material-ui/styles";
 
-const leftPanelWidth = 200;
-const rightPanelWidth = 200;
+const leftPanelWidth = 300;
+const rightPanelWidth = 300;
 
 const useStyles = makeStyles({
   center: {
@@ -54,7 +54,7 @@ export default function LayoutWrapper(props: PropType) {
   return (
     <>
       <ComponentTree
-        panelWidth={leftPanelWidth}
+        drawerWidth={leftPanelWidth}
         open={state.leftPanel.open}
         selectedData={props.selectedData}
         onSelectionChanged={props.onSelectionChanged}
@@ -80,7 +80,7 @@ export default function LayoutWrapper(props: PropType) {
         {props.children}
       </div>
       <DescriptionPane
-        panelWidth={rightPanelWidth}
+        drawerWidth={rightPanelWidth}
         open={state.rightPanel.open}
         selectedData={props.selectedData}
         toggleVisibility={toggleSidePanel.bind(null, "rightPanel")}

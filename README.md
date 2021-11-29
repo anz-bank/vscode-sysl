@@ -96,6 +96,12 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+## 0.26.0
+
+- UI updates:
+  - Increase drawer widths to view more text information.
+  - Selecting an edge selects all the edges in the link group.
+
 ### 0.24.0
 
 - Allow remote plugins to be discovered via the network.

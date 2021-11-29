@@ -24,6 +24,8 @@ export interface Edge {
   from?: string;
   to?: string;
   category?: string;
+  group?: string;
+  groups?: string[];
   opacity?: number;
 }
 export interface TemplateData {

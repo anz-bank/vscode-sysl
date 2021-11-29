@@ -51,12 +51,14 @@ export default function DescriptionPane(props: any) {
               flexDirection: "column",
               justifyContent: "space-between",
               alignItems: "center",
+              width: "100%"
             }}
           >
             <Typography
               sx={{
                 lineHeight: 1,
                 fontSize: "0.8rem",
+                textAlign: "center"
               }}
               variant="body1"
             >
@@ -67,6 +69,7 @@ export default function DescriptionPane(props: any) {
                 fontWeight: "light",
                 lineHeight: 1,
                 fontSize: "0.7rem",
+                textAlign: "center"
               }}
               variant="caption"
             >
@@ -79,10 +82,10 @@ export default function DescriptionPane(props: any) {
         {props.selectedData && selectionLength > 0 ? (
           <List component="div" disablePadding>
             {props.selectedData.nodes.map((node: Node) => {
-              return <DescriptionItemDetails key={node.key} type="node" item={node} />;
+              return <DescriptionItemDetails open={true} key={node.key} type="node" item={node} />;
             })}
             {props.selectedData.edges.map((edge: Edge) => {
-              return <DescriptionItemDetails key={edge.key} type="edge" item={edge} />;
+              return <DescriptionItemDetails open={true} key={edge.key} type="edge" item={edge} />;
             })}
           </List>
         ) : (
