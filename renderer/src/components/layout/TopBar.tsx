@@ -1,9 +1,10 @@
 import React from "react";
-import { AppBar, Toolbar, Tab, Button } from "@mui/material";
+import { AppBar, Toolbar, Tab, Button, CircularProgress } from "@mui/material";
 import { AccountTree, Description } from "@mui/icons-material";
 import { TabList } from "@material-ui/lab";
 import { makeStyles } from "@mui/styles";
 import { SxProps } from "@mui/system";
+import { TabLabelType } from "./LayoutTypes";
 
 const buttonStyle: SxProps = {
   display: "flex",
@@ -46,7 +47,7 @@ function PanelButton(props: any) {
 
 type PropType = {
   width?: string;
-  tabLabels: string[][];
+  tabLabels: TabLabelType[];
   handleTabChange: (event: React.ChangeEvent<{}>, value: string) => void;
   showLeftButton: boolean;
   showRightButton: boolean;
@@ -71,8 +72,25 @@ export default function TopBar(props: PropType) {
             scrollButtons="auto"
             onChange={props.handleTabChange}
           >
-            {props.tabLabels.map(([key, label]) => (
-              <Tab key={key} label={label} value={key} />
+            {props.tabLabels.map(({ key, label, loading }) => (
+              <Tab
+                key={key}
+                label={
+                  <div style={{ display: "flex" }}>
+                    <CircularProgress
+                      size={16}
+                      style={{
+                        verticalAlign: "middle",
+                        marginRight: "10px",
+                        display: loading ? "block" : "none",
+                      }}
+                    />
+                    <span>{label}</span>
+                  </div>
+                }
+                value={key}
+                disabled={loading}
+              />
             ))}
           </TabList>
         </div>

@@ -96,6 +96,10 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+## 0.27.0
+
+- Add loading spinners to tabs
+
 ## 0.26.0
 
 - UI updates:

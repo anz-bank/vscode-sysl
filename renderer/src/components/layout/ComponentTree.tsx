@@ -48,14 +48,12 @@ export default function ComponentTree(props: any) {
   const drawerWidth = props.drawerWidth || 200;
 
   const [nodes, setNodes] = useState(props.activeNodes);
-  const [expanded, setExpanded] = useState(_.map(
-    _.filter(props.activeNodes, "isGroup"),"key"));
+  const [expanded, setExpanded] = useState(_.map(_.filter(props.activeNodes, "isGroup"), "key"));
   const classes = useStyles();
 
   useEffect(() => {
     setNodes(props.activeNodes);
-    setExpanded(_.map(
-      _.filter(props.activeNodes, "isGroup"),"key"));
+    setExpanded(_.map(_.filter(props.activeNodes, "isGroup"), "key"));
   }, [props.activeNodes]);
 
   const treeNode = (node: any) => (
@@ -127,9 +125,7 @@ export default function ComponentTree(props: any) {
           onNodeSelect={(_: React.SyntheticEvent, nodeIds: Array<string>) =>
             selectionChange(nodeIds)
           }
-          onNodeToggle={(_: React.SyntheticEvent, nodeIds: Array<string>) =>
-            setExpanded(nodeIds)
-          }
+          onNodeToggle={(_: React.SyntheticEvent, nodeIds: Array<string>) => setExpanded(nodeIds)}
           expanded={expanded}
           selected={props.selectedData?.nodes.map((node: any) => node.key) ?? null}
           defaultCollapseIcon={<ExpandMore />}

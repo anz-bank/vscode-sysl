@@ -15,7 +15,7 @@ class Executor {
     const id = this.id();
     this.processes[id] = true;
     const promise = f();
-    promise.finally(() => this.end(id));
+    promise.catch((e) => console.error(e)).finally(() => this.end(id));
     return promise;
   }
 

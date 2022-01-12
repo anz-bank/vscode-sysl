@@ -6,7 +6,7 @@ import {
   Collapse,
   Typography,
   Divider,
-  Tooltip
+  Tooltip,
 } from "@mui/material";
 import { ExpandLess, ExpandMore, ArrowForward, Label } from "@mui/icons-material";
 
@@ -48,37 +48,37 @@ export default function DescriptionItemDetails(props: any) {
           disableTypography
           primary={
             <Tooltip title={props.item.label as string} placement="left">
-            <Typography
-              color={textColor}
-              sx={{
-                lineHeight: 1,
-                fontSize: "0.7rem",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-              variant="body2"
-            >
-              {props.item.label}
-            </Typography>
+              <Typography
+                color={textColor}
+                sx={{
+                  lineHeight: 1,
+                  fontSize: "0.7rem",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+                variant="body2"
+              >
+                {props.item.label}
+              </Typography>
             </Tooltip>
           }
           secondary={
             <Tooltip title={props.item.key as string} placement="left">
-            <Typography
-              color={textColor}
-              sx={{
-                fontWeight: "light",
-                fontSize: "0.6rem",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-                textTransform: "uppercase",
-              }}
-              variant="body2"
-            >
-              {props.item.key}
-            </Typography>
+              <Typography
+                color={textColor}
+                sx={{
+                  fontWeight: "light",
+                  fontSize: "0.6rem",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  textTransform: "uppercase",
+                }}
+                variant="body2"
+              >
+                {props.item.key}
+              </Typography>
             </Tooltip>
           }
         />

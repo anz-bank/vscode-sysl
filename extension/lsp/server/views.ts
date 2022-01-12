@@ -9,6 +9,7 @@ import { TextDocument } from "vscode-languageserver-textdocument";
 import { ViewEdit } from "../../views/edits";
 import { ViewKey, viewKeyToString } from "../../views/key";
 import { ViewModel, ViewModelDelta } from "../../views/types";
+import { ViewMeta } from "../../views/types";
 
 // MODELS
 

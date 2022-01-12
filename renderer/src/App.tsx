@@ -22,6 +22,7 @@ import {
   viewKeyToString,
   ViewModel,
 } from "./components/views/types";
+import { TabLabelType } from "./components/layout/LayoutTypes";
 
 type AppState = {
   viewData: {
@@ -99,7 +100,7 @@ function Alert(props: AlertProps) {
   return <MuiAlert elevation={6} {...props} />;
 }
 
-function isDiagramData(model: DiagramData) {
+function isDiagramData(model: any) {
   const hasNodesOrEdges = (obj: any) => "nodes" in obj || "edges" in obj;
   return hasNodesOrEdges(model);
 }
@@ -375,7 +376,7 @@ class App extends React.PureComponent<AppProps, AppState> {
    */
   public handleTabChange(_: React.ChangeEvent<{}>, newValue: string) {
     vscode.postMessage({
-      type: "view changed",
+      type: "view/didChange",
       viewData: {
         current: newValue,
         previous: this.state.activeChild,
@@ -411,9 +412,13 @@ class App extends React.PureComponent<AppProps, AppState> {
       </>
     );
 
-    let tabLabels: [string, string][] = [];
-    this.forEachView(({ keyUri, model, index }) =>
-      tabLabels.push([keyUri, model.meta?.label ?? `View ${index}`])
+    let tabLabels: TabLabelType[] = [];
+    this.forEachViewDataModel(({ key, model, index }) =>
+      tabLabels.push({
+        key: key,
+        label: model.templates?.diagramLabel ?? model.meta?.label ?? `View ${index}`,
+        loading: model.type?.willRender ?? false,
+      })
     );
     tabLabels = sortBy(tabLabels, "[1]");
 
@@ -442,6 +447,14 @@ class App extends React.PureComponent<AppProps, AppState> {
         </LayoutWrapper>
       </TabContext>
     );
+  }
+
+  private forEachViewDataModel(
+    f: (viewData: { key: string; model: DiagramData | HtmlModel; index: number }) => void
+  ) {
+    let i = 1;
+    _.each(this.state.viewData.diagrams, (model, key) => f({ key, model, index: i++ }));
+    _.each(this.state.viewData.htmlDocs, (model, key) => f({ key, model, index: i++ }));
   }
 
   // TODO: Replace the viewData map with something more iterable.

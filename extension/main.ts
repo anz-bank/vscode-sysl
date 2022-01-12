@@ -1,5 +1,6 @@
 import {
   commands,
+  ConfigurationTarget,
   ExtensionContext,
   ProgressLocation,
   TextDocument,
@@ -66,9 +67,16 @@ export async function deactivate(): Promise<void> {
 /** Ensures the Sysl binary is available and returns a wrapper around it. */
 async function getSysl(context: ExtensionContext): Promise<Sysl> {
   const syslPath = workspace.getConfiguration().get<string>(syslBinaryPath);
-  return syslPath
-    ? await checkSysl(syslPath)
-    : await getOrDownloadSysl(context.globalStorageUri.fsPath);
+  if (syslPath) {
+    return await checkSysl(syslPath);
+  } else {
+    const sysl = await getOrDownloadSysl(context.globalStorageUri.fsPath);
+    // set the Sysl path in ext setting to this syslPath
+    await workspace
+      .getConfiguration()
+      .update("sysl.tool.binaryPath", sysl.path, ConfigurationTarget.Global);
+    return sysl;
+  }
 }
 
 /** Creates the engine to manage plugins for the extension. */

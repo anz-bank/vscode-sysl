@@ -1,5 +1,4 @@
 import { each } from "lodash";
-import { type } from "os";
 import { DiagramModel, DiagramObjectData } from "../../views/diagram/model";
 
 export async function buildModel(module: any): Promise<DiagramModel> {

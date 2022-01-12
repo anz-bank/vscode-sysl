@@ -51,14 +51,14 @@ export default function DescriptionPane(props: any) {
               flexDirection: "column",
               justifyContent: "space-between",
               alignItems: "center",
-              width: "100%"
+              width: "100%",
             }}
           >
             <Typography
               sx={{
                 lineHeight: 1,
                 fontSize: "0.8rem",
-                textAlign: "center"
+                textAlign: "center",
               }}
               variant="body1"
             >
@@ -69,7 +69,7 @@ export default function DescriptionPane(props: any) {
                 fontWeight: "light",
                 lineHeight: 1,
                 fontSize: "0.7rem",
-                textAlign: "center"
+                textAlign: "center",
               }}
               variant="caption"
             >

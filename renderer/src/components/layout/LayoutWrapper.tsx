@@ -5,6 +5,7 @@ import DescriptionPane from "./DescriptionPane";
 import ComponentTree from "./ComponentTree";
 import TopBar from "./TopBar";
 import { makeStyles } from "@material-ui/styles";
+import { TabLabelType } from "./LayoutTypes";
 
 const leftPanelWidth = 300;
 const rightPanelWidth = 300;
@@ -21,7 +22,7 @@ type PropType = {
   activeNodes: Node[];
   handleTabChange: (event: React.ChangeEvent<{}>, value: string) => void;
   onSelectionChanged: (selections: DiagramData) => void;
-  tabLabels: string[][];
+  tabLabels: TabLabelType[];
   children: React.ReactNode;
   selectedData: DiagramData | null;
 };
