@@ -23,6 +23,7 @@ import {
   ViewModel,
 } from "./components/views/types";
 import { TabLabelType } from "./components/layout/LayoutTypes";
+import { tabLabelIcon } from "./components/layout/TopBar";
 
 type AppState = {
   viewData: {
@@ -101,8 +102,13 @@ function Alert(props: AlertProps) {
 }
 
 function isDiagramData(model: any) {
-  const hasNodesOrEdges = (obj: any) => "nodes" in obj || "edges" in obj;
+  const hasNodesOrEdges = (obj: any) => "nodes" in obj && obj.nodes;
   return hasNodesOrEdges(model);
+}
+
+function isHtmlModel(model: any) {
+  const hasContent = (obj: any) => "content" in obj;
+  return hasContent(model);
 }
 
 /**
@@ -245,7 +251,7 @@ class App extends React.PureComponent<AppProps, AppState> {
 
           if (meta.kind === "diagram") {
             if (!isDiagramData(model)) {
-              const errorMsg = "data object is missing nodes and/or edges";
+              const errorMsg = "data object is missing nodes";
               this.showError({ errorMsg }, type, meta.kind);
             } else {
               this.setState(
@@ -268,7 +274,7 @@ class App extends React.PureComponent<AppProps, AppState> {
               );
             }
           } else {
-            if (!model.content) {
+            if (!isHtmlModel(model)) {
               this.showError({ errorMsg: "data object is missing content" }, type, meta.kind);
             } else {
               this.setState(
@@ -394,7 +400,7 @@ class App extends React.PureComponent<AppProps, AppState> {
 
     const errorMessage = (
       <>
-        {this.state.error && (
+        {this.state.error?.openSnackBar && (
           <Snackbar
             data-testid="error-snackbar"
             open={this.state.error.openSnackBar}
@@ -417,7 +423,11 @@ class App extends React.PureComponent<AppProps, AppState> {
       tabLabels.push({
         key: key,
         label: model.templates?.diagramLabel ?? model.meta?.label ?? `View ${index}`,
-        loading: model.type?.willRender ?? false,
+        flag: model.type?.willRender
+          ? tabLabelIcon.loading
+          : this.state.error?.openSnackBar
+            ? tabLabelIcon.failed
+            : tabLabelIcon.none
       })
     );
     tabLabels = sortBy(tabLabels, "[1]");

@@ -96,6 +96,10 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+## 0.28.0
+
+- Add error icons to tabs with error messages
+
 ## 0.27.0
 
 - Add loading spinners to tabs

@@ -1,10 +1,37 @@
 import React from "react";
 import { AppBar, Toolbar, Tab, Button, CircularProgress } from "@mui/material";
-import { AccountTree, Description } from "@mui/icons-material";
+import { AccountTree, Description, CancelOutlined } from "@mui/icons-material";
 import { TabList } from "@material-ui/lab";
 import { makeStyles } from "@mui/styles";
 import { SxProps } from "@mui/system";
 import { TabLabelType } from "./LayoutTypes";
+
+export enum tabLabelIcon {
+	none = 0,
+	loading,
+	failed
+};
+
+const LoadingIcon = () => <CircularProgress
+  data-testid="loading-spinner"
+  size={16}
+  style={{
+    verticalAlign: "middle",
+    marginRight: "10px"
+    }}
+/>;
+
+const ErrorIcon = () => <span data-testid="error-icon">
+  <CancelOutlined
+    sx={{
+      color: "red",
+      verticalAlign: "middle",
+      marginRight: "5px",
+      display: "flex",
+      fontSize: 18
+    }}
+  />
+</span>;
 
 const buttonStyle: SxProps = {
   display: "flex",
@@ -72,24 +99,23 @@ export default function TopBar(props: PropType) {
             scrollButtons="auto"
             onChange={props.handleTabChange}
           >
-            {props.tabLabels.map(({ key, label, loading }) => (
+            {props.tabLabels.map(({ key, label, flag }) => (
               <Tab
                 key={key}
                 label={
                   <div style={{ display: "flex" }}>
-                    <CircularProgress
-                      size={16}
-                      style={{
-                        verticalAlign: "middle",
-                        marginRight: "10px",
-                        display: loading ? "block" : "none",
-                      }}
-                    />
+                    {
+                      flag === tabLabelIcon.loading
+                      ? <LoadingIcon />
+                      : flag === tabLabelIcon.failed
+                        ? <ErrorIcon />
+                        : null
+                    }
                     <span>{label}</span>
                   </div>
                 }
                 value={key}
-                disabled={loading}
+                disabled={flag === tabLabelIcon.loading}
               />
             ))}
           </TabList>

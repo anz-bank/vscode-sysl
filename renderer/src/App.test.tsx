@@ -71,6 +71,27 @@ describe("App test", () => {
       expect(diagram.links.count).toEqual(1);
     });
 
+    it("receives message model with willRender type true", async () => {
+      act(() => {
+        window.dispatchEvent(
+          modelEvent({
+            model: {
+              nodes: [],
+              edges: [],
+              meta: {
+                key,
+                kind: "diagram",
+                label: "Test Diagram",
+              },
+              type: { willRender: true }
+            },
+          })
+        );
+      });
+      // expect loading spinner  to be visible
+      expect(screen.getByTestId("loading-spinner")).toBeVisible();
+    });
+
     it.skip("renders an HTML document in a separate tab", async () => {
       const content = "test html content";
       act(() => {
@@ -117,6 +138,7 @@ describe("App test", () => {
       expect(diagram.nodes.count).toEqual(2);
       expect(diagram.links.count).toEqual(1);
       // expect error snackbar to be visible
+      expect(screen.getByTestId("error-icon")).toBeVisible();
       expect(screen.getByTestId("error-snackbar")).toBeVisible();
     });
 
@@ -145,6 +167,7 @@ describe("App test", () => {
       expect(diagram.nodes.count).toEqual(2);
       expect(diagram.links.count).toEqual(1);
       // expect error snackbar to be visible
+      expect(screen.getByTestId("error-icon")).toBeVisible();
       expect(screen.getByTestId("error-snackbar")).toBeVisible();
     });
   });
