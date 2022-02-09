@@ -83,7 +83,7 @@ export async function downloadSysl(dir: string): Promise<Sysl> {
       // Ignore error on mkdir for existing dir.
     }
   }
-  const release = (await download(url, { extract: true })) as any[];
+  const release = (await download(url, { extract: true })) as unknown as any[];
   const sysl = release.find((i) => i.path === "sysl" || i.path === "sysl.exe");
   console.log(`download complete: ${sysl.data.length / 1e6} MB`);
 

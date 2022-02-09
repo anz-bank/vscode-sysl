@@ -96,6 +96,11 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+## 0.29.0
+
+- Refactor `/plugin` and `/model` into npm packages
+- Add GitHub workflow to publish npm packages upon changes and version increments
+
 ## 0.28.0
 
 - Add error icons to tabs with error messages

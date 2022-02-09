@@ -1,0 +1,21 @@
+{
+  "name": "@anz-bank/vscode-sysl-plugin",
+  "version": "0.1.0",
+  "license": "ISC",
+  "description": "Common code for developing vscode-sysl plugins.",
+  "files": [
+    "lib/*"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc -t es5 lib/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@anz-bank/vscode-sysl-model": "^0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.2.4"
+  }
+}
