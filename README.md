@@ -96,6 +96,12 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+
+## 0.30.0
+
+- Update npm workflow names
+- Replace `npm` with `yarn` in CI steps
+
 ## 0.29.0
 
 - Refactor `/plugin` and `/model` into npm packages
