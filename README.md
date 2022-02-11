@@ -96,7 +96,6 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
-
 ## 0.30.0
 
 - Update npm workflow names
