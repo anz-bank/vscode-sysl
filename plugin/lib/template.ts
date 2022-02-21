@@ -24,7 +24,7 @@ import {
 } from "./views";
 import { ViewKey } from "@anz-bank/vscode-sysl-model";
 import { ViewEdits } from "./views";
-import { throttle } from "lodash";
+import { merge, throttle } from "lodash";
 
 export interface PluginConfig {
   initialization?: Initialization;
@@ -145,19 +145,17 @@ export class Plugin {
 
     // Initialization
     connection.onInitialize((params: InitializeParams) => {
-      this.clientCapabilities = params.capabilities;
-      const result = this.config.initialization?.onInitialize?.(params);
-      if (result) {
-        return result;
-      }
-
-      return {
+      const result: InitializeResult = {
         capabilities: {
           textDocumentSync: TextDocumentSyncKind.Incremental,
           workspace: { workspaceFolders: { supported: true } },
           completionProvider: this.config.autocompletion && { resolveProvider: true },
         },
       };
+
+      this.clientCapabilities = params.capabilities;
+      const customResult = this.config.initialization?.onInitialize?.(params);
+      return merge(result, customResult);
     });
 
     // Settings
