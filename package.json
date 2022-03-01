@@ -4,7 +4,7 @@
   "description": "Write Sysl specs easily with instant visual feedback.",
   "author": "ANZ Bank",
   "publisher": "anz-bank",
-  "version": "0.31.0",
+  "version": "0.33.0",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -23,7 +23,9 @@
   },
   "activationEvents": [
     "onLanguage:sysl",
-    "onCustomEditor:sysl.multiView"
+    "onLanguage:sysld",
+    "onCustomEditor:sysl.multiView",
+    "onCustomEditor:sysld.multiView"
   ],
   "main": "./out/main.js",
   "contributes": {
@@ -60,7 +62,7 @@
           "group": "navigation@1"
         },
         {
-          "when": "activeCustomEditorId == 'sysl.multiView'",
+          "when": "activeCustomEditorId == 'sysl.multiView' || activeCustomEditorId == 'sysld.multiView",
           "command": "sysl.diagram.snapshot",
           "group": "navigation@2"
         }
@@ -77,6 +79,18 @@
           ".sysl"
         ],
         "configuration": "./extension/syntax/language-configuration.json"
+      },
+      {
+        "id": "sysld",
+        "aliases": [
+          "SyslD",
+          "Sysld",
+          "sysld",
+          "Sysl Diagram"
+        ],
+        "extensions": [
+          ".sysld"
+        ]
       }
     ],
     "grammars": [
@@ -107,6 +121,16 @@
           }
         ],
         "priority": "option"
+      },
+      {
+        "viewType": "sysld.multiView",
+        "displayName": "Sysl Diagram",
+        "selector": [
+          {
+            "filenamePattern": "*.sysld"
+          }
+        ],
+        "priority": "default"
       }
     ]
   },
@@ -119,6 +143,7 @@
     "prebuild": "yarn install --network-timeout 300000",
     "build": "yarn --cwd renderer build && yarn compile && yarn plugins && yarn esbuild-prod",
     "compile": "tsc",
+    "esbuild-sysld": "esbuild ./extension/plugins/sysld/index.ts --bundle --outfile=out/plugins/sysld/index.js --external:vscode --external:electron --format=cjs --platform=node",
     "esbuild-erd": "esbuild ./extension/plugins/erd/index.ts --bundle --outfile=out/plugins/erd/index.js --external:vscode --external:electron --format=cjs --platform=node",
     "plugins": "yarn esbuild-erd && make -C extension/plugins plugins",
     "schema": "yarn schema-ts && yarn schema-go",

@@ -101,8 +101,8 @@ export class PluginLocator {
   ): Promise<PluginConfig[]> {
     const pluginsDir = path.join(extensionPath, "extension", "plugins");
     const intPath = path.join(pluginsDir, "integration", "integration_model_plugin.arraiz");
-
     const erdPath = path.join(extensionPath, "out", "plugins", "erd", "index.js");
+    const sysldPath = path.join(extensionPath, "out", "plugins", "sysld", "index.js");
 
     return [
       {
@@ -117,6 +117,15 @@ export class PluginLocator {
         id: idFromFile(erdPath),
         lsp: {
           scriptPath: erdPath,
+          serverOptions: {},
+          clientOptions: options,
+        },
+      } as LspPluginConfig,
+      {
+        id: idFromFile(sysldPath),
+        language: ['sysld'],
+        lsp: {
+          scriptPath: sysldPath,
           serverOptions: {},
           clientOptions: options,
         },

@@ -21,9 +21,9 @@ export class MultiDocumentViewEditorProvider implements CustomTextEditorProvider
 
   public static register(context: ExtensionContext): Disposable {
     const provider = new MultiDocumentViewEditorProvider(context.extensionUri.fsPath);
-    const type = multiviewType;
-    const providerRegistration = window.registerCustomEditorProvider(type, provider);
-
+    const registerSyslMultiView = window.registerCustomEditorProvider(multiviewType.sysl, provider);
+    const registerSyslDMultiView = window.registerCustomEditorProvider(multiviewType.sysld, provider);
+    const providerRegistration = Disposable.from(registerSyslMultiView, registerSyslDMultiView);
     const postToActive = (type: string) =>
       customEditorManager.activeCustomEditor?.webviewPanel.webview.postMessage({ type });
     commands.registerCommand("sysl.diagram.snapshot", () => postToActive("view/snapshot"));

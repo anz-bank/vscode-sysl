@@ -16,6 +16,7 @@ import { views } from "../views";
 import { LspPluginClientRouter } from "./lsp_client_router";
 import { Document, Events, PluginClient } from "./types";
 import { TextDocument as LspTextDocument } from "vscode-languageserver-textdocument";
+import { LspPluginConfig } from "./plugin_config";
 
 export interface LspPluginClientConfig {
   inspectPort?: number;
@@ -71,20 +72,21 @@ export class LspPluginClient implements PluginClient, Disposable {
   private readonly router: LspPluginClientRouter;
 
   constructor(
-    private readonly _scriptPath: string,
+    private readonly pluginConfig: LspPluginConfig,
     private readonly events: Events,
     config?: LspPluginClientConfig
   ) {
-    this.id = path.basename(path.dirname(_scriptPath));
+    this.id = path.basename(path.dirname(pluginConfig.lsp.scriptPath));
     const name = `Sysl Plugin: ${this.id}`;
     const run = { module: this.scriptPath, transport: TransportKind.ipc };
     const inspectPort = config?.inspectPort ?? 6051;
     const debugOptions = { execArgv: ["--nolazy", `--inspect=${inspectPort}`] };
     const serverOptions: ServerOptions = { run, debug: { ...run, options: debugOptions } };
     const lspClientOptions: LanguageClientOptions = {
-      documentSelector: [{ scheme: "file", language: "sysl" }],
+      documentSelector: pluginConfig.language
+        ? pluginConfig.language.map(lang => ({ scheme: "file", language: lang }))
+        : [{ scheme: "file", language: "sysl" }] //default
     };
-
     const client = new LanguageClient(this.id, name, serverOptions, lspClientOptions);
     this.client = client;
 
@@ -120,6 +122,6 @@ export class LspPluginClient implements PluginClient, Disposable {
   }
 
   public get scriptPath(): string {
-    return this._scriptPath;
+    return this.pluginConfig.lsp.scriptPath;
   }
 }

@@ -27,7 +27,7 @@ export class PluginFactory {
   }
 
   createLsp(config: LspPluginConfig): PluginClient {
-    return new LspPluginClient(config.lsp.scriptPath, this.events, {
+    return new LspPluginClient(config, this.events, {
       inspectPort: this.nextInspectPort++,
     });
   }

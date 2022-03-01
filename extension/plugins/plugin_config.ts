@@ -6,6 +6,7 @@ import { PluginClientOptions } from "./types";
 export interface PluginConfig {
   id: string;
   name?: string;
+  language?: [string];
 }
 
 export interface LspPluginConfig extends PluginConfig {

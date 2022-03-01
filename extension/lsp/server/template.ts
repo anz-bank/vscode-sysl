@@ -108,6 +108,7 @@ export interface Rendering {
   /** Minimum time (in ms) to wait between callbacks of the same kind. Default 500. */
   throttleDelay?: number;
 
+  onDidOpen?: (e: TextDocumentChangeEvent<TextDocument>) => Promise<RenderResult | undefined>;
   onTextRender?: (e: TextDocumentChangeEvent<TextDocument>) => Promise<RenderResult | undefined>;
   onTextChange?: (e: TextDocumentChangeEvent<TextDocument>) => Promise<RenderResult | undefined>;
 }
@@ -186,7 +187,13 @@ export class Plugin {
         result.open?.length && send(ViewOpenNotification.type, { views: result.open });
         result.edit?.size && send(ViewEditNotification.type, { edits: result.edit.entries() });
       };
-
+      r.onDidOpen &&
+        this.documents.onDidOpen(
+          throttle((e) => {
+            console.log("handling open");
+            r.onDidOpen?.(e).then(notify);
+          }, r.throttleDelay ?? 500)
+        );
       r.onTextChange &&
         this.documents.onDidChangeContent(
           throttle((e) => {
