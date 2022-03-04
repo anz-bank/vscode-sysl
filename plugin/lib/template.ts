@@ -126,7 +126,6 @@ export class Plugin {
   private readonly defaultSettings: SyslSettings;
   public connection?: Connection;
   public clientCapabilities?: ClientCapabilities;
-  public clientSettings?: SyslSettings;
   public readonly viewManager: ViewManager<any> | undefined;
 
   constructor(private readonly config: PluginConfig) {
@@ -156,13 +155,6 @@ export class Plugin {
       this.clientCapabilities = params.capabilities;
       const customResult = this.config.initialization?.onInitialize?.(params);
       return merge(result, customResult);
-    });
-
-    // Settings
-    connection.onInitialized(() => {
-      connection.workspace.getConfiguration({ section: "sysl" }).then((settings: SyslSettings) => {
-        this.clientSettings = settings;
-      });
     });
 
     // Document management
@@ -223,6 +215,13 @@ export class Plugin {
     this.documents.listen(connection);
     connection.listen();
     return connection;
+  }
+
+  /**
+   * Returns the Sysl settings configured on the client.
+   */
+  getClientSettings(): Promise<SyslSettings> {
+    return this.connection.workspace.getConfiguration({ section: "sysl" });
   }
 
   /**
