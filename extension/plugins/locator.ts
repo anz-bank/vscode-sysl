@@ -17,6 +17,14 @@ const exists = promisify(fs.exists);
 
 const idFromFile = (file: string): string => path.parse(file).name;
 
+const configFromFile = ((file: string | undefined) => {
+  let defaultConfig = { documentSelector: [{ scheme: "file", language: "sysl" }] }; //default
+  if (file && fs.existsSync(file)) {
+    return JSON.parse(fs.readFileSync(file).toString());
+  }
+  return defaultConfig;
+});
+
 /** Discovers available plugins on the user's machine and known network locations. */
 export class PluginLocator {
   /** Returns all discoverable plugins in order of precedence. */
@@ -74,11 +82,12 @@ export class PluginLocator {
     async function lspPlugins(dir: string): Promise<PluginConfig[]> {
       const scriptsPath = path.join(dir, ".sysl", "plugins", "lsp");
       return (await dirsIn(scriptsPath)).map((dir: string) => {
+        const config = configFromFile(path.join(dir, "config.json"));
         return {
           id: dir,
           lsp: {
             scriptPath: path.join(dir, "index.js"),
-            clientOptions: options,
+            clientOptions: { ...options, ...config},
           },
         } as LspPluginConfig;
       });
@@ -118,16 +127,15 @@ export class PluginLocator {
         lsp: {
           scriptPath: erdPath,
           serverOptions: {},
-          clientOptions: options,
+          clientOptions: { ...options, documentSelector: [{ scheme: "file", language: "sysl" }] }
         },
       } as LspPluginConfig,
       {
         id: idFromFile(sysldPath),
-        language: ['sysld'],
         lsp: {
           scriptPath: sysldPath,
           serverOptions: {},
-          clientOptions: options,
+          clientOptions: { ...options, documentSelector: [{ scheme: "file", language: "sysld" }] },
         },
       } as LspPluginConfig,
     ];
@@ -195,11 +203,12 @@ export class PluginLocator {
             } as TransformPluginConfig);
             break;
           case "lsp.module":
+            const config = configFromFile(plugin.config);
             configs.push({
               id: plugin.id,
               lsp: {
                 scriptPath: path.resolve(path.dirname(manifestPath), plugin.entrypoint),
-                clientOptions: options,
+                clientOptions: { ...options, ...config }
               },
             } as LspPluginConfig);
             break;

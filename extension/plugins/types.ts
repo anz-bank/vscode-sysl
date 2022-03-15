@@ -1,5 +1,6 @@
 import { TextDocument } from "vscode";
 import { TextDocumentContentChangeEvent } from "vscode-languageserver-protocol";
+import { DocumentSelector } from "vscode-languageclient/node";
 import { Position } from "vscode-languageserver-types";
 import { URI } from "vscode-uri";
 import { Logger } from "../tools/logging";
@@ -28,6 +29,7 @@ export interface PluginClient {
 /** Details about the client's environment. */
 export type PluginClientOptions = {
   workspaceFolder?: string;
+  documentSelector?: DocumentSelector | string[];
   debug?: boolean;
   logger?: Logger;
 
@@ -102,6 +104,7 @@ export interface PluginManifest {
   version: string;
   kind: PluginKind;
   entrypoint: string;
+  config?: string;
   name?: string;
 }
 

@@ -51,7 +51,8 @@ export default function DiagramTemplate(props?: TemplateData) {
       new go.Binding("stroke", "strokeColor")
     ),
     getTextBlockStyle({ margin: "10", label: "label" }),
-    new go.Binding("location", "location", go.Point.parse).makeTwoWay(stringifyPoint)
+    new go.Binding("location", "location", go.Point.parse).makeTwoWay(stringifyPoint),
+    new go.Binding("visible", "visible")
   );
 
   /**
@@ -83,7 +84,8 @@ export default function DiagramTemplate(props?: TemplateData) {
     getTextBlockStyle({ label: "label" }),
     new go.Binding("avoidable", "expanded", (e) => !e),
     new go.Binding("isSubGraphExpanded", "expanded").makeTwoWay(),
-    new go.Binding("location", "location", go.Point.parse).makeTwoWay(stringifyPoint)
+    new go.Binding("location", "location", go.Point.parse).makeTwoWay(stringifyPoint),
+    new go.Binding("visible", "visible")
   );
 
   /**
@@ -140,7 +142,8 @@ function getCustomNodeTemplate(nodeTemplate: TemplateNodeData): go.Node {
       nodeTemplate.sections ? getSectionStyles(nodeTemplate.sections) : {},
       new go.Binding("opacity", "opacity")
     ),
-    new go.Binding("location", "location", go.Point.parse).makeTwoWay(stringifyPoint)
+    new go.Binding("location", "location", go.Point.parse).makeTwoWay(stringifyPoint),
+    new go.Binding("visible", "visible")
   );
 }
 
@@ -201,7 +204,8 @@ function getCustomGroupTemplate(groupTemplate: TemplateGroupData): go.Group {
             )
           )
         )
-      : {}
+      : {},
+      new go.Binding("visible", "visible")
   );
 }
 

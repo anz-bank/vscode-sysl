@@ -96,7 +96,12 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+## 0.36.0
+
+- Support custom plugin config
+
 ## 0.33.0
+
 - Accommodate `.sysld` files
 
 ## 0.30.0

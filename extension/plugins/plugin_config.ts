@@ -12,7 +12,7 @@ export interface PluginConfig {
 export interface LspPluginConfig extends PluginConfig {
   lsp: {
     scriptPath: string;
-    clientOptions: LanguageClientOptions;
+    clientOptions: PluginClientOptions;
     serverOptions: ServerOptions;
     forceDebug?: boolean;
   };

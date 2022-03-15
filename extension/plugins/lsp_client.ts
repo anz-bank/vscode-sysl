@@ -25,6 +25,17 @@ export interface LspPluginClientConfig {
 // TODO: Store somewhere non-global.
 (global as any).actions = [];
 
+/** Converts plugin config of type LspPluginConfig to LanguageClientOptions */
+const getLspClientOptions = (config: LspPluginConfig): LanguageClientOptions => {
+  if (config.lsp.clientOptions) {
+    const { workspaceFolder , debug, logger, throttleDelay, ...configs } = config.lsp.clientOptions;
+    // We are getting rid of PluginClientOptions properties that are not accepted by LanguageClientOptions
+    // This function should be rewritten to transform these properties into acceptable configs for the Language Client constructor
+    return configs;
+  }
+  return { documentSelector: [{ scheme: "file", language: "sysl" }] }; // default
+}
+
 /**
  * Represents the ability to perform actions.
  */
@@ -82,11 +93,7 @@ export class LspPluginClient implements PluginClient, Disposable {
     const inspectPort = config?.inspectPort ?? 6051;
     const debugOptions = { execArgv: ["--nolazy", `--inspect=${inspectPort}`] };
     const serverOptions: ServerOptions = { run, debug: { ...run, options: debugOptions } };
-    const lspClientOptions: LanguageClientOptions = {
-      documentSelector: pluginConfig.language
-        ? pluginConfig.language.map(lang => ({ scheme: "file", language: lang }))
-        : [{ scheme: "file", language: "sysl" }] //default
-    };
+    const lspClientOptions: LanguageClientOptions = getLspClientOptions(pluginConfig);
     const client = new LanguageClient(this.id, name, serverOptions, lspClientOptions);
     this.client = client;
 
