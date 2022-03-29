@@ -17,6 +17,7 @@ export interface Node {
   group?: string;
   isGroup?: boolean;
   opacity?: number;
+  visible?: boolean;
 }
 
 export interface Edge {

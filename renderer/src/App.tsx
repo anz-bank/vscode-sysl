@@ -9,7 +9,7 @@ import { Snackbar } from "@material-ui/core";
 import MuiAlert, { AlertProps } from "@material-ui/lab/Alert";
 
 import { vscode } from "./components/vscode/VsCode";
-import { DiagramData, Edge } from "./components/diagram/DiagramTypes";
+import { DiagramData, Edge, Node } from "./components/diagram/DiagramTypes";
 import { GoJSIndex, shouldNotifyChange, updateState } from "./components/diagram/DiagramState";
 
 import LayoutWrapper from "./components/layout/LayoutWrapper";
@@ -129,7 +129,6 @@ function getDiagramData(data: go.Part[], diagram: DiagramData): DiagramData | nu
   const diagramData: DiagramData = {
     nodes: _(diagram.nodes).keyBy("key").at(nodes).value(),
     edges: _(diagram.edges).keyBy("key").at(edges).value(),
-    type: diagram.type,
   };
 
   return diagramData;
@@ -153,6 +152,7 @@ class App extends React.PureComponent<AppProps, AppState> {
     this.handleTabChange = this.handleTabChange.bind(this);
     this.handleCloseError = this.handleCloseError.bind(this);
     this.setSelectedData = this.setSelectedData.bind(this);
+    this.setVisibility = this.setVisibility.bind(this);
   }
 
   public componentDidMount() {
@@ -191,6 +191,24 @@ class App extends React.PureComponent<AppProps, AppState> {
       () => {
         vscode.setState(this.state);
         console.log("new state", this.state);
+      }
+    );
+  }
+
+  /**
+   * Sets individual node's visibility in the component tree.
+   * @param node The diagram node to set visibility on.
+   */
+  public setVisibility(node: Node): void {
+    this.setState(
+      produce((draft: AppState) => {
+        const diagram = draft.viewData.diagrams[draft.activeChild];
+        const targetNode = diagram.nodes.find((n) => n.key === node.key);
+        // A node's visible property defaults to undefined and is designed to be visible
+        if (targetNode) targetNode.visible = !(targetNode.visible ?? true);
+      }),
+      () => {
+          vscode.setState(this.state);
       }
     );
   }
@@ -257,7 +275,12 @@ class App extends React.PureComponent<AppProps, AppState> {
               this.setState(
                 produce((draft: AppState) => {
                   draft.error = { openSnackBar: false, errorMessage: null };
-                  draft.viewData.diagrams[keyString] = { ...model, resetsDiagram: true };
+                  const nodes = model.nodes;
+                  draft.viewData.diagrams[keyString] = {
+                    ...model,
+                    nodes,
+                    resetsDiagram: true,
+                  };
                   Object.entries(draft.viewData.diagrams).forEach(
                     ([k, { nodes, edges }]) =>
                       (this.gojsIndexes[k] = new GoJSIndex({ nodes, edges }))
@@ -435,6 +458,7 @@ class App extends React.PureComponent<AppProps, AppState> {
     return (
       <TabContext value={this.state.activeChild.toString()}>
         <LayoutWrapper
+          setVisibility={this.setVisibility}
           activeNodes={this.state.viewData.diagrams[this.state.activeChild]?.nodes}
           onSelectionChanged={this.setSelectedData}
           handleTabChange={this.handleTabChange}

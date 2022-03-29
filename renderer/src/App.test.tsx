@@ -172,6 +172,47 @@ describe("App test", () => {
     });
   });
 
+  describe("checking visibility", () => {
+    beforeEach(() => {
+      act(() => {
+        window.dispatchEvent(basicModelEvent);
+      });
+    });
+
+    it("toggle visibility in the tree shows/hides node in the diagram", async () => {
+      const elem = screen.queryByTestId("a-vis")!;
+      expect((diagram.findNodeForKey("a") as go.Part).visible).toEqual(true);
+      Simulate.click(elem);
+      expect((diagram.findNodeForKey("a") as go.Part).visible).toEqual(false);
+      Simulate.click(elem);
+      expect((diagram.findNodeForKey("a") as go.Part).visible).toEqual(true);
+    });
+
+    it("Icon with Visibility On is hidden by default", async () => {
+      const elem = screen.queryByTestId("a-vis-on-icon")!;
+      expect(elem.getAttribute("visibility")).toEqual("hidden");
+    })
+
+    it("Icon with Visibility On is shown on mouse hover", async () => {
+      const elem = screen.queryByTestId("a-vis-on-icon")!;
+      Simulate.mouseOver(elem);
+      console.log(elem);
+      expect(elem.getAttribute("visibility")).not.toEqual("hidden");
+    });
+
+    it("Icon with Visibility Off is always visible", async () => {
+      const elem = screen.queryByTestId("a-vis")!;
+
+      expect((diagram.findNodeForKey("a") as go.Part).visible).toEqual(true);
+      Simulate.click(elem);
+
+      const visOffIcon = screen.queryByTestId("a-vis-off-icon")!;
+
+      expect(visOffIcon).not.toEqual("hidden");
+    });
+
+  });
+
   describe("selection event", () => {
     beforeEach(() => {
       vscode.postMessage = jest.fn();
@@ -184,16 +225,16 @@ describe("App test", () => {
     });
 
     it("postMessage to extension on selection", async () => {
-      expect(vscode.postMessage).toHaveBeenCalledWith({
+      expect(vscode.postMessage).toHaveBeenCalledWith(expect.objectContaining({
         type: "select",
         selectedData: {
-          current: {
-            nodes: [{ key: "a", label: "a" }],
-            edges: [{ key: "a->b", from: "a", to: "b", groups: [], visible: true }],
-          },
+          current: expect.objectContaining({
+            nodes: [expect.objectContaining({ key: "a", label: "a", })],
+            edges: [{ key: "a->b", from: "a", to: "b", groups: [], visible: true, }],
+          }),
           previous: null,
         },
-      });
+      }));
     });
 
     it("selection details visible on right panel", async () => {
@@ -247,16 +288,16 @@ describe("App test", () => {
 
     it("selected node in diagram is selected in tree", async () => {
       const nodeBPart = diagram.findNodeForKey("b") as Part;
-      expect(screen.queryByTestId("b")!.parentNode).not.toHaveClass("Mui-selected");
+      expect(ancestorHasClass(screen.queryByTestId("b"), "Mui-selected")).toBeFalsy();
       diagram.select(nodeBPart);
-      expect(screen.queryByTestId("b")!.parentNode).toHaveClass("Mui-selected");
+      expect(ancestorHasClass(screen.queryByTestId("b"), "Mui-selected")).toBeTruthy();
     });
 
     it("selected node in tree is selected in diagram", async () => {
       const elem = screen.queryByTestId("a")!;
-      expect(elem.parentNode).not.toHaveClass("Mui-selected");
+      expect(ancestorHasClass(elem, "Mui-selected")).toBeFalsy();
       Simulate.click(elem);
-      expect(elem.parentNode).toHaveClass("Mui-selected");
+      expect(ancestorHasClass(elem, "Mui-selected")).toBeTruthy();
       const nodeAPart = diagram.findNodeForKey("a") as Part;
       expect(diagram.selection.has(nodeAPart)).toBe(true);
     });
@@ -293,4 +334,16 @@ function modelEvent(model: any, error?: any) {
       error,
     },
   });
+}
+
+
+/** Returns true if element or any of its ancestors contains the given class name. */
+function ancestorHasClass(element: HTMLElement|null, targetClassName: string) : Boolean {
+  if (!element) {
+    return false;
+  }
+  if (element.classList.contains(targetClassName)) {
+    return true;
+  }
+  return ancestorHasClass(element.parentElement, targetClassName);
 }

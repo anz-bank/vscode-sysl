@@ -47,7 +47,7 @@ export default function DescriptionItemDetails(props: any) {
         <ListItemText
           disableTypography
           primary={
-            <Tooltip title={props.item.label as string} placement="left">
+            <Tooltip title={props.item.label as string || props.item.key} placement="left">
               <Typography
                 color={textColor}
                 sx={{

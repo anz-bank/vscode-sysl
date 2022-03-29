@@ -19,6 +19,7 @@ const useStyles = makeStyles({
 });
 
 type PropType = {
+  setVisibility: (node: Node) => void;
   activeNodes: Node[];
   handleTabChange: (event: React.ChangeEvent<{}>, value: string) => void;
   onSelectionChanged: (selections: DiagramData) => void;
@@ -61,6 +62,7 @@ export default function LayoutWrapper(props: PropType) {
         onSelectionChanged={props.onSelectionChanged}
         activeNodes={props.activeNodes}
         toggleVisibility={toggleSidePanel.bind(null, "leftPanel")}
+        setVisibility={props.setVisibility}
       />
       <div
         className={classes.center}

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { styled } from "@mui/material/styles";
 import { makeStyles } from "@material-ui/styles";
-import { Box, Drawer, IconButton, Typography } from "@mui/material";
+import { Box, Drawer, IconButton, Tooltip, Typography } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ChevronLeft, ChevronRight, ExpandMore } from "@mui/icons-material";
 import TreeView from "@mui/lab/TreeView";
 import { CustomTreeItem } from "./CustomTreeItem";
 import _ from "lodash";
+import VisibleIcon from './VisibleIcon';
 
 const DrawerHeader = styled("div")(() => ({
   display: "flex",
@@ -47,6 +48,7 @@ const useStyles = makeStyles({
 export default function ComponentTree(props: any) {
   const drawerWidth = props.drawerWidth || 200;
 
+  const [onHoverNodeName, setOnHoverNodeName] = useState("");
   const [nodes, setNodes] = useState(props.activeNodes);
   const [expanded, setExpanded] = useState(_.map(_.filter(props.activeNodes, "isGroup"), "key"));
   const classes = useStyles();
@@ -61,7 +63,40 @@ export default function ComponentTree(props: any) {
       classes={{ label: classes.label }}
       key={node.key}
       nodeId={node.key}
-      label={<Typography variant="caption">{node.label}</Typography>}
+      label={
+        <Tooltip title={node.label} placement="right">
+          <div
+            style={{display: "flex", flex: 1, justifyContent: "space-between", alignItems: "center"}}
+            onMouseOver={() => {
+              setOnHoverNodeName(node.label);
+            }}
+            onMouseLeave={() => {
+              setOnHoverNodeName("");
+            }}
+          >
+            <Typography
+              style={{overflow: "hidden", textOverflow: "ellipsis", width: "100%"}}
+              color={node.visible ? "text.primary" : "text.disabled"}
+              variant="caption"
+              data-testid={node.key}
+              className="selectionBoundary"
+            >
+              {node.label}
+            </Typography>
+
+            <IconButton size="small" data-testid={node.label + "-vis"} onClick={() => {
+              // Toggle visibility of selected node
+              props.setVisibility(node);
+            }}>
+              <VisibleIcon
+                nodeName={node.label}
+                visibilityIconOn={node.visible ?? true}
+                isVisible={onHoverNodeName === node.label || !(node.visible ?? true)}
+              />
+            </IconButton>
+          </div>
+        </Tooltip>
+      }
     >
       {Array.isArray(node.children) ? node.children.map((node: any) => treeNode(node)) : null}
     </CustomTreeItem>
@@ -82,6 +117,7 @@ export default function ComponentTree(props: any) {
     return {
       key: "components",
       expanded: true,
+      visible: true,
       children: _.sortBy(groups["root"], "label"),
     };
   };

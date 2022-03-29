@@ -1,5 +1,4 @@
 import React from "react";
-import { Typography, Tooltip } from "@mui/material";
 import TreeItem, { TreeItemProps, useTreeItem, TreeItemContentProps } from "@mui/lab/TreeItem";
 import clsx from "clsx";
 
@@ -57,17 +56,20 @@ function CustomContent(props: TreeItemContentProps, ref: React.Ref<any>) {
       >
         {iconEl}
       </div>
-      <Tooltip title={label as string} placement="right">
-        <Typography
-          // Select the TreeItem if its label is clicked.
-          onClick={(e: React.MouseEvent<HTMLDivElement, MouseEvent>) => handleSelection(e)}
-          component="div"
-          data-testid={nodeId}
-          className={classes.label}
-        >
-          {label}
-        </Typography>
-      </Tooltip>
+      <div
+        // Select the TreeItem if its label is clicked.
+        onClick={(e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+          const element = e.target as HTMLElement;
+          // click on visibility icon should not trigger selection
+          // clicking on the icon could return either <SVG> or <Path>
+          if (element.classList.contains("selectionBoundary") || element.parentElement?.classList.contains("selectionBoundary")) {
+            handleSelection(e);
+          }
+        }}
+        className={classes.label}
+      >
+        {label}
+      </div>
     </div>
   );
 }

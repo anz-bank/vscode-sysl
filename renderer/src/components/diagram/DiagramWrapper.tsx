@@ -82,15 +82,16 @@ export class DiagramWrapper extends React.Component<DiagramProps, {}> {
    * Update diagram selection if selected data has changed in app.
    */
   public componentDidUpdate(prevProps: DiagramProps) {
-    if (
-      !this.diagramRef.current ||
-      !this.props.selectedData ||
-      _.isEqual(prevProps.selectedData, this.props.selectedData)
-    ) {
+    if (!this.diagramRef.current || !this.props.nodes) {
       return;
     }
+
     const diagram = this.diagramRef.current.getDiagram();
-    if (diagram instanceof go.Diagram) {
+    if (!(diagram instanceof go.Diagram)) {
+      return;
+    }
+
+    if (this.props.selectedData && !_.isEqual(prevProps.selectedData, this.props.selectedData)) {
       diagram.startTransaction("selecting parts");
       diagram.clearHighlighteds();
       this.props.selectedData.nodes?.forEach(
@@ -100,6 +101,16 @@ export class DiagramWrapper extends React.Component<DiagramProps, {}> {
         (edge) => ((diagram.findLinkForKey(edge.key) as go.Link).isSelected = true)
       );
       diagram.commitTransaction("selecting parts");
+    }
+
+    if (!_.isEqual(prevProps.nodes, this.props.nodes)) {
+      diagram.startTransaction("update visibility of diagram nodes");
+      this.props.nodes?.forEach(
+        (node) => {
+          (diagram.findNodeForKey(node.key) as go.Part).visible = node.visible ?? true;
+        }
+      );
+      diagram.commitTransaction("update visibility of diagram nodes");
     }
   }
 
