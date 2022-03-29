@@ -200,12 +200,20 @@ export class CommandPluginClient implements PluginClient {
 
     const response = await spawnBuffer(command, args, options);
 
-    this.logger.log("command complete:", command, ...(args ?? []), truncate(response.toString()));
-
     if (!response) {
       throw new Error("no response");
     }
-    return JSON.parse(response.toString());
+
+    const responseObject = JSON.parse(response.toString());
+
+    if (responseObject.error) {
+      this.logger.log("command error:",responseObject.error);
+      throw new Error("Response received with error");
+    } else {
+      this.logger.log("command complete:", command, ...(args ?? []), truncate(response.toString()));
+    }
+
+    return responseObject;
   }
 
   public get clientOptions(): PluginClientOptions {
