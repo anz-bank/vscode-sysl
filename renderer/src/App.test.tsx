@@ -196,7 +196,6 @@ describe("App test", () => {
     it("Icon with Visibility On is shown on mouse hover", async () => {
       const elem = screen.queryByTestId("a-vis-on-icon")!;
       Simulate.mouseOver(elem);
-      console.log(elem);
       expect(elem.getAttribute("visibility")).not.toEqual("hidden");
     });
 
@@ -211,6 +210,19 @@ describe("App test", () => {
       expect(visOffIcon).not.toEqual("hidden");
     });
 
+    it("postMessage to extension on changing visibility", async () => {
+      act(() => {
+        window.dispatchEvent(basicModelEvent);
+        vscode.postMessage = jest.fn();
+      });
+      const elem = screen.queryByTestId("a-vis")!;
+      Simulate.click(elem);
+      expect(vscode.postMessage).toHaveBeenCalledWith(expect.objectContaining({
+        type: "view/visibilityChanged",
+        current: expect.arrayContaining([{ key: "a", label: "a", visible: false }]),
+        previous: expect.arrayContaining([{ key: "a", label: "a"}]),
+      }));
+    });
   });
 
   describe("selection event", () => {

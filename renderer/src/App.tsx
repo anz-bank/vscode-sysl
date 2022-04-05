@@ -97,6 +97,12 @@ type SelectionMessageEvent = {
   error?: { [key: string]: any };
 };
 
+type VisibilityMessageEvent = {
+  type: string;
+  previous: Node[],
+  current: Node[],
+}
+
 function Alert(props: AlertProps) {
   return <MuiAlert elevation={6} {...props} />;
 }
@@ -200,13 +206,23 @@ class App extends React.PureComponent<AppProps, AppState> {
    * @param node The diagram node to set visibility on.
    */
   public setVisibility(node: Node): void {
+    const nextState = produce(this.state, (draft: AppState) => {
+      const diagram = draft.viewData.diagrams[draft.activeChild];
+      const targetNode = diagram.nodes.find((n) => n.key === node.key);
+      // A node's visible property defaults to undefined and is designed to be visible
+      if (targetNode) targetNode.visible = !(targetNode.visible ?? true);
+      return draft;
+    });
+
+    const message: VisibilityMessageEvent = {
+      type: "view/visibilityChanged",
+      previous: this.state.viewData.diagrams[this.state.activeChild].nodes ?? [],
+      current: nextState.viewData?.diagrams[nextState.activeChild].nodes ?? [],
+    };
+    vscode.postMessage(message);
+
     this.setState(
-      produce((draft: AppState) => {
-        const diagram = draft.viewData.diagrams[draft.activeChild];
-        const targetNode = diagram.nodes.find((n) => n.key === node.key);
-        // A node's visible property defaults to undefined and is designed to be visible
-        if (targetNode) targetNode.visible = !(targetNode.visible ?? true);
-      }),
+      nextState,
       () => {
           vscode.setState(this.state);
       }
@@ -254,7 +270,7 @@ class App extends React.PureComponent<AppProps, AppState> {
    * Handle messages sent from the extension to the webview.
    */
   public handleParentMessage(event: ParentMessageEvent) {
-    console.log("received message from parent", event.data);
+    console.log("[App > handleParentMessage] event", event.data);
     const { type, model, error } = event.data;
     const meta = model?.meta ?? {};
     if (error) {
@@ -334,7 +350,7 @@ class App extends React.PureComponent<AppProps, AppState> {
             }
           }
           break;
-      }
+        }
     } catch (e) {
       this.showError({ errorMsg: e }, type, meta.kind);
     }
