@@ -1,30 +1,30 @@
-import { expect } from "chai";
+import "jest-extended";
 import { URI } from "vscode-uri";
 import { uriToViewKey, viewKeyToString } from "./key";
 
-suite("view key to string", () => {
+describe("view key to string", () => {
   test("empty", async () => {
-    expect(viewKeyToString({} as any)).to.equal("view:/");
+    expect(viewKeyToString({} as any)).toEqual("view:/");
   });
   test("local doc", async () => {
     const docUri = "file:/foo/bar.sysl";
-    expect(viewKeyToString({ docUri } as any)).to.equal(`view+${docUri}`);
+    expect(viewKeyToString({ docUri } as any)).toEqual(`view+${docUri}`);
   });
   test("remote doc", async () => {
     const docUri = "file://remote.com/foo/bar.sysl";
-    expect(viewKeyToString({ docUri } as any)).to.equal(`view+${docUri}`);
+    expect(viewKeyToString({ docUri } as any)).toEqual(`view+${docUri}`);
   });
   test("full key", async () => {
     const docUri = "file://remote.com/foo/bar.sysl";
-    expect(viewKeyToString({ docUri, pluginId: "foo", viewId: "bar" })).to.equal(
+    expect(viewKeyToString({ docUri, pluginId: "foo", viewId: "bar" })).toEqual(
       `view+${docUri}?pluginId=foo&viewId=bar`
     );
   });
 });
 
-suite("uri to view key", () => {
+describe("uri to view key", () => {
   test("empty", async () => {
-    expect(uriToViewKey(URI.parse(""))).to.deep.equal({
+    expect(uriToViewKey(URI.parse(""))).toEqual({
       docUri: "file:///",
       pluginId: "",
       viewId: "",
@@ -32,7 +32,7 @@ suite("uri to view key", () => {
   });
   test("full key", async () => {
     const docUri = "file://remote.com/foo/bar.sysl";
-    expect(uriToViewKey(URI.parse(`view+${docUri}?pluginId=foo&viewId=bar`))).to.deep.equal({
+    expect(uriToViewKey(URI.parse(`view+${docUri}?pluginId=foo&viewId=bar`))).toEqual({
       docUri,
       pluginId: "foo",
       viewId: "bar",
