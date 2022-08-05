@@ -1,4 +1,3 @@
-import { filter } from "lodash";
 import { URI } from "vscode-uri";
 
 /** A composite key identifying a particular view. */
@@ -26,10 +25,10 @@ export function viewKeyToString(key: ViewKey): string {
     const docUri = URI.parse(key.docUri);
     uri = docUri.with({ scheme: `${uri.scheme}+${docUri.scheme}` });
   }
-  let query = filter([
+  let query = [
     key.pluginId && `pluginId=${key.pluginId}`,
     key.viewId && `viewId=${key.viewId}`,
-  ]);
+  ].filter((i) => i);
   if (query.length) {
     uri = uri.with({ query: query.join("&") });
   }
