@@ -4,6 +4,8 @@ suite("executor", function () {
   this.timeout(20000);
 
   const executor = (global as any).__executor__;
+  setup(() => executor.allSettled());
+  teardown(() => executor.allSettled());
 
   suite("no processes", () => {
     test("count is zero", () => {
@@ -24,6 +26,7 @@ suite("executor", function () {
 
       expect(executor.count).to.equal(1);
       await promise;
+      await sleep(1);
       expect(executor.count).to.equal(0);
     });
 
@@ -35,6 +38,7 @@ suite("executor", function () {
       executor.onSettled(() => (invoked = true));
       expect(invoked).to.be.false;
       await promise;
+      await sleep(1);
       expect(invoked).to.be.true;
     });
 

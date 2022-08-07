@@ -16,5 +16,4 @@ const testFiles = glob
 testFiles.forEach((file) => mocha.addFile(path.join(testRoot, file)));
 console.log(testFiles);
 
-mocha.globalSetup(() => getOrDownloadSysl(root));
-mocha.run();
+getOrDownloadSysl(root).then(() => mocha.run());

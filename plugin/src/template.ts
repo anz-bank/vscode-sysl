@@ -1,34 +1,37 @@
+import { Model } from "@anz-bank/sysl/model";
+import { ViewKey } from "@anz-bank/vscode-sysl-model";
+import { merge, throttle } from "lodash";
+import { TextDocument } from "vscode-languageserver-textdocument";
 import {
-  createConnection,
-  Connection,
-  TextDocuments,
-  ProposedFeatures,
-  InitializeParams,
   ClientCapabilities,
   CompletionItem,
-  PublishDiagnosticsParams,
-  TextDocumentPositionParams,
-  TextDocumentSyncKind,
-  TextDocumentChangeEvent,
-  TextDocumentWillSaveEvent,
+  Connection,
+  createConnection,
+  InitializeParams,
   InitializeResult,
+  ProposedFeatures,
+  PublishDiagnosticsParams,
+  TextDocumentChangeEvent,
+  TextDocumentPositionParams,
+  TextDocuments,
+  TextDocumentSyncKind,
+  TextDocumentWillSaveEvent,
 } from "vscode-languageserver/node";
-import { TextDocument } from "vscode-languageserver-textdocument";
+import { ModelItem, ModelManager, ModelManagerConfiguration } from "./models";
 import {
   TextDocumentRenderNotification,
   ViewEditNotification,
+  ViewEdits,
   ViewItem,
   ViewManager,
   ViewManagerConfiguration,
   ViewOpenNotification,
 } from "./views";
-import { ViewKey } from "@anz-bank/vscode-sysl-model";
-import { ViewEdits } from "./views";
-import { merge, throttle } from "lodash";
 
 export interface PluginConfig {
   initialization?: Initialization;
   docManagement?: DocumentManagement<TextDocument>;
+  modelManagement?: ModelManagement<any>;
   autocompletion?: Autocompletion;
   validation?: Validation;
   rendering?: Rendering;
@@ -36,8 +39,15 @@ export interface PluginConfig {
 }
 
 export interface Initialization {
-  /** Overrides default onInitialize if provided. */
-  onInitialize?: (params: InitializeParams) => InitializeResult;
+  /**
+   * Returns an {@link InitializeResult} that is merged into the default {@link InitializeResult},
+   * overwriting values with the same paths.
+   *
+   * Invoked before the connection is initialized, so some functions (e.g.
+   * {@link Plugin.getClientSettings} are not yet available. If they're needed, for one-off plugin
+   * setup, they should be chained after {@link Connection.onInitialized}.
+   */
+  onInitialize?: (params: InitializeParams) => Promise<InitializeResult>;
 }
 
 export interface DocumentManagement<T> {
@@ -51,9 +61,22 @@ export interface DocumentManagement<T> {
   onWillSave?: (e: TextDocumentWillSaveEvent<T>) => void;
 }
 
+export interface ModelManagement<T> {
+  /** Configuration for the model manager. */
+  modelManagerConfig?: ModelManagerConfiguration<string, ModelItem, T, any>;
+  /** Minimum time (in ms) to wait between callbacks of the same kind. Default 500. */
+  throttleDelay?: number;
+
+  onDidChangeContent?: (e: TextDocumentChangeEvent<T>) => void;
+  onDidOpen?: (e: TextDocumentChangeEvent<T>) => void;
+  onDidClose?: (e: TextDocumentChangeEvent<T>) => void;
+  onDidSave?: (e: TextDocumentChangeEvent<T>) => void;
+  onWillSave?: (e: TextDocumentWillSaveEvent<T>) => void;
+}
+
 export interface Autocompletion {
-  onCompletion?: (pos: TextDocumentPositionParams) => CompletionItem[];
-  onCompletionResolve?: (item: CompletionItem) => CompletionItem;
+  onCompletion?: (pos: TextDocumentPositionParams) => Promise<CompletionItem[]>;
+  onCompletionResolve?: (item: CompletionItem) => Promise<CompletionItem>;
 }
 
 /**
@@ -69,6 +92,7 @@ export interface Autocompletion {
 export interface Validation {
   skipOnChange?: boolean;
   skipOnSave?: boolean;
+  skipOnModelChange?: boolean;
   onValidate?: (doc: TextDocument) => Promise<PublishDiagnosticsParams | void>;
 }
 
@@ -108,6 +132,7 @@ export interface Rendering {
   /** Minimum time (in ms) to wait between callbacks of the same kind. Default 500. */
   throttleDelay?: number;
 
+  onDidOpen?: (e: TextDocumentChangeEvent<TextDocument>) => Promise<RenderResult | undefined>;
   onTextRender?: (e: TextDocumentChangeEvent<TextDocument>) => Promise<RenderResult | undefined>;
   onTextChange?: (e: TextDocumentChangeEvent<TextDocument>) => Promise<RenderResult | undefined>;
 }
@@ -122,15 +147,22 @@ const builtinDefaultSettings: SyslSettings = {
 
 export class Plugin {
   private readonly documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
-  private readonly documentSettings: Map<string, Thenable<SyslSettings>> = new Map();
+  private readonly documentSettings: Map<string, Promise<SyslSettings>> = new Map();
   private readonly defaultSettings: SyslSettings;
   public connection?: Connection;
   public clientCapabilities?: ClientCapabilities;
+  public readonly modelManager: ModelManager<Model> | undefined;
   public readonly viewManager: ViewManager<any> | undefined;
+
+  private hasConfigurationCapability: boolean = false;
 
   constructor(private readonly config: PluginConfig) {
     this.defaultSettings = config.settings?.defaults ?? builtinDefaultSettings;
 
+    const modelManagerConfig = this.config.modelManagement?.modelManagerConfig;
+    if (modelManagerConfig) {
+      this.modelManager = new ModelManager<Model>(modelManagerConfig);
+    }
     const viewManagerConfig = this.config.rendering?.viewManagerConfig;
     if (viewManagerConfig) {
       this.viewManager = new ViewManager(viewManagerConfig);
@@ -143,7 +175,7 @@ export class Plugin {
     this.connection = connection;
 
     // Initialization
-    connection.onInitialize((params: InitializeParams) => {
+    connection.onInitialize(async (params: InitializeParams) => {
       const result: InitializeResult = {
         capabilities: {
           textDocumentSync: TextDocumentSyncKind.Incremental,
@@ -152,21 +184,34 @@ export class Plugin {
         },
       };
 
+      // Does the client support the `workspace/configuration` request?
+      // If not, we fall back using global settings.
+      this.hasConfigurationCapability = !!params.capabilities?.workspace?.configuration;
+
       this.clientCapabilities = params.capabilities;
-      const customResult = this.config.initialization?.onInitialize?.(params);
+      const customResult = await this.config.initialization?.onInitialize?.(params);
       return merge(result, customResult);
     });
 
     // Document management
     const dm = this.config.docManagement;
     if (dm) {
-      const keys = ["onDidChangeContent", "onDidOpen", "onDidClose", "onDidSave", "onWillSave"];
-      keys.forEach((k) => dm[k] && this.documents[k](throttle(dm[k], dm.throttleDelay ?? 500)));
+      const delay = dm.throttleDelay ?? 500;
+      dm.onDidChangeContent &&
+        this.documents.onDidChangeContent(throttle(dm.onDidChangeContent, delay));
+      dm.onDidOpen && this.documents.onDidOpen(throttle(dm.onDidOpen, delay));
+      dm.onDidClose && this.documents.onDidClose(throttle(dm.onDidClose, delay));
+      dm.onDidSave && this.documents.onDidSave(throttle(dm.onDidSave, delay));
+      dm.onWillSave && this.documents.onWillSave(throttle(dm.onWillSave, delay));
     }
+
+    // Model management
+    this.modelManager?.listen(connection);
 
     // Rendering
     const r = this.config.rendering;
     if (r) {
+      const delay = r.throttleDelay ?? 500;
       // Unpacks a rendering result and sends notifications to the client.
       const notify = (result: RenderResult | undefined): void => {
         if (!result) {
@@ -177,17 +222,14 @@ export class Plugin {
         result.edit?.size && send(ViewEditNotification.type, { edits: result.edit.entries() });
       };
 
+      r.onDidOpen &&
+        this.documents.onDidOpen(throttle((e) => r.onDidOpen?.(e).then(notify), delay));
       r.onTextChange &&
-        this.documents.onDidChangeContent(
-          throttle((e) => {
-            console.log("handling change");
-            r.onTextChange?.(e).then(notify);
-          }, r.throttleDelay ?? 500)
-        );
+        this.documents.onDidChangeContent(throttle((e) => r.onTextChange?.(e).then(notify), delay));
       r.onTextRender &&
         connection.onNotification(
           TextDocumentRenderNotification.type,
-          throttle((e) => r.onTextRender?.(e).then(notify), r.throttleDelay ?? 500)
+          throttle((e) => r.onTextRender?.(e).then(notify), delay)
         );
 
       this.viewManager?.listen(connection);
@@ -203,6 +245,13 @@ export class Plugin {
       };
       v.skipOnChange || this.documents.onDidChangeContent(handle);
       v.skipOnSave || this.documents.onDidSave(handle);
+
+      v.skipOnModelChange ||
+        this.modelManager?.onDidChange(async (model: any, uri: string) => {
+          const doc = this.documents.get(uri);
+          const result = doc && (await onValidate(doc));
+          result && connection.sendDiagnostics(result);
+        });
     }
 
     // Autocompletion
@@ -220,8 +269,19 @@ export class Plugin {
   /**
    * Returns the Sysl settings configured on the client.
    */
-  getClientSettings(): Promise<SyslSettings> {
-    return this.connection.workspace.getConfiguration({ section: "sysl" });
+  async getClientSettings(): Promise<SyslSettings> {
+    if (!this.hasConfigurationCapability) {
+      return builtinDefaultSettings;
+    }
+    const conn = this.connection;
+    if (!conn) {
+      throw new Error("no connection");
+    }
+    return new Promise(function (resolve, reject) {
+      conn.onInitialized(async () => {
+        conn.workspace.getConfiguration({ section: "sysl" }).then(resolve).catch(reject);
+      });
+    });
   }
 
   /**
@@ -229,6 +289,13 @@ export class Plugin {
    */
   getDocument(uri: string): TextDocument | undefined {
     return this.documents.get(uri);
+  }
+
+  /**
+   * Returns the stored model of a document identified by {@code uri}.
+   */
+  getModel(uri: string): Model | undefined {
+    return this.modelManager?.get(uri);
   }
 
   /**

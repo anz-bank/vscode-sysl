@@ -4,7 +4,7 @@
  */
 
 import { Connection, TextDocumentChangeEvent } from "vscode-languageserver";
-import { ProtocolNotificationType } from "vscode-languageserver-protocol";
+import { ProtocolNotificationType } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { ViewEdit, ViewModel, ViewModelDelta } from "./types";
 import { ViewKey, viewKeyToString } from "@anz-bank/vscode-sysl-model";
@@ -76,11 +76,14 @@ export class ViewManager<T extends { visible?: boolean }> {
    * @param connection The connection to listen on.
    */
   listen(connection: Connection): void {
-    connection.onNotification(ViewDidOpenNotification.type, (event: ViewDidOpenParams) => {
-      console.log("opened", event.view.key);
-      const { key, model } = event.view;
-      this._views[viewKeyToString(key)] = this.configuration.create(key, model);
-    });
+    connection.onNotification<ViewDidOpenParams, void>(
+      ViewDidOpenNotification.type,
+      (event: ViewDidOpenParams) => {
+        console.log("opened", event.view.key);
+        const { key, model } = event.view;
+        this._views[viewKeyToString(key)] = this.configuration.create(key, model);
+      }
+    );
 
     connection.onNotification(ViewDidCloseNotification.type, (event: ViewDidCloseParams) => {
       console.log("closed", event.key);
@@ -145,7 +148,7 @@ export namespace ViewOpenNotification {
  */
 export interface ViewOpenParams {
   /** The views to open. */
-  views: ViewItem[];
+  views: ViewItem<any, any>[];
 }
 
 // - View Did Open
