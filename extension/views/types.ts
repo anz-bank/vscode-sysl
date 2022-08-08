@@ -1,36 +1,10 @@
+import { Disposable, ViewKey } from "@anz-bank/vscode-sysl-model";
+import { ViewModel, ViewModelDelta } from "@anz-bank/vscode-sysl-plugin";
 import { URI } from "vscode-uri";
 import { views } from ".";
 import { ViewEdit } from "./edits";
 import { ViewEvent, ViewModelChangeEvent } from "./events";
-import { ViewKey } from "./key";
 import { MultiView } from "./multi/types";
-
-/** Standalone alias of VS Code's {@code Disposable} class. */
-export interface Disposable {
-  dispose: () => void;
-}
-
-/** The kind of view to use to render a model. */
-export type ViewKind = "html" | "diagram";
-
-/**
- * The data used to render a view. The specific schema of the model depends on the view rendering
- * it.
- */
-export interface ViewModel {
-  meta?: ViewMeta;
-}
-
-export interface ViewModelDelta {
-  meta?: ViewMeta;
-}
-
-/** Metadata associated with a view that may be used by the client rendering it. */
-export type ViewMeta = {
-  key?: ViewKey;
-  label?: string;
-  kind?: ViewKind;
-};
 
 /**
  * An abstract surface for a view to render onto.

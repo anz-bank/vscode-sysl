@@ -1,6 +1,6 @@
+import { Disposable, ViewKey } from "@anz-bank/vscode-sysl-model";
+import { ViewModel, ViewModelDelta } from "@anz-bank/vscode-sysl-plugin";
 import { URI } from "vscode-uri";
-import { ViewKey } from "../key";
-import { Disposable, ViewModel, ViewModelDelta } from "../types";
 
 /** Stub for the VS Code Webview interface. */
 export interface Webview {

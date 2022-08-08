@@ -1,18 +1,21 @@
+import { ViewKey } from "@anz-bank/vscode-sysl-model";
+import {
+  defaultViewManagerConfig,
+  Plugin,
+  RenderResult,
+  ViewEdits,
+  ViewMeta,
+} from "@anz-bank/vscode-sysl-plugin";
 import { TextDocumentChangeEvent } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { Plugin, RenderResult } from "../../lsp/server/template";
-import { defaultViewManagerConfig } from "../../lsp/server/views";
 import { DiagramModel } from "../../views/diagram/model";
-import { ViewEdits } from "../../views/edits";
-import { ViewKey } from "../../views/key";
-import { ViewMeta } from "../../views/types";
 import { buildModel } from "./diagram";
 
 const plugin = new Plugin({
   rendering: {
     viewManagerConfig: defaultViewManagerConfig,
     onDidOpen,
-    onTextChange
+    onTextChange,
   },
 });
 plugin.createConnection();

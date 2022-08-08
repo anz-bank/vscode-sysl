@@ -1,6 +1,6 @@
+import { Disposable } from "@anz-bank/vscode-sysl-model";
 import { spawn, SpawnOptions } from "child_process";
 import { pull, size } from "lodash";
-import { Disposable } from "../views/types";
 
 /** Executes child processes and records completion. */
 class Executor {

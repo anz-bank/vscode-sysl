@@ -96,6 +96,17 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+## 0.44.0
+
+- Generate Sysl models in the extension to send to plugins.
+  - This change means plugins can work with compiled Sysl models without needing `sysl` to compile
+    the models themselves. This is simpler and more efficient, avoiding duplicate compiles, but also
+    frees plugins to more easily run remotely without needing access to imported specs.
+  - Sysl model generation for plugins is memoized, so even though each plugin client asks to
+    generate a model, the tasks is only executed once.
+- Notify plugins of model changes via new `model/didChange` notifications.
+- Tidy up build tooling and deps for `model`, `plugin`, and the built-in `erd` plugin.
+
 ## 0.36.0
 
 - Support custom plugin config

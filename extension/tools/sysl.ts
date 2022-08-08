@@ -1,6 +1,9 @@
-import path from "path";
+import { Model } from "@anz-bank/sysl/model";
+import { PbDocumentModel } from "@anz-bank/sysl/pbModel";
 import { truncate } from "lodash";
-import { SemVer, coerce } from "semver";
+import memoize from "memoizee";
+import path from "path";
+import { coerce, SemVer } from "semver";
 import { defaultLogger, Logger } from "./logging";
 import { spawnBuffer } from "./spawn";
 
@@ -17,6 +20,7 @@ export class Sysl {
   constructor(path: string, options?: { logger?: Logger }) {
     this.path = path;
     this.logger = options?.logger ?? defaultLogger;
+    this.protobufFromSource = memoize(this.protobufFromSource.bind(this), {});
   }
 
   /**
@@ -32,6 +36,12 @@ export class Sysl {
   public async protobufModuleFromSource(source: string, sourcePath: string): Promise<any> {
     const buffer = await this.protobufFromSource(source, sourcePath, "json");
     return JSON.parse(buffer.toString("utf-8"));
+  }
+
+  /** Returns a protobuf message representing the compiled content of source. */
+  public async modelFromSource(source: string, sourcePath: string): Promise<Model> {
+    const buffer = await this.protobufFromSource(source, sourcePath, "json");
+    return PbDocumentModel.fromJson(buffer.toString("utf-8"))!.toModel();
   }
 
   /** Returns a protobuf message representing the compiled content of the spec at modelPath. */

@@ -1,12 +1,13 @@
-import { URI } from "vscode-uri";
+import { Disposable, ViewKey, viewKeyToString } from "@anz-bank/vscode-sysl-model";
+import { ViewModel, ViewModelDelta } from "@anz-bank/vscode-sysl-plugin";
 import { flatten, pull } from "lodash";
-import { ViewKey, viewKeyToString } from "./key";
-import { Disposable, View, ViewModel, ViewModelDelta, Views } from "./types";
-import { ViewEvent, ViewModelChangeEvent } from "./events";
+import { URI } from "vscode-uri";
+import { Document } from "../plugins/types";
 import { ViewEdit } from "./edits";
+import { ViewEvent, ViewModelChangeEvent } from "./events";
 import { MultiViewFactory } from "./multi";
 import { MultiView } from "./multi/types";
-import { Document } from "../plugins/types";
+import { View, Views } from "./types";
 
 export type DocumentFinder = (docUri: URI) => Thenable<Document>;
 

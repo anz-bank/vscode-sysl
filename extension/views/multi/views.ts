@@ -1,9 +1,10 @@
+import { ViewKey, viewKeyToString } from "@anz-bank/vscode-sysl-model";
+import { ViewModel, ViewModelDelta } from "@anz-bank/vscode-sysl-plugin";
 import { each, set } from "lodash";
 import { URI } from "vscode-uri";
 import { views } from "..";
 import { SnapshotEvent, Snapshotter } from "../../editor/snapshot";
-import { ViewKey, viewKeyToString } from "../key";
-import { View, SurfaceView, ViewModel, ViewModelDelta, ViewSurface } from "../types";
+import { SurfaceView, View, ViewSurface } from "../types";
 import { WebViewSurface } from "../web/views";
 import { Webview, WebviewEvent } from "../web/webview";
 import { MultiModel } from "./model";

@@ -205,7 +205,7 @@ function getCustomGroupTemplate(groupTemplate: TemplateGroupData): go.Group {
           )
         )
       : {},
-      new go.Binding("visible", "visible")
+    new go.Binding("visible", "visible")
   );
 }
 

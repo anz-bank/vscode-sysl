@@ -1,7 +1,7 @@
+import { ViewKey, viewKeyToString } from "@anz-bank/vscode-sysl-model";
 import { URI } from "vscode-uri";
 import { MultiViewFactory } from ".";
 import { views } from "..";
-import { ViewKey, viewKeyToString } from "../key";
 import { FakeView, View } from "../types";
 import { AbstractMultiView } from "./views";
 

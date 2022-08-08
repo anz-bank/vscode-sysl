@@ -19,7 +19,7 @@ function getScreenshot(): string | undefined {
   if (!diagram) {
     return undefined;
   }
-  return diagram.makeSvg().outerHTML;
+  return diagram.makeSvg()?.outerHTML;
 }
 
 function getDiagram(): go.Diagram | undefined {

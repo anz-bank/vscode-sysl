@@ -1,4 +1,4 @@
-import { ViewModel } from "../types";
+import { ViewModelDelta } from "@anz-bank/vscode-sysl-plugin";
 
 // Need an equivalent of a Range within some arbitrary model for incremental changes.
 export interface DiagramObjectData {}
@@ -6,7 +6,7 @@ export interface DiagramObjectKey {}
 
 export type GoJSDiagramModel = DiagramModel;
 
-export interface DiagramModel<N = DiagramObjectData, E = DiagramObjectData> extends ViewModel {
+export interface DiagramModel<N = DiagramObjectData, E = DiagramObjectData> extends ViewModelDelta {
   nodes: N[];
   edges: E[];
   templates?: {

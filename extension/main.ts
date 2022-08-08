@@ -20,8 +20,8 @@ import { viewRegistry } from "./views";
 import { CustomEditorMultiViewFactory } from "./views/multi/factory_vscode";
 import { VsCodeEvents } from "./plugins/events_vscode";
 import { PluginClientOptions } from "./plugins/types";
-import { Disposable } from "./views/types";
 import { URI } from "vscode-uri";
+import { Disposable } from "@anz-bank/vscode-sysl-model";
 
 /** The language client, created in {@link activate}, to be cleaned up in {@link deactivate}. */
 let client: LanguageClient;

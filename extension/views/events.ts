@@ -1,4 +1,4 @@
-import { ProtocolNotificationType } from "vscode-languageserver-protocol";
+import { ViewKey } from "@anz-bank/vscode-sysl-model";
 import {
   ViewDidChangeNotification,
   ViewDidChangeParams,
@@ -10,9 +10,9 @@ import {
   ViewDidOpenParams,
   ViewDidShowNotification,
   ViewDidShowParams,
-} from "../lsp/server/views";
+} from "@anz-bank/vscode-sysl-plugin";
+import { ProtocolNotificationType } from "vscode-languageserver/node";
 import { Document } from "../plugins/types";
-import { ViewKey } from "./key";
 
 /** An event that occurred in or around a view. */
 export interface ViewEvent {
@@ -56,6 +56,6 @@ export class Notifier {
   }
 
   send<T>(notificationType: ProtocolNotificationType<T, void>, payload: T): void {
-    this.client.sendNotification(notificationType, payload);
+    this.client.sendNotification<T>(notificationType, payload);
   }
 }

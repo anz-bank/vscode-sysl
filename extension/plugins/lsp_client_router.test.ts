@@ -1,12 +1,9 @@
-import chai from "chai";
-import { expect } from "chai";
+import chai, { expect } from "chai";
 import sinon, { SinonSpyCall } from "sinon";
 import sinonChai from "sinon-chai";
 chai.use(sinonChai);
 
-import { Views } from "../views/types";
-import { LspPluginClientRouter, LanguageClientSpy } from "./lsp_client_router";
-import { ViewRegistry } from "../views/registry";
+import { ViewKey } from "@anz-bank/vscode-sysl-model";
 import {
   ViewDidChangeNotification,
   ViewDidChangeParams,
@@ -20,11 +17,14 @@ import {
   ViewDidShowParams,
   ViewEditNotification,
   ViewEditParams,
+  ViewModel,
   ViewOpenNotification,
   ViewOpenParams,
-} from "../lsp/server/views";
-import { ViewKey } from "../views/key";
-import { ViewModel } from "../views/types";
+} from "@anz-bank/vscode-sysl-plugin";
+import { ProtocolNotificationType } from "vscode-languageserver-protocol";
+import { ViewRegistry } from "../views/registry";
+import { Views } from "../views/types";
+import { LanguageClientSpy, LspPluginClientRouter } from "./lsp_client_router";
 
 const key: ViewKey = {
   docUri: "file:/foo.sysl",
@@ -32,6 +32,8 @@ const key: ViewKey = {
   viewId: "test",
 };
 const model: ViewModel = { meta: { key } };
+
+export const fooType = new ProtocolNotificationType<any, void>("foo");
 
 suite("LSP plugin client router", () => {
   let client: LanguageClientSpy;
@@ -47,8 +49,8 @@ suite("LSP plugin client router", () => {
 
   test("LanguageClient spy", () => {
     const fooListener = sinon.spy();
-    client.onNotification("foo", fooListener);
-    client.acceptNotification("foo", 42);
+    client.onNotification(fooType, fooListener);
+    client.acceptNotification(fooType, 42);
     expect(fooListener).to.be.called.calledOnceWithExactly(42);
   });
 
@@ -70,14 +72,14 @@ suite("LSP plugin client router", () => {
   suite("from server", () => {
     test("open view", async () => {
       const payload = { views: [{ key, model }] } as ViewOpenParams;
-      client.acceptNotification(ViewOpenNotification.type.method, payload);
+      client.acceptNotification(ViewOpenNotification.type, payload);
       expect(views.openView).to.have.been.calledWith(key, model);
     });
 
     test("edit view", async () => {
       const edits = [[key, [{ model }]]];
       const payload = { edits } as ViewEditParams;
-      client.acceptNotification(ViewEditNotification.type.method, payload);
+      client.acceptNotification(ViewEditNotification.type, payload);
       expect(views.applyEdit).to.have.been.calledWith(edits);
     });
   });

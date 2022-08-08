@@ -1,8 +1,10 @@
-import path from "path";
+import download from "download";
 import * as fs from "fs";
-import { Sysl } from "../tools/sysl";
+import got from "got";
 import { flatten } from "lodash";
+import path from "path";
 import { promisify } from "util";
+import { Sysl } from "../tools/sysl";
 import {
   CommandPluginConfig,
   LspPluginConfig,
@@ -10,20 +12,18 @@ import {
   TransformPluginConfig,
 } from "./plugin_config";
 import { PluginClientOptions, PluginManifest, PluginManifests } from "./types";
-import got from "got";
-import download from "download";
 
 const exists = promisify(fs.exists);
 
 const idFromFile = (file: string): string => path.parse(file).name;
 
-const configFromFile = ((file: string | undefined) => {
+const configFromFile = (file: string | undefined) => {
   let defaultConfig = { documentSelector: [{ scheme: "file", language: "sysl" }] }; //default
   if (file && fs.existsSync(file)) {
     return JSON.parse(fs.readFileSync(file).toString());
   }
   return defaultConfig;
-});
+};
 
 /** Discovers available plugins on the user's machine and known network locations. */
 export class PluginLocator {
@@ -87,7 +87,7 @@ export class PluginLocator {
           id: dir,
           lsp: {
             scriptPath: path.join(dir, "index.js"),
-            clientOptions: { ...options, ...config},
+            clientOptions: { ...options, ...config },
           },
         } as LspPluginConfig;
       });
@@ -127,7 +127,7 @@ export class PluginLocator {
         lsp: {
           scriptPath: erdPath,
           serverOptions: {},
-          clientOptions: { ...options, documentSelector: [{ scheme: "file", language: "sysl" }] }
+          clientOptions: { ...options, documentSelector: [{ scheme: "file", language: "sysl" }] },
         },
       } as LspPluginConfig,
       {
@@ -208,7 +208,7 @@ export class PluginLocator {
               id: plugin.id,
               lsp: {
                 scriptPath: path.resolve(path.dirname(manifestPath), plugin.entrypoint),
-                clientOptions: { ...options, ...config }
+                clientOptions: { ...options, ...config },
               },
             } as LspPluginConfig);
             break;

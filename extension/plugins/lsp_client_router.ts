@@ -1,12 +1,13 @@
-import { ProtocolNotificationType } from "vscode-languageserver-protocol";
+import { Disposable } from "@anz-bank/vscode-sysl-model";
 import {
   ViewEditNotification,
   ViewEditParams,
   ViewOpenNotification,
   ViewOpenParams,
-} from "../lsp/server/views";
+} from "@anz-bank/vscode-sysl-plugin";
+import { ProtocolNotificationType } from "vscode-languageserver-protocol";
 import { NotificationSender, Notifier, ViewEvent, ViewModelChangeEvent } from "../views/events";
-import { Disposable, Views } from "../views/types";
+import { Views } from "../views/types";
 
 /**
  * Routes events between a plugin and the renderer.
@@ -26,16 +27,15 @@ export class LspPluginClientRouter implements Disposable {
   async start(): Promise<Disposable[]> {
     const { client, views, notifier } = this;
     const disposables: Disposable[] = [];
-    disposables.push(client.start());
-    await client.onReady();
+    await client.start();
 
-    client.onNotification(ViewOpenNotification.type.method, (data: ViewOpenParams) => {
+    client.onNotification(ViewOpenNotification.type, (data: ViewOpenParams) => {
       data.views.forEach(async (view) => {
         await views.openView(view.key, view.model);
       });
     });
 
-    client.onNotification(ViewEditNotification.type.method, (data: ViewEditParams) => {
+    client.onNotification(ViewEditNotification.type, (data: ViewEditParams) => {
       views.applyEdit(data.edits);
     });
 
@@ -65,41 +65,40 @@ export class LspPluginClientRouter implements Disposable {
   }
 }
 
-/** An non-VS Code-specific interface for language clients. */
+/** A non-VS Code-specific interface for language clients. */
 export interface LanguageClient extends NotificationSender {
-  onReady: () => Thenable<void>;
-  start(): Disposable;
-  onNotification(method: string, listener: (e: any) => any);
-  sendNotification<T>(notificationType: ProtocolNotificationType<T, void>, payload: T);
+  start(): Promise<void>;
+  onNotification<T>(type: ProtocolNotificationType<T, void>, listener: (e: T) => any): void;
+  sendNotification<T>(notificationType: ProtocolNotificationType<T, void>, payload: T): void;
 }
 
 /** A language client that records interactions. */
 export class LanguageClientSpy implements LanguageClient {
   started: boolean = false;
+
   listeners: { [key: string]: ((e: any) => any)[] } = {};
   received: [string, any][] = [];
   sent: [string, any][] = [];
 
-  acceptNotification(method: string, payload: any): void {
-    this.received.push([method, payload]);
-    this.listeners[method]?.forEach((l) => l(payload));
+  acceptNotification<T>(type: ProtocolNotificationType<T, void>, payload: any): void {
+    this.received.push([type.method, payload]);
+    this.listeners[type.method]?.forEach((l) => l(payload));
+  }
+  onNotification<T>(type: ProtocolNotificationType<T, void>, listener: (e: any) => any) {
+    this.listeners[type.method] ??= [];
+    this.listeners[type.method].push(listener);
   }
 
-  onNotification(method: string, listener: (e: any) => any) {
-    this.listeners[method] ??= [];
-    this.listeners[method].push(listener);
-  }
-
-  sendNotification<T>(notificationType: ProtocolNotificationType<T, void>, payload: T) {
+  sendNotification<T>(
+    notificationType: ProtocolNotificationType<T, void>,
+    payload: T
+  ): Promise<void> {
     this.sent.push([notificationType.method, payload]);
-  }
-
-  onReady(): Thenable<any> {
     return Promise.resolve();
   }
 
-  start() {
+  start(): Promise<void> {
     this.started = true;
-    return { dispose: () => {} };
+    return Promise.resolve();
   }
 }

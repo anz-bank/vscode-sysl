@@ -8,13 +8,13 @@ import {
   PluginClientOptions,
 } from "../plugins/types";
 import { Change, Context, Request, Response } from "../protocol/plugin";
-import { ViewKey } from "../views/key";
-import { Disposable, ViewModel } from "../views/types";
 import { views } from "../views";
 import { Sysl } from "../tools/sysl";
 import { spawnBuffer } from "../tools/spawn";
 import { ViewModelChangeEvent } from "../views/events";
 import { defaultLogger, Logger } from "../tools/logging";
+import { Disposable, ViewKey } from "@anz-bank/vscode-sysl-model";
+import { ViewModel } from "@anz-bank/vscode-sysl-plugin";
 
 /** Details about how to invoke the plugin. */
 export type RunOptions = {
@@ -207,7 +207,7 @@ export class CommandPluginClient implements PluginClient {
     const responseObject = JSON.parse(response.toString());
 
     if (responseObject.error) {
-      this.logger.log("command error:",responseObject.error);
+      this.logger.log("command error:", responseObject.error);
       throw new Error("Response received with error");
     } else {
       this.logger.log("command complete:", command, ...(args ?? []), truncate(response.toString()));

@@ -1,4 +1,3 @@
-"use strict";
 import { LanguageClient, LanguageClientOptions, ServerOptions } from "vscode-languageclient/node";
 import { Sysl } from "../../tools/sysl";
 

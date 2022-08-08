@@ -9,8 +9,9 @@
     "noImplicitAny": false,
     "sourceMap": true,
     "strict": true,
+    "alwaysStrict": true,
     "skipLibCheck": true
   },
   "include": ["extension"],
-  "exclude": ["node_modules", "test-resources", ".vscode-test"]
+  "exclude": ["test-resources", ".vscode-test"]
 }

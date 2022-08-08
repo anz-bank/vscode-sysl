@@ -4,8 +4,8 @@ node_modules
 /extension/test/screenshots
 
 # Production
-/out
-/dist
+out/
+dist/
 /renderer/build
 main.js*
 

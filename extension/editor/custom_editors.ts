@@ -1,6 +1,6 @@
 import { TextDocument, WebviewPanel, WebviewPanelOnDidChangeViewStateEvent } from "vscode";
 import { pull } from "lodash";
-import { Disposable } from "../views/types";
+import { Disposable } from "@anz-bank/vscode-sysl-model";
 
 /**
  * A Webview-based editor for a text document.

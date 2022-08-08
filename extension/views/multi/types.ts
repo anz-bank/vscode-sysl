@@ -1,6 +1,7 @@
+import { Disposable, ViewKey } from "@anz-bank/vscode-sysl-model";
+import { ViewModel, ViewModelDelta } from "@anz-bank/vscode-sysl-plugin";
 import { URI } from "vscode-uri";
-import { ViewKey } from "../key";
-import { Disposable, View, ViewModel, ViewModelDelta } from "../types";
+import { View } from "../types";
 
 /** A container for multiple child views. */
 export interface MultiView extends Disposable {

@@ -4,7 +4,7 @@ import { DocumentSelector } from "vscode-languageclient/node";
 import { Position } from "vscode-languageserver-types";
 import { URI } from "vscode-uri";
 import { Logger } from "../tools/logging";
-import { Disposable } from "../views/types";
+import { Disposable } from "@anz-bank/vscode-sysl-model";
 
 /**
  * A plugin that contributes functionality to the VS Code extension.
@@ -85,6 +85,12 @@ export interface Events {
 
   /** Subscribes {@link listener} to be invoked when a text document is changed. */
   onDidChangeTextDocument(listener: (e: DocumentChangeEvent) => any): Disposable;
+
+  /** Subscribes {@link listener} to be invoked when a text document is opened. */
+  onDidOpenTextDocument(listener: (e: Document) => any): Disposable;
+
+  /** Subscribes {@link listener} to be invoked when a text document is closed. */
+  onDidCloseTextDocument(listener: (e: Document) => any): Disposable;
 
   /** Subscribes {@link listener} to be invoked when a text document is saved. */
   onDidSaveTextDocument(listener: (e: DocumentChangeEvent) => any): Disposable;

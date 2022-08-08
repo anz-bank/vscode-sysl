@@ -1,4 +1,4 @@
-import { ViewModel, ViewModelDelta } from "../types";
+import { ViewModel, ViewModelDelta } from "@anz-bank/vscode-sysl-plugin";
 
 /** Models the content of a web page. */
 export interface WebModel extends ViewModel {

@@ -4,7 +4,7 @@
   "description": "Write Sysl specs easily with instant visual feedback.",
   "author": "ANZ Bank",
   "publisher": "anz-bank",
-  "version": "0.39.0",
+  "version": "0.44.0",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -158,6 +158,20 @@
     "test-unit": "ts-node extension/test/runUnitTest",
     "test-watch": "nodemon --watch 'extension/**' --ext 'ts,json,sysl' --exec 'ts-node extension/test/runUnitTest'"
   },
+  "dependencies": {
+    "@anz-bank/sysl": "^0.7.0",
+    "@anz-bank/vscode-sysl-model": "^0.3.0",
+    "@anz-bank/vscode-sysl-plugin": "^0.4.0",
+    "@types/download": "^8.0.1",
+    "@types/memoizee": "^0.4.8",
+    "lodash": "^4.17.21",
+    "memoizee": "^0.4.15",
+    "semver": "^7.3.5",
+    "vscode-languageclient": "^8.0.2",
+    "vscode-languageserver": "^8.0.2",
+    "vscode-languageserver-protocol": "3.17.2",
+    "vscode-languageserver-textdocument": "^1.0.1"
+  },
   "devDependencies": {
     "@types/chai": "^4.2.21",
     "@types/glob": "^7.1.4",
@@ -185,21 +199,12 @@
     "replace": "^1.2.1",
     "sinon": "^11.1.2",
     "sinon-chai": "^3.7.0",
-    "ts-mocha": "^8.0.0",
+    "ts-mocha": "^10.0.0",
     "ts-node": "^10.2.1",
     "ts-protoc-gen": "^0.15.0",
     "typescript": "^4.3.5",
     "vsce": "^1.96.2",
-    "vscode-languageclient": "^7.0.0",
     "vscode-test": "^1.6.1",
     "vscode-uri": "^3.0.2"
-  },
-  "dependencies": {
-    "@types/download": "^8.0.1",
-    "lodash": "^4.17.21",
-    "semver": "^7.3.5",
-    "vscode-languageserver": "^7.0.0",
-    "vscode-languageserver-protocol": "^3.16.0",
-    "vscode-languageserver-textdocument": "^1.0.1"
   }
 }

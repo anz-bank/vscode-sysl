@@ -1,13 +1,16 @@
+import { ViewKey } from "@anz-bank/vscode-sysl-model";
+import {
+  defaultViewManagerConfig,
+  Plugin,
+  RenderResult,
+  ViewEdits,
+  ViewMeta,
+} from "@anz-bank/vscode-sysl-plugin";
 import { TextDocumentChangeEvent } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI } from "vscode-uri";
-import { Plugin, RenderResult } from "../../lsp/server/template";
-import { defaultViewManagerConfig } from "../../lsp/server/views";
 import { Sysl } from "../../tools/sysl";
 import { DiagramModel } from "../../views/diagram/model";
-import { ViewEdits } from "../../views/edits";
-import { ViewKey } from "../../views/key";
-import { ViewMeta } from "../../views/types";
 import { buildModel } from "./diagram";
 
 const plugin = new Plugin({
@@ -54,7 +57,8 @@ async function onTextChange({ document: { uri: docUri } }): Promise<RenderResult
 
 /** Returns a model for the ERD diagram. */
 async function buildModelForKey(key: ViewKey): Promise<DiagramModel> {
-  const binaryPath = plugin.clientSettings?.tool?.binaryPath;
+  // TODO: render model from notification instead of compiling.
+  const binaryPath = (await plugin.getClientSettings()).tool?.binaryPath;
   if (!binaryPath) {
     throw new Error("must have Sysl binary to generate ERD diagram");
   }

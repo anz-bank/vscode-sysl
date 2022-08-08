@@ -60,7 +60,7 @@ function getScreenshot(): string | undefined {
   if (!diagram) {
     return undefined;
   }
-  return diagram.makeSvg().outerHTML;
+  return diagram.makeSvg()?.outerHTML;
 }
 
 /** Selects a view tab by label. */

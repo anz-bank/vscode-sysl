@@ -1,3 +1,5 @@
+import { ViewKey } from "@anz-bank/vscode-sysl-model";
+import { ViewKind } from "@anz-bank/vscode-sysl-plugin";
 import { last } from "lodash";
 import {
   commands,
@@ -10,8 +12,7 @@ import {
 } from "vscode";
 import { views } from "..";
 import { CustomEditor, customEditorManager } from "../../editor/custom_editors";
-import { ViewKey } from "../key";
-import { View, ViewKind } from "../types";
+import { View } from "../types";
 import { HtmlDocumentView, RawWebViewSurface } from "./views";
 
 /**

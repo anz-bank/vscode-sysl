@@ -5,21 +5,21 @@ const model = {
   nodes: [
     {
       key: "a",
-      label: "A"
+      label: "A",
     },
     {
       key: "b",
-      label: "B"
-    }
+      label: "B",
+    },
   ],
   links: [
     {
       from: "a",
       to: "b",
-      key: 'a->b'
-    }
-  ]
-}
+      key: "a->b",
+    },
+  ],
+};
 
 suite("Sysld plugin", () => {
   test("build diagram", async () => {
@@ -27,7 +27,7 @@ suite("Sysld plugin", () => {
       nodes: [
         {
           key: "a",
-          label: "A"
+          label: "A",
         },
         {
           key: "b",

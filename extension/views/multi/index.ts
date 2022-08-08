@@ -3,7 +3,7 @@ import { MultiView } from "./types";
 
 export const multiviewType = {
   sysl: "sysl.multiView",
-  sysld: "sysld.multiView"
+  sysld: "sysld.multiView",
 };
 
 export interface MultiViewFactory {

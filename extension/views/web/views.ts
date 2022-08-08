@@ -1,8 +1,9 @@
+import { ViewKey } from "@anz-bank/vscode-sysl-model";
+import { ViewKind, ViewModel, ViewModelDelta } from "@anz-bank/vscode-sysl-plugin";
 import { truncate } from "lodash";
 import { views } from "..";
 import { isDiagram } from "../diagram/model";
-import { ViewKey } from "../key";
-import { View, ViewKind, ViewModel, ViewModelDelta, ViewSurface } from "../types";
+import { View, ViewSurface } from "../types";
 import { WebModel, WebModelDelta } from "./model";
 import { Webview } from "./webview";
 

@@ -6,8 +6,8 @@ export async function buildModel(module: any): Promise<DiagramModel> {
   if (module.nodes?.length && module.links?.length) {
     return {
       nodes: module.nodes,
-      edges: module.links
-    }
+      edges: module.links,
+    };
   }
 
   return { nodes, edges };

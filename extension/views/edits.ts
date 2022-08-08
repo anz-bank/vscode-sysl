@@ -1,4 +1,4 @@
-import { ViewKey, viewKeyToString } from "./key";
+import { ViewKey, viewKeyToString } from "@anz-bank/vscode-sysl-model";
 
 /**
  * A view edit represents edits that should be applied to a view's model.
