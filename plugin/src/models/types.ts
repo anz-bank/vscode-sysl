@@ -2,17 +2,18 @@
  * A model edit represents edits that should be applied to a model.
  *
  * What the edit contains and how it is interpreted is up to the model.
+ * All models and deltas will be encoded as strings over the wire.
  */
-export type ModelEdit = ModelSetEdit<any> | ModelUpdateEdit<any>;
+export type ModelEdit = ModelSetEdit | ModelUpdateEdit;
 
-export type ModelSetEdit<T> = {
+export type ModelSetEdit = {
   /** The model to set. */
-  model: T;
+  model: string;
 };
 
-export type ModelUpdateEdit<D> = {
+export type ModelUpdateEdit = {
   /** A change to apply. */
-  delta: D;
+  delta: string;
 };
 
 type ModelEditsEntry = {
@@ -47,14 +48,14 @@ export class ModelEdits {
     return Object.values(edits);
   }
 
-  /** Adds an edit to set the model of a model. */
-  set<T>(key: string, model: T): ModelEdits {
+  /** Adds an edit to set the model. */
+  set(key: string, model: string): ModelEdits {
     this._edits.push({ key, edit: { model } });
     return this;
   }
 
   /** Adds an edit to update the model of a model. */
-  update<D>(key: string, delta: D): ModelEdits {
+  update(key: string, delta: string): ModelEdits {
     this._edits.push({ key, edit: { delta } });
     return this;
   }

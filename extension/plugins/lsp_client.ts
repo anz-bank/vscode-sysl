@@ -3,7 +3,6 @@ import {
   ModelDidChangeNotification,
   ModelDidCloseNotification,
   ModelDidOpenNotification,
-  ModelDidOpenParams,
   TextDocumentRenderNotification,
 } from "@anz-bank/vscode-sysl-plugin";
 import { set } from "lodash";
@@ -12,7 +11,6 @@ import {
   ClientCapabilities,
   DocumentSelector,
   FeatureState,
-  InitializeParams,
   LanguageClient,
   LanguageClientOptions,
   ServerCapabilities,
@@ -153,6 +151,10 @@ export class LspPluginClient implements PluginClient, Disposable {
       this.events.onRender(this.render.bind(this)),
 
       this.events.onDidSaveTextDocument(async (e: DocumentChangeEvent) => {
+        // TODO: Use document selector to only compile relevant .sysl files.
+        if (!e.document.uri.fsPath.endsWith(".sysl")) {
+          return;
+        }
         const model = await compileDoc(e.document);
         this.client.sendNotification(ModelDidChangeNotification.type, {
           key: e.document.uri.toString(),
@@ -161,14 +163,22 @@ export class LspPluginClient implements PluginClient, Disposable {
       }),
 
       this.events.onDidOpenTextDocument(async (doc) => {
+        // TODO: Use document selector to only compile relevant .sysl files.
+        if (!doc.uri.fsPath.endsWith(".sysl")) {
+          return;
+        }
         const model = await compileDoc(doc);
-        this.client.sendNotification<ModelDidOpenParams, void>(ModelDidOpenNotification.type, {
+        this.client.sendNotification(ModelDidOpenNotification.type, {
           key: doc.uri.toString(),
           model: model as any, // TODO: Encode model as object.
         });
       }),
 
       this.events.onDidCloseTextDocument(async (doc) => {
+        // TODO: Use document selector to only notify about relevant .sysl files.
+        if (!doc.uri.fsPath.endsWith(".sysl")) {
+          return;
+        }
         this.client.sendNotification(ModelDidCloseNotification.type, {
           key: doc.uri.toString(),
         });

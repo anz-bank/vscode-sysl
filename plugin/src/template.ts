@@ -17,7 +17,7 @@ import {
   TextDocumentSyncKind,
   TextDocumentWillSaveEvent,
 } from "vscode-languageserver/node";
-import { ModelItem, ModelManager, ModelManagerConfiguration } from "./models";
+import { ModelManager, ModelManagerConfiguration } from "./models";
 import {
   TextDocumentRenderNotification,
   ViewEditNotification,
@@ -63,7 +63,7 @@ export interface DocumentManagement<T> {
 
 export interface ModelManagement<T> {
   /** Configuration for the model manager. */
-  modelManagerConfig?: ModelManagerConfiguration<string, ModelItem, T, any>;
+  modelManagerConfig?: ModelManagerConfiguration<string, T, any>;
   /** Minimum time (in ms) to wait between callbacks of the same kind. Default 500. */
   throttleDelay?: number;
 
@@ -247,7 +247,7 @@ export class Plugin {
       v.skipOnSave || this.documents.onDidSave(handle);
 
       v.skipOnModelChange ||
-        this.modelManager?.onDidChange(async (model: any, uri: string) => {
+        this.modelManager?.onDidChange(async (model: Model, uri: string) => {
           const doc = this.documents.get(uri);
           const result = doc && (await onValidate(doc));
           result && connection.sendDiagnostics(result);

@@ -5,7 +5,7 @@
 
 import { Model } from "@anz-bank/sysl/model";
 import { PbDocumentModel } from "@anz-bank/sysl/pbModel";
-import { pull } from "lodash";
+import { isObject, isString, pull } from "lodash";
 import { Connection } from "vscode-languageserver";
 import { Disposable, ProtocolNotificationType } from "vscode-languageserver/node";
 
@@ -14,25 +14,23 @@ import { Disposable, ProtocolNotificationType } from "vscode-languageserver/node
 // TODO: Implement.
 type ModelDelta = any;
 
-export type ModelItem<K = string, T = Model> = {
-  key: K;
-  model?: T;
-};
-
-export interface ModelManagerConfiguration<K, M, T, D extends ModelDelta> {
-  create(key: K, model: T): M;
+export interface ModelManagerConfiguration<K, T, D extends ModelDelta> {
+  create(key: K, model: T): T;
   update(model: T, changes: D[]): T;
 }
 
-export const defaultModelManagerConfig: ModelManagerConfiguration<
-  string,
-  ModelItem,
-  Model,
-  ModelDelta
-> = {
-  create(key: string, model: Model): ModelItem<string, Model> {
-    return { key, model };
+export const defaultModelManagerConfig: ModelManagerConfiguration<string, Model, ModelDelta> = {
+  create(key: string, value: string | Model): Model {
+    let model: Model;
+    // TODO: model should be a Model, not a string.
+    if (isString(value)) {
+      model = PbDocumentModel.fromJson(value).toModel();
+    } else {
+      model = value;
+    }
+    return model;
   },
+
   update(model: Model, changes: ModelDelta[]): Model {
     // TODO: Do incremental deltas and update.
     return PbDocumentModel.fromJson(changes[0]!).toModel();
@@ -48,7 +46,7 @@ export class ModelManager<T> {
 
   private readonly _changeListeners: ((model: T, url: string) => any)[] = [];
 
-  constructor(private readonly configuration: ModelManagerConfiguration<string, any, T, any>) {}
+  constructor(private readonly configuration: ModelManagerConfiguration<string, T, any>) {}
 
   /**
    * Returns the model for the given URI or key. Returns undefined if
@@ -85,7 +83,12 @@ export class ModelManager<T> {
     connection.onNotification(ModelDidOpenNotification.type, (event: ModelDidOpenParams) => {
       const { key, model } = event;
       console.log("opened", key);
+      console.log(event, typeof event.model, isObject(event.model));
+      console.log(event.model.constructor.name);
+
       this._models[key] = this.configuration.create(key, model as any);
+      console.log(event, typeof event.model, isObject(event.model));
+      this._changeListeners.forEach((fn) => fn(this._models[key], key));
     });
 
     connection.onNotification(ModelDidCloseNotification.type, (event: ModelDidCloseParams) => {
@@ -93,14 +96,11 @@ export class ModelManager<T> {
       delete this._models[event.key];
     });
 
-    connection.onNotification(
-      ModelDidChangeNotification.type,
-      (event: ModelDidChangeParams<any>) => {
-        const uri = event.key;
-        this._models[uri] = this.configuration.update(this._models[uri], event.modelChanges);
-        this._changeListeners.forEach((fn) => fn(this._models[uri], uri));
-      }
-    );
+    connection.onNotification(ModelDidChangeNotification.type, (event: ModelDidChangeParams) => {
+      const uri = event.key;
+      this._models[uri] = this.configuration.update(this._models[uri], event.modelChanges);
+      this._changeListeners.forEach((fn) => fn(this._models[uri], uri));
+    });
   }
 
   onDidChange(listener: (model: T, uri: string) => any): Disposable {
@@ -119,24 +119,6 @@ export class ModelManager<T> {
 export interface ModelClientCapabilities {}
 
 // NOTIFICATIONS
-
-// - Model Open
-
-/**
- * The model open notification is sent from a server to a client to ask
- * the client to display a particular model in the user interface.
- */
-export namespace ModelOpenNotification {
-  export const type = new ProtocolNotificationType<ModelOpenParams, void>("model/open");
-}
-
-/**
- * The parameters of a model open notification.
- */
-export interface ModelOpenParams {
-  /** The models to open. */
-  models: ModelItem[];
-}
 
 // - Model Did Open
 
@@ -161,7 +143,7 @@ export interface ModelDidOpenParams {
   /**
    * The details of the model that was opened.
    */
-  model: Model;
+  model: string;
 }
 
 // - Model Did Close
@@ -191,15 +173,13 @@ export interface ModelDidCloseParams {
  * changes to a model.
  */
 export namespace ModelDidChangeNotification {
-  export const type = new ProtocolNotificationType<ModelDidChangeParams<any>, void>(
-    "model/didChange"
-  );
+  export const type = new ProtocolNotificationType<ModelDidChangeParams, void>("model/didChange");
 }
 
 /**
  * The parameters of a model did change notification.
  */
-export interface ModelDidChangeParams<D> {
+export interface ModelDidChangeParams {
   /**
    * The key of the model that was changed.
    */
@@ -208,5 +188,5 @@ export interface ModelDidChangeParams<D> {
   /**
    * The changes that occurred in the model's model.
    */
-  modelChanges: D[];
+  modelChanges: string[];
 }
