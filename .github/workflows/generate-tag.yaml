@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - ".github/**"
+      - "docs/**"
+      - "model/**"
+      - "plugin/**"
 
 jobs:
   generate-tag:
@@ -12,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: '0'
+          fetch-depth: "0"
       - name: Bump version and push tag
         uses: anothrNick/github-tag-action@1.36.0
         env:

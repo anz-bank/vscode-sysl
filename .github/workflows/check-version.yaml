@@ -4,6 +4,11 @@ on:
   pull_request:
     branches:
       - master
+    paths-ignore:
+      - ".github/**"
+      - "docs/**"
+      - "model/**"
+      - "plugin/**"
 
 jobs:
   check-version:

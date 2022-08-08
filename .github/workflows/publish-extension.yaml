@@ -2,6 +2,11 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - ".github/**"
+      - "docs/**"
+      - "model/**"
+      - "plugin/**"
 
 name: Publish extension to Marketplace
 jobs:
