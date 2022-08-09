@@ -18,17 +18,17 @@
   dependencies:
     vscode-uri "^3.0.3"
 
-"@anz-bank/vscode-sysl-plugin@^0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@anz-bank/vscode-sysl-plugin/-/vscode-sysl-plugin-0.4.0.tgz#0c5bb3f0affbeb82aba5c28cf23a18d028992dfb"
-  integrity sha512-hKG2FPXSu9qA6gnSrZW1j/emKBrnClH5HHHXBnvEVww+lOZ4CnyTjd2thCvp3eeZPhe/2UtTtmhgyTMyK+cl1w==
+"@anz-bank/vscode-sysl-plugin@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@anz-bank/vscode-sysl-plugin/-/vscode-sysl-plugin-0.5.0.tgz#4e55fc8caa57d7325ea72872a364a395a38c5d61"
+  integrity sha512-AoR1NQjMFcmy3FGOKxUwSiXtuTAlZgxr2ID/PgzaHsytrk1W51VMJoLMpOC3UyNykD9f546dE2QXcskRAJaEaA==
   dependencies:
     "@anz-bank/sysl" "^0.7.0"
     "@anz-bank/vscode-sysl-model" "^0.3.0"
     "@types/lodash" "^4.14.182"
     lodash "^4.17.21"
     vscode-languageserver "^8.0.2"
-    vscode-languageserver-protocol "^3.16.0"
+    vscode-languageserver-protocol "3.17.2"
     vscode-languageserver-textdocument "^1.0.1"
 
 "@apidevtools/json-schema-ref-parser@9.0.9":
@@ -3503,7 +3503,7 @@ vscode-languageclient@^8.0.2:
     semver "^7.3.5"
     vscode-languageserver-protocol "3.17.2"
 
-vscode-languageserver-protocol@3.17.2, vscode-languageserver-protocol@^3.16.0:
+vscode-languageserver-protocol@3.17.2:
   version "3.17.2"
   resolved "https://registry.yarnpkg.com/vscode-languageserver-protocol/-/vscode-languageserver-protocol-3.17.2.tgz#beaa46aea06ed061576586c5e11368a9afc1d378"
   integrity sha512-8kYisQ3z/SQ2kyjlNeQxbkkTNmVFoQCqkmGrzLH6A9ecPlgTbp3wDTnUNqaUxYr4vlAcloxx8zwy7G5WdguYNg==
