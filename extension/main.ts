@@ -1,3 +1,4 @@
+import { fromPairs } from "lodash";
 import {
   commands,
   ConfigurationTarget,
@@ -8,20 +9,19 @@ import {
   workspace,
 } from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
-import { fromPairs } from "lodash";
 
-import { syslBinaryPath, remoteUrl } from "./constants";
+import { Disposable } from "@anz-bank/vscode-sysl-model";
+import { URI } from "vscode-uri";
+import { remoteUrl, syslBinaryPath } from "./constants";
 import { buildClient } from "./lsp/client/sysl";
+import { VsCodeEvents } from "./plugins/events_vscode";
+import { PluginEngine } from "./plugins/plugin_engine";
+import { PluginClientOptions } from "./plugins/types";
 import { Sysl } from "./tools/sysl";
 import { checkSysl, errorMessage, getOrDownloadSysl } from "./tools/sysl_download";
-import { PluginEngine } from "./plugins/plugin_engine";
-import { MultiDocumentViewEditorProvider } from "./views/multi/provider";
 import { viewRegistry } from "./views";
 import { CustomEditorMultiViewFactory } from "./views/multi/factory_vscode";
-import { VsCodeEvents } from "./plugins/events_vscode";
-import { PluginClientOptions } from "./plugins/types";
-import { URI } from "vscode-uri";
-import { Disposable } from "@anz-bank/vscode-sysl-model";
+import { MultiDocumentViewEditorProvider } from "./views/multi/provider";
 
 /** The language client, created in {@link activate}, to be cleaned up in {@link deactivate}. */
 let client: LanguageClient;
@@ -49,11 +49,12 @@ export async function activate(context: ExtensionContext) {
   pluginEngine = await buildPluginEngine(context, sysl);
   await pluginEngine.activate();
 
-  registerActions();
+  registerActions(sysl);
   watchAuxFiles();
 
   const output = window.createOutputChannel("Sysl");
-  output.appendLine(`Registered ${pluginEngine.plugins.length} plugins`);
+  const ids = pluginEngine.plugins.map((p) => p.id).join(", ");
+  output.appendLine(`Registered ${pluginEngine.plugins.length} plugins (${ids})`);
 
   // TODO: Generalize test instrumentation.
   (global as any).__test__?.onActivated();
@@ -99,10 +100,20 @@ async function buildPluginEngine(context: ExtensionContext, sysl: Sysl): Promise
   });
 }
 
-function registerActions() {
+// TODO: Move to plugin package to share with plugins.
+type Action = {
+  action: string;
+  title: string;
+  category?: string;
+};
+
+function registerActions(sysl: Sysl) {
+  const compileDoc = async (doc: TextDocument): Promise<string> =>
+    (await sysl.protobufFromSource(doc.getText(), doc.uri.fsPath)).toString("utf-8");
+
   commands.registerCommand("sysl.action.list", () => {
-    const actions = (global as any).actions;
-    const toLabel = (a) => (a.category ? `${a.category}: ` : "") + a.title;
+    const actions = (global as any).actions as Action[];
+    const toLabel = (a: Action) => (a.category ? `${a.category}: ` : "") + a.title;
     const nameToId: { [key: string]: string } = fromPairs(
       actions.map((a) => [toLabel(a), a.action])
     );
@@ -112,11 +123,14 @@ function registerActions() {
         return;
       }
       const id = nameToId[name];
-      window.withProgress({ location: ProgressLocation.Notification, title: name }, () =>
-        commands.executeCommand(id, {
-          uri: window.activeTextEditor?.document.uri.toString(),
-        })
-      );
+      window.withProgress({ location: ProgressLocation.Notification, title: name }, async () => {
+        const doc = window.activeTextEditor?.document;
+        let model: string | undefined = undefined;
+        if (doc && doc.uri.fsPath.endsWith(".sysl")) {
+          model = await compileDoc(doc).catch(() => undefined);
+        }
+        return commands.executeCommand(id, { uri: doc?.uri.toString(), model });
+      });
     });
   });
 }

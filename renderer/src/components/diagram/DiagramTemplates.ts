@@ -28,7 +28,21 @@ export default function DiagramTemplate(props?: TemplateData) {
 
   // Set layout if provided, else default to no layout.
   if (props?.diagramLayout) {
-    diagram.layout = new props.diagramLayout();
+    if (_.isString(props.diagramLayout)) {
+      const layouts: { [key: string]: typeof go.Layout } = {
+        GridLayout: go.GridLayout,
+        TreeLayout: go.TreeLayout,
+        ForceDirectedLayout: go.ForceDirectedLayout,
+        LayeredDigraphLayout: go.LayeredDigraphLayout,
+        CircularLayout: go.CircularLayout,
+      };
+      const Layout = layouts[props.diagramLayout];
+      if (Layout) {
+        diagram.layout = new Layout();
+      }
+    } else {
+      diagram.layout = new props.diagramLayout();
+    }
   }
 
   // restrict nodes positions to a grid

@@ -96,6 +96,10 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+## 0.47.0
+
+- Support plugin actions by compiling models when invoked on `.sysl` files.
+
 ## 0.46.0
 
 - Fix communication of models between extension and LSP plugins.
