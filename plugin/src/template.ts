@@ -70,8 +70,6 @@ export interface ModelManagement<T> {
   onDidChangeContent?: (e: TextDocumentChangeEvent<T>) => void;
   onDidOpen?: (e: TextDocumentChangeEvent<T>) => void;
   onDidClose?: (e: TextDocumentChangeEvent<T>) => void;
-  onDidSave?: (e: TextDocumentChangeEvent<T>) => void;
-  onWillSave?: (e: TextDocumentWillSaveEvent<T>) => void;
 }
 
 export interface Autocompletion {
@@ -135,6 +133,7 @@ export interface Rendering {
   onDidOpen?: (e: TextDocumentChangeEvent<TextDocument>) => Promise<RenderResult | undefined>;
   onTextRender?: (e: TextDocumentChangeEvent<TextDocument>) => Promise<RenderResult | undefined>;
   onTextChange?: (e: TextDocumentChangeEvent<TextDocument>) => Promise<RenderResult | undefined>;
+  onModelChange?: (e: TextDocumentChangeEvent<TextDocument>) => Promise<RenderResult | undefined>;
 }
 
 /**
@@ -226,6 +225,8 @@ export class Plugin {
         this.documents.onDidOpen(throttle((e) => r.onDidOpen?.(e).then(notify), delay));
       r.onTextChange &&
         this.documents.onDidChangeContent(throttle((e) => r.onTextChange?.(e).then(notify), delay));
+      r.onModelChange &&
+        this.modelManager?.onDidChange(throttle((e) => r.onModelChange?.(e).then(notify), delay));
       r.onTextRender &&
         connection.onNotification(
           TextDocumentRenderNotification.type,

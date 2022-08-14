@@ -5,8 +5,8 @@
 
 import { Model } from "@anz-bank/sysl/model";
 import { PbDocumentModel } from "@anz-bank/sysl/pbModel";
-import { isObject, isString, pull } from "lodash";
-import { Connection } from "vscode-languageserver";
+import { isString, pull } from "lodash";
+import { Connection, URI } from "vscode-languageserver";
 import { Disposable, ProtocolNotificationType } from "vscode-languageserver/node";
 
 // MODELS
@@ -41,10 +41,11 @@ export const defaultModelManagerConfig: ModelManagerConfiguration<string, Model,
  * Manages a set of models to keep track of their state in the client.
  */
 export class ModelManager<T> {
-  /** The models being actively managed. Each key is a string ID for the model's document. */
-  private readonly _models: { [key: string]: T } = {};
+  /** The models being actively managed. Each key is the URI of the model's document. */
+  private readonly _models: { [key: URI]: T } = {};
 
-  private readonly _changeListeners: ((model: T, url: string) => any)[] = [];
+  /** Callbacks to invoke when a model changes. */
+  private readonly _changeListeners: ((model: T, uri: URI) => any)[] = [];
 
   constructor(private readonly configuration: ModelManagerConfiguration<string, T, any>) {}
 
@@ -55,8 +56,8 @@ export class ModelManager<T> {
    * @param uri The text document's URI to retrieve.
    * @return the text document or `undefined`.
    */
-  public get(key: string): T | undefined {
-    return this._models[key];
+  public get(uri: URI): T | undefined {
+    return this._models[uri];
   }
 
   /**
@@ -82,18 +83,8 @@ export class ModelManager<T> {
   listen(connection: Connection): void {
     connection.onNotification(ModelDidOpenNotification.type, (event: ModelDidOpenParams) => {
       const { key, model } = event;
-      console.log("opened", key);
-      console.log(event, typeof event.model, isObject(event.model));
-      console.log(event.model.constructor.name);
-
       this._models[key] = this.configuration.create(key, model as any);
-      console.log(event, typeof event.model, isObject(event.model));
       this._changeListeners.forEach((fn) => fn(this._models[key], key));
-    });
-
-    connection.onNotification(ModelDidCloseNotification.type, (event: ModelDidCloseParams) => {
-      console.log("closed", event.key);
-      delete this._models[event.key];
     });
 
     connection.onNotification(ModelDidChangeNotification.type, (event: ModelDidChangeParams) => {
@@ -101,15 +92,15 @@ export class ModelManager<T> {
       this._models[uri] = this.configuration.update(this._models[uri], event.modelChanges);
       this._changeListeners.forEach((fn) => fn(this._models[uri], uri));
     });
+
+    connection.onNotification(ModelDidCloseNotification.type, (event: ModelDidCloseParams) => {
+      delete this._models[event.key];
+    });
   }
 
   onDidChange(listener: (model: T, uri: string) => any): Disposable {
     this._changeListeners.push(listener);
-    return {
-      dispose: () => {
-        pull(this._changeListeners, listener);
-      },
-    };
+    return { dispose: () => pull(this._changeListeners, listener) };
   }
 }
 
