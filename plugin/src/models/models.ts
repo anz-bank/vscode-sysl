@@ -83,17 +83,40 @@ export class ModelManager<T> {
   listen(connection: Connection): void {
     connection.onNotification(ModelDidOpenNotification.type, (event: ModelDidOpenParams) => {
       const { key, model } = event;
-      this._models[key] = this.configuration.create(key, model as any);
+      try {
+        const newModel = this.configuration.create(key, model as any);
+        if (!newModel) {
+          console.warn(`opened model for ${key} to invalid value (${newModel})`);
+          return;
+        }
+        this._models[key] = newModel;
+      } catch (err) {
+        console.warn(`opened model for ${key} to invalid value: ${err}`);
+        return;
+      }
+      console.debug(`opened model for ${key}`);
       this._changeListeners.forEach((fn) => fn(this._models[key], key));
     });
 
     connection.onNotification(ModelDidChangeNotification.type, (event: ModelDidChangeParams) => {
-      const uri = event.key;
-      this._models[uri] = this.configuration.update(this._models[uri], event.modelChanges);
-      this._changeListeners.forEach((fn) => fn(this._models[uri], uri));
+      const { key } = event;
+      try {
+        const newModel = this.configuration.update(this._models[key], event.modelChanges);
+        if (!newModel) {
+          console.warn(`changed model for ${key} to invalid value (${newModel})`);
+          return;
+        }
+        this._models[key] = newModel;
+      } catch (err) {
+        console.warn(`changed model for ${key} to invalid value: ${err}`);
+        return;
+      }
+      console.debug(`changed model for ${key}`);
+      this._changeListeners.forEach((fn) => fn(this._models[key], key));
     });
 
     connection.onNotification(ModelDidCloseNotification.type, (event: ModelDidCloseParams) => {
+      console.debug("closed", event.key);
       delete this._models[event.key];
     });
   }

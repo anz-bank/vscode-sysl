@@ -16,6 +16,7 @@ import {
   TextDocuments,
   TextDocumentSyncKind,
   TextDocumentWillSaveEvent,
+  URI,
 } from "vscode-languageserver/node";
 import { ModelManager, ModelManagerConfiguration } from "./models";
 import {
@@ -133,7 +134,7 @@ export interface Rendering {
   onDidOpen?: (e: TextDocumentChangeEvent<TextDocument>) => Promise<RenderResult | undefined>;
   onTextRender?: (e: TextDocumentChangeEvent<TextDocument>) => Promise<RenderResult | undefined>;
   onTextChange?: (e: TextDocumentChangeEvent<TextDocument>) => Promise<RenderResult | undefined>;
-  onModelChange?: (e: TextDocumentChangeEvent<TextDocument>) => Promise<RenderResult | undefined>;
+  onModelChange?: (model: Model, uri: URI) => Promise<RenderResult | undefined>;
 }
 
 /**
@@ -226,7 +227,9 @@ export class Plugin {
       r.onTextChange &&
         this.documents.onDidChangeContent(throttle((e) => r.onTextChange?.(e).then(notify), delay));
       r.onModelChange &&
-        this.modelManager?.onDidChange(throttle((e) => r.onModelChange?.(e).then(notify), delay));
+        this.modelManager?.onDidChange(
+          throttle((model, uri) => r.onModelChange?.(model, uri).then(notify), delay)
+        );
       r.onTextRender &&
         connection.onNotification(
           TextDocumentRenderNotification.type,
