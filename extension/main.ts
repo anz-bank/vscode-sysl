@@ -1,3 +1,5 @@
+import { Disposable } from "@anz-bank/vscode-sysl-model";
+import { Action } from "@anz-bank/vscode-sysl-plugin";
 import { fromPairs } from "lodash";
 import {
   commands,
@@ -9,10 +11,8 @@ import {
   workspace,
 } from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
-
-import { Disposable } from "@anz-bank/vscode-sysl-model";
 import { URI } from "vscode-uri";
-import { remoteUrl, syslBinaryPath } from "./constants";
+import { remoteUrl, renderDiagramCommand, syslBinaryPath } from "./constants";
 import { buildClient } from "./lsp/client/sysl";
 import { VsCodeEvents } from "./plugins/events_vscode";
 import { PluginEngine } from "./plugins/plugin_engine";
@@ -75,7 +75,7 @@ async function getSysl(context: ExtensionContext): Promise<Sysl> {
     // set the Sysl path in ext setting to this syslPath
     await workspace
       .getConfiguration()
-      .update("sysl.tool.binaryPath", sysl.path, ConfigurationTarget.Global);
+      .update(syslBinaryPath, sysl.path, ConfigurationTarget.Global);
     return sysl;
   }
 }
@@ -100,13 +100,6 @@ async function buildPluginEngine(context: ExtensionContext, sysl: Sysl): Promise
   });
 }
 
-// TODO: Move to plugin package to share with plugins.
-type Action = {
-  action: string;
-  title: string;
-  category?: string;
-};
-
 function registerActions(sysl: Sysl) {
   const compileDoc = async (doc: TextDocument): Promise<string> =>
     (await sysl.protobufFromSource(doc.getText(), doc.uri.fsPath)).toString("utf-8");
@@ -115,7 +108,8 @@ function registerActions(sysl: Sysl) {
     const actions = (global as any).actions as Action[];
     const toLabel = (a: Action) => (a.category ? `${a.category}: ` : "") + a.title;
     const nameToId: { [key: string]: string } = fromPairs(
-      actions.map((a) => [toLabel(a), a.action])
+      // Fallback to `.action` for backwards compatibility (< v0.6.0).
+      actions.map((a) => [toLabel(a), a.id ?? (a as any).action])
     );
 
     window.showQuickPick(Object.keys(nameToId)).then((name) => {
@@ -170,10 +164,10 @@ function handleMissingSysl() {
     const setPathItem = "Set Path to Sysl";
     window.showErrorMessage(errorMessage.syslUnavailable, setPathItem).then((item) => {
       if (item === setPathItem) {
-        commands.executeCommand("workbench.action.openSettings", "sysl.tool.binaryPath");
+        commands.executeCommand("workbench.action.openSettings", syslBinaryPath);
       }
     });
   };
   show();
-  commands.registerCommand("sysl.renderDiagram", show);
+  commands.registerCommand(renderDiagramCommand, show);
 }

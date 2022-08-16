@@ -65,9 +65,7 @@ export class ViewRegistry implements Views {
   /** Invoked by a view when it is opened. */
   async acceptOpenView<T, D>(view: View<T, D>): Promise<void> {
     const { key } = view;
-
     (this.views[viewKeyToString(key)] ??= []).push(view);
-
     const event = await this.buildEvent(view);
     this.onDidOpenViewListeners.forEach(async (f) => f(event));
   }

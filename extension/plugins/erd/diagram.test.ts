@@ -1,28 +1,40 @@
+import {
+  Application,
+  AppName,
+  Model,
+  Primitive,
+  Reference,
+  Struct,
+  Type,
+  TypePrimitive,
+} from "@anz-bank/sysl/model";
 import { expect } from "chai";
 import { buildModel } from "./diagram";
 
-const mod = {
-  apps: {
-    App: {
-      types: {
-        Foo: {
-          relation: {
-            attrDefs: {
-              f: { typeRef: { ref: { path: ["Bar"] } } },
-            },
-          },
-        },
-        Bar: {
-          relation: {
-            attrDefs: {
-              g: { primitive: "int" },
-            },
-          },
-        },
-      },
-    },
-  },
-};
+const mod: Model = new Model({
+  apps: [
+    new Application({
+      name: new AppName(["App"]),
+      types: [
+        new Type({
+          discriminator: "!table",
+          name: "Foo",
+          value: new Struct([
+            new Type({
+              name: "f",
+              value: new Reference({ appName: new AppName(["App"]), typeName: "Bar" }),
+            }),
+          ]),
+        }),
+        new Type({
+          discriminator: "!table",
+          name: "Bar",
+          value: new Struct([new Type({ name: "g", value: new Primitive(TypePrimitive.INT) })]),
+        }),
+      ],
+    }),
+  ],
+});
 
 suite("ERD plugin", () => {
   test("build diagram", async () => {

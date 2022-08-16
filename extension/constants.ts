@@ -7,6 +7,9 @@ export const customViewType = "sysl.gojsDiagram";
 /** The configuration key for the path to a custom Sysl binary. */
 export const syslBinaryPath = "sysl.tool.binaryPath";
 
+/** The command to render a Sysl document as a diagram. */
+export const renderDiagramCommand: TextEditorCommand = "sysl.renderDiagram";
+
 /** ID of a command to execute from a Sysl text editor. */
 export type TextEditorCommand = "sysl.renderDiagram";
 

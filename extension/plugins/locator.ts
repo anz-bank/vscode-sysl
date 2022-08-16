@@ -108,25 +108,22 @@ export class PluginLocator {
     extensionPath: string,
     options?: PluginClientOptions
   ): Promise<PluginConfig[]> {
-    const pluginsDir = path.join(extensionPath, "extension", "plugins");
-    const intPath = path.join(pluginsDir, "integration", "integration_model_plugin.arraiz");
+    const intPath = path.join(extensionPath, "out", "plugins", "integration", "index.js");
     const erdPath = path.join(extensionPath, "out", "plugins", "erd", "index.js");
     const sysldPath = path.join(extensionPath, "out", "plugins", "sysld", "index.js");
 
     return [
       {
         id: idFromFile(intPath),
-        transform: {
-          sysl,
+        lsp: {
           scriptPath: intPath,
-          clientOptions: options,
+          clientOptions: { ...options, documentSelector: [{ scheme: "file", language: "sysl" }] },
         },
-      } as TransformPluginConfig,
+      } as LspPluginConfig,
       {
         id: idFromFile(erdPath),
         lsp: {
           scriptPath: erdPath,
-          serverOptions: {},
           clientOptions: { ...options, documentSelector: [{ scheme: "file", language: "sysl" }] },
         },
       } as LspPluginConfig,
@@ -134,7 +131,6 @@ export class PluginLocator {
         id: idFromFile(sysldPath),
         lsp: {
           scriptPath: sysldPath,
-          serverOptions: {},
           clientOptions: { ...options, documentSelector: [{ scheme: "file", language: "sysld" }] },
         },
       } as LspPluginConfig,
@@ -159,6 +155,7 @@ export class PluginLocator {
           https: { rejectUnauthorized: false },
         })
         ?.json();
+      console.log("got ", obj);
       plugins = await this.parseManifest(sysl, globalStoragePath, remoteUrl, obj.plugins, options);
     } catch (e) {
       throw new Error(`Error fetching remote plugins: ${e}`);
@@ -177,43 +174,33 @@ export class PluginLocator {
   ): Promise<PluginConfig[]> {
     let configs: PluginConfig[] = [];
     try {
+      console.log("parse manifest", manifestPath, manifests);
       for (let i = 0; i < manifests.length; i++) {
         const plugin = manifests[i];
+        const scriptPath = path.resolve(path.dirname(manifestPath), plugin.entrypoint);
         switch (plugin.kind) {
           case "command":
             configs.push({
               id: plugin.id,
-              command: {
-                sysl,
-                runOptions: {
-                  command: path.resolve(path.dirname(manifestPath), plugin.entrypoint),
-                },
-                clientOptions: options,
-              },
+              command: { sysl, runOptions: { command: scriptPath }, clientOptions: options },
             } as CommandPluginConfig);
             break;
           case "transform":
             configs.push({
               id: plugin.id,
-              transform: {
-                sysl,
-                scriptPath: path.resolve(path.dirname(manifestPath), plugin.entrypoint),
-                clientOptions: options,
-              },
+              transform: { sysl, scriptPath, clientOptions: options },
             } as TransformPluginConfig);
             break;
           case "lsp.module":
             const config = configFromFile(plugin.config);
             configs.push({
               id: plugin.id,
-              lsp: {
-                scriptPath: path.resolve(path.dirname(manifestPath), plugin.entrypoint),
-                clientOptions: { ...options, ...config },
-              },
+              lsp: { scriptPath, clientOptions: { ...options, ...config } },
             } as LspPluginConfig);
             break;
           case "archive":
             const pluginPath: string = path.join(globalStoragePath, ".sysl", "plugins", plugin.id);
+            console.log("archive ", pluginPath);
             // check if already downloaded (fetch from globalStorage)
             // if ((await filesIn(pluginPath)).length) {
             //   console.log(`plugin found at ${pluginPath}`);
@@ -256,9 +243,17 @@ async function downloadPlugin(dir: string, url: string): Promise<PluginManifest[
       // Ignore error on mkdir for existing dir.
     }
   }
-  const response = (await download(url, dir, { extract: true })) as any;
+  console.log("downlaod and extract", url, "into", dir);
+  let response;
+  try {
+    response = (await download(url, dir, { extract: true })) as any;
+  } catch (err) {
+    console.log("error downloading plugin", err);
+    throw err;
+  }
   // extract manifest.json from the archive
   const manifest = response.find((i) => i.path === "manifest.json");
+  console.log("extracted manifest", manifest);
   const plugins: PluginManifest[] = JSON.parse(manifest.data.toString())?.plugins;
   plugins?.forEach((p: PluginManifest) => (p.entrypoint = path.resolve(dir, p.entrypoint)));
   return plugins;

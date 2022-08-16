@@ -29,7 +29,7 @@ suite("contributions", () => {
 
     // Use CommandMap types to check all commands are present.
     const textCommands: constants.TextEditorCommandMap = {
-      "sysl.renderDiagram": () => {},
+      [constants.renderDiagramCommand]: () => {},
     };
     Object.keys(textCommands).forEach(expectCommandPresent);
 

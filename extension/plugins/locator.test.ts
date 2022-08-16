@@ -20,16 +20,10 @@ suite("plugins", () => {
 
   suite("locator", () => {
     test("builtin", async () => {
-      mock({
-        "root/extension/plugins/integration": {
-          "integration_model_plugin.arraiz": "",
-          "integration_model_plugin.arrai": "",
-        },
-      });
       const plugins = await PluginLocator.builtin(sysl, "root");
 
-      expect((plugins[0] as TransformPluginConfig).transform.scriptPath).to.equal(
-        path.normalize("root/extension/plugins/integration/integration_model_plugin.arraiz")
+      expect((plugins[0] as LspPluginConfig).lsp.scriptPath).to.equal(
+        path.normalize("root/out/plugins/integration/index.js")
       );
       expect((plugins[1] as LspPluginConfig).lsp.scriptPath).to.equal(
         path.normalize("root/out/plugins/erd/index.js")

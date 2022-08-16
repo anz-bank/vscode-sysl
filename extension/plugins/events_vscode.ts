@@ -1,6 +1,7 @@
 import { Disposable } from "@anz-bank/vscode-sysl-model";
 import { pull } from "lodash";
 import { commands, TextDocument, TextDocumentChangeEvent, Uri, window, workspace } from "vscode";
+import { renderDiagramCommand } from "../constants";
 import { Events } from "./types";
 
 type DocumentChangeListener = (e: TextDocumentChangeEvent) => any;
@@ -15,7 +16,7 @@ export class VsCodeEvents implements Events {
 
   register(): Disposable {
     const disposables = [
-      commands.registerCommand("sysl.renderDiagram", this.handleRenderCommand.bind(this)),
+      commands.registerCommand(renderDiagramCommand, this.handleRenderCommand.bind(this)),
       workspace.onDidChangeTextDocument(this.handleDidChangeTextDocument.bind(this)),
       workspace.onDidSaveTextDocument(this.handleDidSaveTextDocument.bind(this)),
       workspace.onDidOpenTextDocument(this.handleDidOpenTextDocument.bind(this)),

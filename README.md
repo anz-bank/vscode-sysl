@@ -96,6 +96,12 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+## 0.49.0
+
+- Improve integration diagram plugin to use LSP framework.
+- Improve ERD diagram to use Sysl SDK and handle type decorators (e.g. `set of <reference>`).
+- Improve default diagram node template to have bigger text relative to the box.
+
 ## 0.47.0
 
 - Support plugin actions by compiling models when invoked on `.sysl` files.

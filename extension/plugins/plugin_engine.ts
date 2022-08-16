@@ -1,4 +1,5 @@
 import { Disposable } from "@anz-bank/vscode-sysl-model";
+import { window } from "vscode";
 import { Sysl } from "../tools/sysl";
 import { PluginLocator } from "./locator";
 import { PluginConfig } from "./plugin_config";
@@ -35,17 +36,10 @@ export class PluginEngine {
       const configs = await this.locate();
       configs.forEach((c) => (c.sysl = this.config.sysl));
       this._plugins = this.build(configs);
-      this.plugins.forEach((p) => p.start());
+      await Promise.all(this.plugins.map((p) => p.start()));
       if (this._plugins.length) {
         this.disposables.push(this.config.events.register());
       }
-
-      this.config.events.onDidSaveTextDocument(async (e: DocumentChangeEvent) => {
-        const model = await this.config.sysl?.protobufFromSource(
-          e.document.getText(),
-          e.document.uri.fsPath
-        );
-      });
     } catch (e) {
       console.error(`Error activating plugins: ${e}`);
     }

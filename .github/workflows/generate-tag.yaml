@@ -7,8 +7,6 @@ on:
     paths-ignore:
       - ".github/**"
       - "docs/**"
-      - "model/**"
-      - "plugin/**"
 
 jobs:
   generate-tag:

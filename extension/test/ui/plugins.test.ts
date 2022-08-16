@@ -43,7 +43,8 @@ suite("plugins", function () {
 
   suite("builtin", async function () {
     test("initial render", async function () {
-      await diagram.renderFull();
+      await diagram.render();
+      await sleep(5000);
       await diagram.selectTab("Integration");
 
       const data = await diagram.getData();
@@ -55,6 +56,7 @@ suite("plugins", function () {
 
     test("after edit", async function () {
       await diagram.render();
+      await sleep(5000);
       await diagram.selectTab("Integration");
 
       await Input.into(editor, Input.emptyApp("Foo"));

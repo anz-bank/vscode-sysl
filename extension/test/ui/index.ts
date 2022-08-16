@@ -3,6 +3,7 @@ import Mocha from "mocha";
 import glob from "glob";
 import { ConfigurationTarget, workspace } from "vscode";
 import { getOrDownloadSysl } from "../../tools/sysl_download";
+import { syslBinaryPath } from "../../constants";
 
 export async function run(): Promise<void> {
   // Create the mocha test
@@ -44,9 +45,7 @@ export async function run(): Promise<void> {
 /** Ensures a discoverable Sysl binary exists. */
 async function ensureSysl(rootDir: string): Promise<void> {
   const setSyslPathConfig = async (path: string) =>
-    await workspace
-      .getConfiguration()
-      .update("sysl.tool.binaryPath", path, ConfigurationTarget.Global);
+    await workspace.getConfiguration().update(syslBinaryPath, path, ConfigurationTarget.Global);
 
   await setSyslPathConfig("");
   const sysl = await getOrDownloadSysl(rootDir);

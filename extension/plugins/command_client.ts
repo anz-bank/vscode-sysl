@@ -1,3 +1,5 @@
+import { Disposable, ViewKey } from "@anz-bank/vscode-sysl-model";
+import { ViewModel } from "@anz-bank/vscode-sysl-plugin";
 import { throttle, truncate } from "lodash";
 import path from "path";
 import {
@@ -8,13 +10,11 @@ import {
   PluginClientOptions,
 } from "../plugins/types";
 import { Change, Context, Request, Response } from "../protocol/plugin";
-import { views } from "../views";
-import { Sysl } from "../tools/sysl";
-import { spawnBuffer } from "../tools/spawn";
-import { ViewModelChangeEvent } from "../views/events";
 import { defaultLogger, Logger } from "../tools/logging";
-import { Disposable, ViewKey } from "@anz-bank/vscode-sysl-model";
-import { ViewModel } from "@anz-bank/vscode-sysl-plugin";
+import { spawnBuffer } from "../tools/spawn";
+import { Sysl } from "../tools/sysl";
+import { views } from "../views";
+import { ViewModelChangeEvent } from "../views/events";
 
 /** Details about how to invoke the plugin. */
 export type RunOptions = {

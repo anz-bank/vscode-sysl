@@ -8,9 +8,9 @@ import {
   ViewEdits,
   ViewMeta,
 } from "@anz-bank/vscode-sysl-plugin";
-import { TextDocumentChangeEvent, URI } from "vscode-languageserver";
+import { URI } from "vscode-languageserver-protocol";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { Sysl } from "../../tools/sysl";
+import { TextDocumentChangeEvent } from "vscode-languageserver/node";
 import { DiagramModel } from "../../views/diagram/model";
 import { buildModel } from "./diagram";
 
@@ -26,15 +26,15 @@ const plugin = new Plugin({
 });
 plugin.createConnection();
 
-// The document-agnostic parts of the ERD view key.
+// The document-agnostic parts of the integration view key.
 const partialKey: ViewKey = {
   docUri: "",
-  pluginId: "erd",
+  pluginId: "int",
   viewId: "diagram",
 };
 
 /** The metadata for the view without a particular key. */
-const partialMeta: ViewMeta = { label: "ERD", kind: "diagram" };
+const partialMeta: ViewMeta = { label: "Integration", kind: "diagram" };
 
 async function onModelChange(model: Model, docUri: URI): Promise<RenderResult | undefined> {
   const key: ViewKey = { ...partialKey, docUri };
@@ -50,18 +50,25 @@ async function onTextRender(
   const key: ViewKey = { ...partialKey, docUri: e.document.uri };
 
   if (!plugin.viewManager?.get(key)) {
-    const model = await buildModelForKey(key);
-    if (model.nodes.length) {
-      return { open: [{ key, model }] };
+    try {
+      const model = await buildModelForKey(key);
+      if (model.nodes.length) {
+        return { open: [{ key, model }] };
+      }
+    } catch (err: any) {
+      // plugin.connection?.sendNotification(ShowMessageNotification.type, {
+      //   type: MessageType.Error,
+      //   message: err.toString(),
+      // });
     }
   }
 }
 
-/** Returns a model for the ERD diagram. */
+/** Returns a model for the integration diagram. */
 async function buildModelForKey(key: ViewKey): Promise<DiagramModel> {
   const model = plugin.getModel(key.docUri);
   if (!model) {
-    throw new Error("must have compiled model to render ERD diagram");
+    throw new Error("must have compiled model to render integration diagram");
   }
 
   return { meta: { ...partialMeta, key }, ...(await buildModel(model)) };

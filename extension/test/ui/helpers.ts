@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import fs from "fs";
 import { Suite, Test } from "mocha";
-import path from "path";
 import retry from "p-retry";
+import path from "path";
 
 import {
   commands,
@@ -15,10 +15,10 @@ import {
   Webview,
   workspace,
 } from "vscode";
-import { checkSysl } from "../../tools/sysl_download";
+import { renderDiagramCommand, syslBinaryPath } from "../../constants";
 import { CustomEditorManager } from "../../editor/custom_editors";
+import { checkSysl } from "../../tools/sysl_download";
 import { DiagramModel } from "../../views/diagram/model";
-import { isUndefined } from "lodash";
 
 export class Input {
   /** Returns the position of the end of the document in editor. */
@@ -197,7 +197,7 @@ export class Screenshot {
 export class Diagram {
   /** Renders a diagram of the active document and waits to load and focus the webview. */
   async render(): Promise<void> {
-    await commands.executeCommand("sysl.renderDiagram");
+    await commands.executeCommand(renderDiagramCommand);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     await allSettled();
   }
@@ -282,7 +282,7 @@ export class Tools {
       await checkSysl(path.resolve(__dirname, "../../../sysl"));
       await workspace
         .getConfiguration()
-        .update("sysl.tool.binaryPath", "./sysl", ConfigurationTarget.Global);
+        .update(syslBinaryPath, "./sysl", ConfigurationTarget.Global);
     }
   }
 }

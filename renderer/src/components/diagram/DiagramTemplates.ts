@@ -57,14 +57,21 @@ export default function DiagramTemplate(props?: TemplateData) {
   const nodeTemplate = $(
     go.Node,
     "Auto",
+    { height: 48, width: 128 },
     $(
       go.Shape,
       "Rectangle",
-      { height: 96, width: 256, stroke: "black", fill: "white" },
+      {
+        stretch: go.GraphObject.Fill,
+        fill: "white",
+        stroke: "black",
+        strokeWidth: 1,
+      },
       new go.Binding("fill", "bgColor"),
+      new go.Binding("strokeWidth", "strokeWidth"),
       new go.Binding("stroke", "strokeColor")
     ),
-    getTextBlockStyle({ margin: "10", label: "label" }),
+    getTextBlockStyle({ margin: "0 8 0 8", label: "label" }),
     new go.Binding("location", "location", go.Point.parse).makeTwoWay(stringifyPoint),
     new go.Binding("visible", "visible")
   );
@@ -305,9 +312,9 @@ function getTextBlockStyle(text: TemplateTextBlock): go.TextBlock {
       textAlign: text.align ?? "center",
       verticalAlignment: go.Spot.Center,
       alignment: go.Spot.Center,
-      overflow: text.overflow ?? go.TextBlock.OverflowEllipsis,
-      maxLines: text.maxLines ?? 1,
-      font: text.font ?? "",
+      overflow: text.overflow ?? go.TextBlock.WrapDesiredSize,
+      maxLines: text.maxLines ?? 3,
+      font: text.font ?? "12px arial",
     },
     text.segmentOffset
       ? { segmentOffset: new go.Point(text.segmentOffset.x, text.segmentOffset.y) }

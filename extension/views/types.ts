@@ -129,6 +129,7 @@ export interface Views {
   acceptOpenMultiView(docUri: URI, multiView: MultiView): void;
   acceptCloseMultiView(multiview: MultiView): void;
 
+  getAllViews(): View<any, any>[];
   getViews(key: ViewKey): View<any, any>[] | undefined;
   getMultiViews(docUri: URI): MultiView[] | undefined;
   openView: <T extends ViewModel>(key: ViewKey, model?: T) => Promise<View<T, any>[]>;

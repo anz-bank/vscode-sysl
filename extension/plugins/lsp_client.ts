@@ -136,26 +136,26 @@ export class LspPluginClient implements PluginClient, Disposable {
     this.router = new LspPluginClientRouter(views, client);
   }
 
-  async start(): Promise<void> {
-    const compileDoc = async (doc: Document): Promise<string> => {
-      const sysl = this.pluginConfig.sysl;
-      const jsonBuffer = await sysl?.protobufFromSource(doc.getText(), doc.uri.fsPath);
-      if (!jsonBuffer) {
-        throw new Error("no model");
-      }
-      return jsonBuffer.toString();
-    };
+  async compileDoc(doc: Document): Promise<string> {
+    // TODO: Use document selector to only compile relevant .sysl files.
+    if (!doc.uri.fsPath.endsWith(".sysl")) {
+      throw new Error("only .sysl files can be compiled");
+    }
+    const sysl = this.pluginConfig.sysl;
+    const jsonBuffer = await sysl?.protobufFromSource(doc.getText(), doc.uri.fsPath);
+    if (!jsonBuffer) {
+      throw new Error("no model generated");
+    }
+    return jsonBuffer.toString("utf-8");
+  }
 
+  async start(): Promise<void> {
     this.subscriptions.push(
       ...(await this.router.start()),
       this.events.onRender(this.render.bind(this)),
 
       this.events.onDidSaveTextDocument(async (e: DocumentChangeEvent) => {
-        // TODO: Use document selector to only compile relevant .sysl files.
-        if (!e.document.uri.fsPath.endsWith(".sysl")) {
-          return;
-        }
-        const model = await compileDoc(e.document);
+        const model = await this.compileDoc(e.document).catch(() => undefined);
         this.client.sendNotification(ModelDidChangeNotification.type, {
           key: e.document.uri.toString(),
           modelChanges: [model],
@@ -163,11 +163,7 @@ export class LspPluginClient implements PluginClient, Disposable {
       }),
 
       this.events.onDidOpenTextDocument(async (doc) => {
-        // TODO: Use document selector to only compile relevant .sysl files.
-        if (!doc.uri.fsPath.endsWith(".sysl")) {
-          return;
-        }
-        const model = await compileDoc(doc);
+        const model = await this.compileDoc(doc).catch(() => undefined);
         this.client.sendNotification(ModelDidOpenNotification.type, {
           key: doc.uri.toString(),
           model: model as any, // TODO: Encode model as object.
@@ -192,6 +188,18 @@ export class LspPluginClient implements PluginClient, Disposable {
   }
 
   async render(doc: Document): Promise<void> {
+    try {
+      const model = await this.compileDoc(doc);
+      // Store the state of the model in the plugin for access at render time.
+      // TODO: Only send if the plugin supports the model capability.
+      await this.client.sendNotification(ModelDidOpenNotification.type, {
+        key: doc.uri.toString(),
+        model: model as any, // TODO: Encode model as object.
+      });
+    } catch {
+      // Do nothing, model won't be available (or it will be stale).
+    }
+
     const payload: TextDocumentChangeEvent<LspTextDocument> = {
       document: { ...doc, uri: doc.uri.toString() },
     };

@@ -7,7 +7,7 @@ import {
 } from "@anz-bank/vscode-sysl-plugin";
 import { ProtocolNotificationType } from "vscode-languageserver-protocol";
 import { NotificationSender, Notifier, ViewEvent, ViewModelChangeEvent } from "../views/events";
-import { Views } from "../views/types";
+import { View, Views } from "../views/types";
 
 /**
  * Routes events between a plugin and the renderer.
@@ -56,6 +56,11 @@ export class LspPluginClientRouter implements Disposable {
         notifier.sendViewDidChange({ key: e.key, modelChanges: [e.change] })
       )
     );
+
+    // Notify the server about all views that are already open (race condition).
+    views.getAllViews().forEach(({ key }: View<any, any>) => {
+      notifier.sendViewDidOpen({ view: { key } });
+    });
 
     return disposables;
   }

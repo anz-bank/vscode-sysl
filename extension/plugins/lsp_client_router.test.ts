@@ -1,5 +1,5 @@
 import chai, { expect } from "chai";
-import sinon, { SinonSpyCall } from "sinon";
+import sinon, { SinonSpyCall, SinonStubbedInstance } from "sinon";
 import sinonChai from "sinon-chai";
 chai.use(sinonChai);
 
@@ -37,11 +37,12 @@ export const fooType = new ProtocolNotificationType<any, void>("foo");
 
 suite("LSP plugin client router", () => {
   let client: LanguageClientSpy;
-  let views: Views;
+  let views: SinonStubbedInstance<ViewRegistry>;
   let sent: any;
 
   setup(async () => {
     views = sinon.createStubInstance(ViewRegistry);
+    views.getAllViews.returns([]);
     client = new LanguageClientSpy();
     sent = sinon.spy(client, "sendNotification");
     await new LspPluginClientRouter(views, client).start();
