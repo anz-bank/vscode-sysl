@@ -35,12 +35,12 @@ const model: ViewModel = { meta: { key } };
 
 export const fooType = new ProtocolNotificationType<any, void>("foo");
 
-suite("LSP plugin client router", () => {
+describe("LSP plugin client router", () => {
   let client: LanguageClientSpy;
   let views: SinonStubbedInstance<ViewRegistry>;
   let sent: any;
 
-  setup(async () => {
+  beforeEach(async () => {
     views = sinon.createStubInstance(ViewRegistry);
     views.getAllViews.returns([]);
     client = new LanguageClientSpy();
@@ -70,7 +70,7 @@ suite("LSP plugin client router", () => {
     expect(views.onDidChangeView).to.have.been.calledOnce;
   });
 
-  suite("from server", () => {
+  describe("from server", () => {
     test("open view", async () => {
       const payload = { views: [{ key, model }] } as ViewOpenParams;
       client.acceptNotification(ViewOpenNotification.type, payload);
@@ -85,7 +85,7 @@ suite("LSP plugin client router", () => {
     });
   });
 
-  suite("from views", () => {
+  describe("from views", () => {
     test("did open view", () => {
       simulate(views.onDidOpenView).calledWith({ key });
       expect(sent).to.have.been.calledWith(ViewDidOpenNotification.type, {

@@ -1,13 +1,15 @@
 import { expect } from "chai";
+import { Executor } from "./spawn";
 
-suite("executor", function () {
-  this.timeout(20000);
+describe("executor", () => {
+  let executor: Executor;
+  beforeEach(() => {
+    executor = new Executor();
+    executor.allSettled();
+  });
+  afterEach(() => executor.allSettled());
 
-  const executor = (global as any).__executor__;
-  setup(() => executor.allSettled());
-  teardown(() => executor.allSettled());
-
-  suite("no processes", () => {
+  describe("no processes", () => {
     test("count is zero", () => {
       expect(executor.count).to.equal(0);
     });
@@ -19,7 +21,7 @@ suite("executor", function () {
     });
   });
 
-  suite("active process", () => {
+  describe("active process", () => {
     test("count is non-zero", async () => {
       const task = async () => await sleep(50);
       const promise = executor.start(task);

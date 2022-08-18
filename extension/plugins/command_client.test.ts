@@ -1,4 +1,4 @@
-import { expect } from "chai";
+import chai, { expect } from "chai";
 import { URI } from "vscode-uri";
 import { TestEvents } from "./events_test";
 import { SimpleDocument } from "./types";
@@ -9,14 +9,18 @@ import { FakeMultiViewFactory } from "../views/multi/factory_test";
 import { localSysl } from "../tools/sysl_download";
 import path from "path";
 
-suite("command plugin client", () => {
+import sinonChai from "sinon-chai";
+chai.should();
+chai.use(sinonChai);
+
+describe("command plugin client", () => {
   let client: ExampleClient;
   let events: TestEvents;
   let openView: sinon.SinonSpy;
   let applyEdit: sinon.SinonSpy;
   const fakeFactory = new FakeMultiViewFactory();
 
-  setup(async () => {
+  beforeEach(async () => {
     viewRegistry.multiviewFactory = fakeFactory;
     events = new TestEvents();
     client = new ExampleClient(await localSysl(path.resolve(__dirname, "../..")), events);
@@ -25,7 +29,7 @@ suite("command plugin client", () => {
     applyEdit = sinon.spy(views, "applyEdit");
   });
 
-  teardown(() => {
+  afterEach(() => {
     openView.restore();
     applyEdit.restore();
   });
@@ -43,15 +47,15 @@ suite("command plugin client", () => {
     await client.stop();
   });
 
-  suite("events", () => {
+  describe("events", () => {
     const uri = URI.parse("file:/foo.sysl");
     const document = new SimpleDocument(uri, "App:\n  ...");
 
-    setup(async () => {
+    beforeEach(async () => {
       await client.start();
     });
 
-    teardown(async () => {
+    afterEach(async () => {
       await client.stop();
       viewRegistry.getAllMultiViews().forEach((v) => {
         v.dispose();

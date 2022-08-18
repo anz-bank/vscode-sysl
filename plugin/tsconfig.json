@@ -16,5 +16,6 @@
     "types": [] // Ignore parent node_modules
   },
   "include": ["src"],
-  "exclude": ["vscode", "**/*.test.ts"]
+  "exclude": ["vscode", "**/*.test.ts"],
+  "files": ["global.d.ts"]
 }

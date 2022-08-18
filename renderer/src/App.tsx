@@ -24,6 +24,8 @@ import {
 } from "./components/views/types";
 import { TabLabelType } from "./components/layout/LayoutTypes";
 import { tabLabelIcon } from "./components/layout/TopBar";
+import { uriToViewKey } from "@anz-bank/vscode-sysl-model";
+import { URI } from "vscode-uri";
 
 type AppState = {
   viewData: {
@@ -99,9 +101,9 @@ type SelectionMessageEvent = {
 
 type VisibilityMessageEvent = {
   type: string;
-  previous: Node[],
-  current: Node[],
-}
+  previous: Node[];
+  current: Node[];
+};
 
 function Alert(props: AlertProps) {
   return <MuiAlert elevation={6} {...props} />;
@@ -221,12 +223,9 @@ class App extends React.PureComponent<AppProps, AppState> {
     };
     vscode.postMessage(message);
 
-    this.setState(
-      nextState,
-      () => {
-          vscode.setState(this.state);
-      }
-    );
+    this.setState(nextState, () => {
+      vscode.setState(this.state);
+    });
   }
 
   /**
@@ -350,7 +349,7 @@ class App extends React.PureComponent<AppProps, AppState> {
             }
           }
           break;
-        }
+      }
     } catch (e) {
       this.showError({ errorMsg: e }, type, meta.kind);
     }
@@ -421,11 +420,12 @@ class App extends React.PureComponent<AppProps, AppState> {
    */
   public handleTabChange(_: React.ChangeEvent<{}>, newValue: string) {
     vscode.postMessage({
-      type: "view/didChange",
-      viewData: {
-        current: newValue,
-        previous: this.state.activeChild,
-      },
+      type: "view/didHide",
+      key: uriToViewKey(URI.parse(this.state.activeChild)),
+    });
+    vscode.postMessage({
+      type: "view/didShow",
+      key: uriToViewKey(URI.parse(newValue)),
     });
     this.setState(
       produce((draft: AppState) => {
@@ -465,8 +465,8 @@ class App extends React.PureComponent<AppProps, AppState> {
         flag: model.type?.willRender
           ? tabLabelIcon.loading
           : this.state.error?.openSnackBar
-            ? tabLabelIcon.failed
-            : tabLabelIcon.none
+          ? tabLabelIcon.failed
+          : tabLabelIcon.none,
       })
     );
     tabLabels = sortBy(tabLabels, "[1]");

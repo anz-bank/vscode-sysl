@@ -4,10 +4,10 @@ import { CustomEditor, CustomEditorManager } from "./custom_editors";
 
 const noopDisposable = { dispose: () => {} };
 
-suite("custom editor manager", () => {
+describe("custom editor manager", () => {
   let panelManager: CustomEditorManager;
 
-  setup(() => {
+  beforeEach(() => {
     panelManager = new CustomEditorManager();
   });
 
@@ -15,7 +15,7 @@ suite("custom editor manager", () => {
     expect(panelManager.activeCustomEditor).to.be.undefined;
   });
 
-  suite("single", () => {
+  describe("single", () => {
     test("active", async () => {
       const editor = fakeEditor(true);
       panelManager.addEditor(editor);
@@ -29,7 +29,7 @@ suite("custom editor manager", () => {
     });
   });
 
-  suite("multiple", () => {
+  describe("multiple", () => {
     const active = fakeEditor(true);
     const panels: CustomEditor[] = [fakeEditor(false), active, fakeEditor(false)];
     test("single active", async () => {
@@ -46,7 +46,7 @@ suite("custom editor manager", () => {
     });
   });
 
-  suite("dispose", () => {
+  describe("dispose", () => {
     const editors = [fakeEditor(false), fakeEditor(true), fakeEditor(false)];
     const [one, two] = editors;
 

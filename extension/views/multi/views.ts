@@ -30,6 +30,7 @@ export abstract class AbstractMultiView implements MultiView {
   public getChild<T extends ViewModel, D extends ViewModelDelta>(
     key: ViewKey
   ): View<T, D> | undefined {
+    console.trace("GET CHILD", key);
     return this._children[viewKeyToString(key)];
   }
 

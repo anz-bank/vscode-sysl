@@ -3,8 +3,8 @@ import { expect } from "chai";
 import { parseSnapshotEvent, SnapshotEvent } from "./snapshot";
 import path from "path";
 
-suite("snapshot", () => {
-  suite("parse event", () => {
+describe("snapshot", () => {
+  describe("parse event", () => {
     const modelUri = URI.file(path.join(__dirname, "test.sysl"));
 
     test("no diagram name", () => {

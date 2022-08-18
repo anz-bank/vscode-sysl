@@ -36,7 +36,7 @@ const mod: Model = new Model({
   ],
 });
 
-suite("ERD plugin", () => {
+describe("ERD plugin", () => {
   test("build diagram", async () => {
     expect(await buildModel(mod)).to.deep.equal({
       nodes: [

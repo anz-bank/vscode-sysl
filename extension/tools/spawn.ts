@@ -1,9 +1,10 @@
 import { Disposable } from "@anz-bank/vscode-sysl-model";
 import { spawn, SpawnOptions } from "child_process";
 import { pull, size } from "lodash";
+import { output } from "../constants";
 
 /** Executes child processes and records completion. */
-class Executor {
+export class Executor {
   private readonly processes: { [key: string]: boolean } = {};
 
   private onSettledListeners: (() => any)[] = [];
@@ -79,6 +80,7 @@ export function spawnBuffer(
   return executor.start(
     () =>
       new Promise<Buffer>((resolve, reject) => {
+        output.appendLine(`spawn: ${command} ${args.join(" ")} ${options.input ? "<stdin>" : ""}`);
         const process = spawn(command, args, options);
         if (options.input) {
           options.input && process.stdin?.write(options.input);

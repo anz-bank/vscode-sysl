@@ -11,7 +11,7 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: "16"
-      - run: yarn install
+      - run: yarn install --frozen-lockfile
         working-directory: model
 
       - name: Run test
@@ -26,7 +26,7 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: "16"
-      - run: yarn install
+      - run: yarn install --frozen-lockfile
         working-directory: plugin
 
       - name: Run test
@@ -41,12 +41,23 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: "16"
-      - run: yarn install
+      - run: yarn install --frozen-lockfile
         working-directory: renderer
 
       - name: Run test
         working-directory: renderer
         run: yarn test
+
+  test_extension:
+    name: Run extension tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+      - run: yarn install --frozen-lockfile
+      - run: yarn test-unit
 
   test_integration:
     name: Run integration tests
@@ -59,13 +70,14 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: "16"
+      - run: yarn install --frozen-lockfile
       - run: yarn build
       - run: yarn config set network-timeout 300000
 
       - name: Run test
         if: runner.os == 'Linux'
-        run: xvfb-run -a yarn test
+        run: xvfb-run -a yarn test-ui
 
       - name: Run test
         if: runner.os != 'Linux'
-        run: yarn test
+        run: yarn test-ui

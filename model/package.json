@@ -21,7 +21,7 @@
     "vscode-uri": "^3.0.3"
   },
   "devDependencies": {
-    "@types/jest": "^27",
+    "@types/jest": "^28.1.7",
     "jest": "^27",
     "jest-extended": "^2",
     "prettier": "^2",

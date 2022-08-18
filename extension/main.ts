@@ -12,7 +12,7 @@ import {
 } from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
 import { URI } from "vscode-uri";
-import { remoteUrl, renderDiagramCommand, syslBinaryPath } from "./constants";
+import { output, remoteUrl, renderDiagramCommand, syslBinaryPath } from "./constants";
 import { buildClient } from "./lsp/client/sysl";
 import { VsCodeEvents } from "./plugins/events_vscode";
 import { PluginEngine } from "./plugins/plugin_engine";
@@ -52,7 +52,7 @@ export async function activate(context: ExtensionContext) {
   registerActions(sysl);
   watchAuxFiles();
 
-  const output = window.createOutputChannel("Sysl");
+  output.appendLine(`Initializing plugins...`);
   const ids = pluginEngine.plugins.map((p) => p.id).join(", ");
   output.appendLine(`Registered ${pluginEngine.plugins.length} plugins (${ids})`);
 
@@ -62,7 +62,7 @@ export async function activate(context: ExtensionContext) {
 
 export async function deactivate(): Promise<void> {
   await client?.stop();
-  pluginEngine.deactivate();
+  await pluginEngine.deactivate();
 }
 
 /** Ensures the Sysl binary is available and returns a wrapper around it. */

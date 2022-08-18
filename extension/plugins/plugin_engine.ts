@@ -1,10 +1,11 @@
 import { Disposable } from "@anz-bank/vscode-sysl-model";
+import { zip } from "lodash";
 import { window } from "vscode";
 import { Sysl } from "../tools/sysl";
 import { PluginLocator } from "./locator";
 import { PluginConfig } from "./plugin_config";
 import { PluginFactory } from "./plugin_factory";
-import { PluginClient, PluginClientOptions, Events, DocumentChangeEvent } from "./types";
+import { Events, PluginClient, PluginClientOptions } from "./types";
 
 /** Configures the plugin engine. */
 export type PluginEngineConfig = {
@@ -32,22 +33,26 @@ export class PluginEngine {
 
   /** Discovers, registers and enables plugins. */
   async activate(): Promise<void> {
-    try {
-      const configs = await this.locate();
-      configs.forEach((c) => (c.sysl = this.config.sysl));
-      this._plugins = this.build(configs);
-      await Promise.all(this.plugins.map((p) => p.start()));
-      if (this._plugins.length) {
-        this.disposables.push(this.config.events.register());
-      }
-    } catch (e) {
-      console.error(`Error activating plugins: ${e}`);
+    const configs = await this.locate();
+    configs.forEach((c) => (c.sysl = this.config.sysl));
+    this._plugins = this.build(configs);
+    const starts = await Promise.allSettled(this.plugins.map((p) => p.start()));
+
+    const fails = zip(this.plugins, starts).filter(([_, p]) => p!.status === "rejected");
+    if (fails.length) {
+      window.showErrorMessage(
+        `Failed to start plugins: ${fails.map(([config]) => config!.id).join(", ")}`
+      );
+    }
+
+    if (this.plugins.length > fails.length) {
+      this.disposables.push(this.config.events.register());
     }
   }
 
-  deactivate() {
-    this.plugins.forEach((p) => p.stop());
+  async deactivate(): Promise<void> {
     this.disposables.forEach((d) => d.dispose());
+    await Promise.all(this.plugins.map((p) => p.stop()));
   }
 
   /** Locates available plugins and returns a config for each. */

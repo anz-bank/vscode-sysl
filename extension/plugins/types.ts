@@ -3,7 +3,6 @@ import { TextDocumentContentChangeEvent } from "vscode-languageserver-protocol";
 import { DocumentSelector } from "vscode-languageclient/node";
 import { Position } from "vscode-languageserver-types";
 import { URI } from "vscode-uri";
-import { Logger } from "../tools/logging";
 import { Disposable } from "@anz-bank/vscode-sysl-model";
 
 /**
@@ -31,7 +30,6 @@ export type PluginClientOptions = {
   workspaceFolder?: string;
   documentSelector?: DocumentSelector | string[];
   debug?: boolean;
-  logger?: Logger;
 
   /** Minimum time (in ms) to wait between callbacks of the same kind. Default 500. */
   throttleDelay?: number;

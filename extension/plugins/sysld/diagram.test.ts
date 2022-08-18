@@ -21,7 +21,7 @@ const model = {
   ],
 };
 
-suite("Sysld plugin", () => {
+describe("Sysld plugin", () => {
   test("build diagram", async () => {
     expect(await buildModel(model)).to.deep.equal({
       nodes: [

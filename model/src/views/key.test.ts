@@ -1,4 +1,3 @@
-import "jest-extended";
 import { URI } from "vscode-uri";
 import { uriToViewKey, viewKeyToString } from "./key";
 

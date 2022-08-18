@@ -35,7 +35,7 @@ export interface LspPluginClientConfig {
 /** Converts plugin config of type LspPluginConfig to LanguageClientOptions */
 const getLspClientOptions = (config: LspPluginConfig): LanguageClientOptions => {
   if (config.lsp.clientOptions) {
-    const { workspaceFolder, debug, logger, throttleDelay, ...configs } = config.lsp.clientOptions;
+    const { workspaceFolder, debug, throttleDelay, ...configs } = config.lsp.clientOptions;
     // We are getting rid of PluginClientOptions properties that are not accepted by LanguageClientOptions
     // This function should be rewritten to transform these properties into acceptable configs for the Language Client constructor
     return configs;

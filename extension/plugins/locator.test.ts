@@ -2,7 +2,7 @@ import { expect } from "chai";
 import path from "path";
 import { Sysl } from "../tools/sysl";
 import { PluginLocator } from "./locator";
-import { CommandPluginConfig, LspPluginConfig, TransformPluginConfig } from "./plugin_config";
+import { CommandPluginConfig, LspPluginConfig } from "./plugin_config";
 
 const mock = require("mock-fs");
 
@@ -13,12 +13,12 @@ function cast<T>(x: any) {
   return x as T;
 }
 
-suite("plugins", () => {
-  teardown(() => {
+describe("plugins", () => {
+  afterEach(() => {
     mock.restore();
   });
 
-  suite("locator", () => {
+  describe("locator", () => {
     test("builtin", async () => {
       const plugins = await PluginLocator.builtin(sysl, "root");
 
@@ -30,7 +30,7 @@ suite("plugins", () => {
       );
     });
 
-    suite("local", async () => {
+    describe("local", () => {
       test("none", async () => {
         mock({ "workspace/foo.arraiz": "" });
         const plugins = await PluginLocator.localPlugins(sysl, ["workspace"]);
@@ -65,6 +65,13 @@ suite("plugins", () => {
           path.normalize("workspace/.sysl/plugins/foo.arraiz"),
         ]);
       });
+    });
+
+    describe("network", () => {
+      // test("all", async () => {
+      //   mock({ storage: {} });
+      //   await PluginLocator.networkPlugins(sysl, "storage", "", {});
+      // });
     });
   });
 });

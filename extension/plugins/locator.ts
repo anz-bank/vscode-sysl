@@ -1,9 +1,11 @@
 import download from "download";
 import * as fs from "fs";
-import got from "got";
+import got, { CancelableRequest } from "got";
 import { flatten } from "lodash";
 import path from "path";
 import { promisify } from "util";
+import { ProgressLocation, window } from "vscode";
+import { output } from "../constants";
 import { Sysl } from "../tools/sysl";
 import {
   CommandPluginConfig,
@@ -18,7 +20,7 @@ const exists = promisify(fs.exists);
 const idFromFile = (file: string): string => path.parse(file).name;
 
 const configFromFile = (file: string | undefined) => {
-  let defaultConfig = { documentSelector: [{ scheme: "file", language: "sysl" }] }; //default
+  let defaultConfig = { documentSelector: [{ scheme: "file", language: "sysl" }] };
   if (file && fs.existsSync(file)) {
     return JSON.parse(fs.readFileSync(file).toString());
   }
@@ -39,7 +41,10 @@ export class PluginLocator {
     return flatten([
       await this.localPlugins(sysl, workspaceDirs, options),
       await this.builtin(sysl, extensionPath, options),
-      await this.networkPlugins(sysl, globalStoragePath, remoteUrl, options),
+      await this.networkPlugins(sysl, globalStoragePath, remoteUrl, options).catch((err) => {
+        window.showErrorMessage(`Failed to fetch plugins: ${err}`);
+        return [];
+      }),
     ]);
   }
 
@@ -49,9 +54,14 @@ export class PluginLocator {
     workspaceDirs: string[],
     options?: PluginClientOptions
   ): Promise<PluginConfig[]> {
+    const compatible = (filename: string): boolean => {
+      const exe = filename.endsWith(".exe");
+      return process.platform === "win32" ? exe : !exe;
+    };
+
     async function commandPlugins(dir: string): Promise<PluginConfig[]> {
       const scriptsPath = path.join(dir, ".sysl", "plugins");
-      return (await filesIn(scriptsPath)).map((script) => {
+      return (await filesIn(scriptsPath)).filter(compatible).map((script) => {
         const scriptName = path.parse(script).base;
         return {
           id: scriptName,
@@ -114,21 +124,21 @@ export class PluginLocator {
 
     return [
       {
-        id: idFromFile(intPath),
+        id: "integration",
         lsp: {
           scriptPath: intPath,
           clientOptions: { ...options, documentSelector: [{ scheme: "file", language: "sysl" }] },
         },
       } as LspPluginConfig,
       {
-        id: idFromFile(erdPath),
+        id: "edg",
         lsp: {
           scriptPath: erdPath,
           clientOptions: { ...options, documentSelector: [{ scheme: "file", language: "sysl" }] },
         },
       } as LspPluginConfig,
       {
-        id: idFromFile(sysldPath),
+        id: "sysld",
         lsp: {
           scriptPath: sysldPath,
           clientOptions: { ...options, documentSelector: [{ scheme: "file", language: "sysld" }] },
@@ -144,27 +154,44 @@ export class PluginLocator {
     remoteUrl: string,
     options?: PluginClientOptions
   ): Promise<PluginConfig[]> {
-    let plugins: PluginConfig[] = [];
-    try {
-      const obj: PluginManifests = await got
-        .get(remoteUrl, {
+    return window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: "Initializing plugins",
+        cancellable: true,
+      },
+      async (progress, token) => {
+        progress.report({ message: "Fetching manifest...", increment: 10 });
+
+        const gotConfig = {
           // This timeout is to pass github runner on Windows environment.
           // FIXME: Adjust timeout if needed.
           timeout: 10000,
           // This can only be handled by an API behind internal DNS which is implicitly trusted.
           https: { rejectUnauthorized: false },
-        })
-        ?.json();
-      console.log("got ", obj);
-      plugins = await this.parseManifest(sysl, globalStoragePath, remoteUrl, obj.plugins, options);
-    } catch (e) {
-      throw new Error(`Error fetching remote plugins: ${e}`);
-    } finally {
-      return plugins;
-    }
+        };
+
+        return new Promise((resolve, reject) => {
+          const get = got.get(remoteUrl, gotConfig);
+          (get.json() as CancelableRequest<PluginManifests>)
+            .then(({ plugins }) => {
+              progress.report({ message: "Processing plugins...", increment: 20 });
+              this.parseManifest(sysl, globalStoragePath, remoteUrl, plugins, options).then(
+                resolve
+              );
+            })
+            .catch(reject);
+
+          token.onCancellationRequested(() => {
+            reject("Cancelled by user");
+            get?.cancel();
+          });
+        });
+      }
+    );
   }
 
-  /** Parses the Manifest to download plugins and/or return their configs */
+  /** Parses the Manifest to download plugins and/or return their configs. */
   static async parseManifest(
     sysl: Sysl,
     globalStoragePath: string,
@@ -174,7 +201,6 @@ export class PluginLocator {
   ): Promise<PluginConfig[]> {
     let configs: PluginConfig[] = [];
     try {
-      console.log("parse manifest", manifestPath, manifests);
       for (let i = 0; i < manifests.length; i++) {
         const plugin = manifests[i];
         const scriptPath = path.resolve(path.dirname(manifestPath), plugin.entrypoint);
@@ -200,7 +226,6 @@ export class PluginLocator {
             break;
           case "archive":
             const pluginPath: string = path.join(globalStoragePath, ".sysl", "plugins", plugin.id);
-            console.log("archive ", pluginPath);
             // check if already downloaded (fetch from globalStorage)
             // if ((await filesIn(pluginPath)).length) {
             //   console.log(`plugin found at ${pluginPath}`);
@@ -234,7 +259,7 @@ export class PluginLocator {
 }
 
 async function downloadPlugin(dir: string, url: string): Promise<PluginManifest[]> {
-  console.log(`downloading plugin from ${url} into ${dir}...`);
+  output.appendLine(`Downloading plugin from ${url} into ${dir}...`);
 
   try {
     await promisify(fs.mkdir)(dir);
@@ -243,17 +268,16 @@ async function downloadPlugin(dir: string, url: string): Promise<PluginManifest[
       // Ignore error on mkdir for existing dir.
     }
   }
-  console.log("downlaod and extract", url, "into", dir);
+
   let response;
   try {
     response = (await download(url, dir, { extract: true })) as any;
   } catch (err) {
-    console.log("error downloading plugin", err);
+    console.error("Error downloading plugin", err);
     throw err;
   }
   // extract manifest.json from the archive
   const manifest = response.find((i) => i.path === "manifest.json");
-  console.log("extracted manifest", manifest);
   const plugins: PluginManifest[] = JSON.parse(manifest.data.toString())?.plugins;
   plugins?.forEach((p: PluginManifest) => (p.entrypoint = path.resolve(dir, p.entrypoint)));
   return plugins;

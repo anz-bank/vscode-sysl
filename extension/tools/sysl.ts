@@ -1,10 +1,10 @@
 import { Model } from "@anz-bank/sysl/model";
 import { PbDocumentModel } from "@anz-bank/sysl/pbModel";
-import { truncate } from "lodash";
+import { SpawnOptions } from "child_process";
 import memoize from "memoizee";
-import path from "path";
+import path, { normalize } from "path";
 import { coerce, SemVer } from "semver";
-import { defaultLogger, Logger } from "./logging";
+import { output } from "../constants";
 import { spawnBuffer } from "./spawn";
 
 /** The possible Sysl protobuf representations. */
@@ -15,12 +15,12 @@ export class Sysl {
   /** The path to the Sysl executable to use. */
   public readonly path: string;
 
-  private readonly logger: Logger;
+  /** Memoized {@link spawnBuffer}. */
+  private readonly memoSpawn: typeof spawnBuffer;
 
-  constructor(path: string, options?: { logger?: Logger }) {
+  constructor(path: string) {
     this.path = path;
-    this.logger = options?.logger ?? defaultLogger;
-    this.protobufFromSource = memoize(this.protobufFromSource.bind(this), {});
+    this.memoSpawn = memoize(memoSpawn, { normalizer: JSON.stringify });
   }
 
   /**
@@ -47,7 +47,9 @@ export class Sysl {
   /** Returns a protobuf message representing the compiled content of the spec at modelPath. */
   public async protobuf(modelPath: string, mode: ProtobufMode = "json"): Promise<Buffer> {
     const args = ["protobuf", `--mode=${mode}`, path.basename(modelPath)];
-    return spawnBuffer(this.path, args);
+    // Execute sysl in the model's directory.
+    const cwd = path.join(modelPath, "..");
+    return this.memoSpawn(this.path, args, { cwd });
   }
 
   /** Returns a protobuf message representing the compiled content of source. */
@@ -56,17 +58,8 @@ export class Sysl {
     sourcePath: string,
     mode: ProtobufMode = "json"
   ): Promise<Buffer> {
-    const args = ["protobuf", `--mode=${mode}`];
     const input = this.toStdin(sourcePath, source);
-
-    const optionsStr = { input: truncate(input.toString()) };
-    this.logger.log("protobuf spawn:", this.path, ...(args ?? []), optionsStr);
-
-    const result = await spawnBuffer(this.path, args, { input });
-
-    this.logger.log("protobuf complete:", this.path, ...(args ?? []), truncate(result.toString()));
-
-    return result;
+    return this.memoSpawn(this.path, ["protobuf", `--mode=${mode}`], { input });
   }
 
   /** Returns the output of sysl transform on a model using a script. */
@@ -88,21 +81,12 @@ export class Sysl {
       input: this.toStdin(modelPath, syslSource),
       timeout: 50000,
     };
-    const args = ["transform", `--script=${scriptPath}`];
-
-    const optionsStr = { ...options, input: truncate(options.input.toString()) };
-    this.logger.log("transform spawn:", this.path, ...(args ?? []), optionsStr);
-
-    const result = await spawnBuffer(this.path, args, options);
-
-    this.logger.log("transform complete:", this.path, ...(args ?? []), truncate(result.toString()));
-
-    return result;
+    return this.memoSpawn(this.path, ["transform", `--script=${scriptPath}`], options);
   }
 
   /** Returns the version of Sysl, or undefined if the version cannot be determined. */
   public async version(): Promise<string | undefined> {
-    const info = (await spawnBuffer(this.path, ["info"])).toString("utf-8");
+    const info = (await this.memoSpawn(this.path, ["info"])).toString("utf-8");
     return info.match(/Version\s*:\s*[^v]*(v[^\r\n]+)/)?.[1];
   }
 
@@ -116,4 +100,13 @@ export class Sysl {
   private toStdin(path: string, content: string): string {
     return JSON.stringify([{ path, content }]);
   }
+}
+
+/** Delegates to {@link spawnBuffer} and memoizes results for identical calls. */
+async function memoSpawn(
+  command: string,
+  args: ReadonlyArray<string> = [],
+  options: SpawnOptions & { input?: any } = {}
+): Promise<Buffer> {
+  return spawnBuffer(command, args, options);
 }

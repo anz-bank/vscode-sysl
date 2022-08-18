@@ -96,6 +96,13 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+## 0.50.0
+
+- Show progress notification while fetching network plugins, and error message for plugins that fail to start.
+- Replace Mocha with Jest for unit testing the extension; use mocked VS Code APIs.
+- Filter local plugins by extension and platform (only .exe on Windows, no .exe on other platforms).
+- Fix bug in memoization of Sysl CLI invocations.
+
 ## 0.49.0
 
 - Improve integration diagram plugin to use LSP framework.

@@ -1,7 +1,9 @@
 import { Disposable, ViewKey } from "@anz-bank/vscode-sysl-model";
 import { ViewModel } from "@anz-bank/vscode-sysl-plugin";
-import { throttle, truncate } from "lodash";
+import { omit, throttle } from "lodash";
 import path from "path";
+import { window } from "vscode";
+import { output } from "../constants";
 import {
   Document,
   DocumentChangeEvent,
@@ -10,7 +12,6 @@ import {
   PluginClientOptions,
 } from "../plugins/types";
 import { Change, Context, Request, Response } from "../protocol/plugin";
-import { defaultLogger, Logger } from "../tools/logging";
 import { spawnBuffer } from "../tools/spawn";
 import { Sysl } from "../tools/sysl";
 import { views } from "../views";
@@ -26,23 +27,18 @@ export type RunOptions = {
 export class CommandPluginClient implements PluginClient {
   private readonly subscriptions: Disposable[] = [];
 
-  private logger: Logger;
-
   constructor(
     public readonly id: string,
     protected readonly sysl: Sysl,
     private readonly runOptions: RunOptions,
     private readonly events: Events,
     private readonly _clientOptions: PluginClientOptions = {}
-  ) {
-    this.logger = _clientOptions.logger ?? defaultLogger;
-  }
+  ) {}
 
   /**
    * Initializes the plugin client for communication with the plugin.
    */
   async start(): Promise<void> {
-    console.log("starting plugin", this.id);
     const throttled = (f: any) => throttle(f.bind(this), this.clientOptions?.throttleDelay ?? 500);
     this.subscriptions.push(
       this.events.onRender((doc) => this.render(doc)),
@@ -62,7 +58,6 @@ export class CommandPluginClient implements PluginClient {
    * Shuts down the plugin client, disconnecting from the plugin.
    */
   async stop(): Promise<void> {
-    console.log("stopping plugin", this.id);
     this.subscriptions.forEach((s) => s.dispose());
   }
 
@@ -111,7 +106,7 @@ export class CommandPluginClient implements PluginClient {
     try {
       await this.process(doc, "SAVE_FILE", "TEXT", true);
     } catch (e) {
-      console.error(`error rendering command plugin ${this.id}`, e);
+      window.showErrorMessage(`Plugin ${this.id}: ${e}`);
     }
   }
 
@@ -125,7 +120,6 @@ export class CommandPluginClient implements PluginClient {
     openIfNot: boolean = false,
     detail?: any
   ): Promise<void> {
-    console.log(`command: processing ${source} ${action} on ${doc.uri.fsPath}`);
     const req = await this.buildRequest(doc, action, source, detail);
     await this.callAndHandle(req, doc, openIfNot);
   }
@@ -195,22 +189,20 @@ export class CommandPluginClient implements PluginClient {
     const { command, args } = this.runOptions;
     const options = { input: JSON.stringify(request) };
 
-    const optionsStr = { ...options, input: truncate(options.input?.toString()) };
-    this.logger.log("command spawn:", command, ...(args ?? []), optionsStr);
+    output.appendLine(`Calling ${this.id} with ${JSON.stringify(truncated(request))}`);
 
     const response = await spawnBuffer(command, args, options);
-
     if (!response) {
-      throw new Error("no response");
+      throw new Error("No response");
     }
-
     const responseObject = JSON.parse(response.toString());
 
     if (responseObject.error) {
-      this.logger.log("command error:", responseObject.error);
-      throw new Error("Response received with error");
+      throw new Error(`Response: ${responseObject.error.message}`);
     } else {
-      this.logger.log("command complete:", command, ...(args ?? []), truncate(response.toString()));
+      output.appendLine(
+        `Command plugin ${this.id} call successful: ${Object.keys(responseObject).join(", ")}`
+      );
     }
 
     return responseObject;
@@ -219,4 +211,22 @@ export class CommandPluginClient implements PluginClient {
   public get clientOptions(): PluginClientOptions {
     return this._clientOptions;
   }
+}
+
+/** Returns a shallowish copy of {@code request} with the large context properties truncated. */
+function truncated(request: Request): Request {
+  const out: Request = {};
+  if (request.initialize) {
+    out.initialize = request.initialize;
+  } else if (request.onchange) {
+    out.onchange = {
+      change: request.onchange?.change,
+      context: {
+        ...omit(request.onchange?.context, "fileContent", "module"),
+        fileContent: `<${request.onchange?.context?.fileContent?.length} B>`,
+        module: `<${request.onchange?.context?.module?.length} B>`,
+      },
+    };
+  }
+  return out;
 }

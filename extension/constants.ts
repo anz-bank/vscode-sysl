@@ -1,3 +1,5 @@
+import { window } from "vscode";
+
 /** The command to install the Sysl LSP server. */
 export const installSyslLspCommand = "sysl.tools.installSyslLsp";
 
@@ -23,3 +25,5 @@ export type CustomEditorCommandMap = { [key in CustomEditorCommand]: (...args: a
 
 /** The remote URL from which to fetch network plugins. */
 export const remoteUrl = "http://go/vscode-sysl-plugins";
+
+export const output = window.createOutputChannel("Sysl");

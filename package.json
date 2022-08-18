@@ -4,7 +4,7 @@
   "description": "Write Sysl specs easily with instant visual feedback.",
   "author": "ANZ Bank",
   "publisher": "anz-bank",
-  "version": "0.49.0",
+  "version": "0.50.0",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -156,7 +156,7 @@
     "lint": "eslint . --ext .ts,.tsx",
     "test": "yarn test-unit && yarn test-ui",
     "test-ui": "node out/test/runTest",
-    "test-unit": "ts-node extension/test/runUnitTest",
+    "test-unit": "yarn jest",
     "test-watch": "nodemon --watch 'extension/**' --ext 'ts,json,sysl' --exec 'ts-node extension/test/runUnitTest'"
   },
   "dependencies": {
@@ -176,6 +176,7 @@
   "devDependencies": {
     "@types/chai": "^4.2.21",
     "@types/glob": "^7.1.4",
+    "@types/jest": "^26",
     "@types/mocha": "^9.0.0",
     "@types/mock-fs": "^4.13.1",
     "@types/node": "^14.17.5",
@@ -191,6 +192,8 @@
     "eslint": "^7.32.0",
     "glob": "^7.1.7",
     "got": "^11.8.2",
+    "jest": "26.6.0",
+    "jest-extended": "^3.0.2",
     "json-schema-to-typescript": "^10.1.4",
     "mocha": "^9.1.0",
     "mock-fs": "^5.0.0",
@@ -200,6 +203,7 @@
     "replace": "^1.2.1",
     "sinon": "^11.1.2",
     "sinon-chai": "^3.7.0",
+    "ts-jest": "^26",
     "ts-mocha": "^10.0.0",
     "ts-node": "^10.2.1",
     "ts-protoc-gen": "^0.15.0",
