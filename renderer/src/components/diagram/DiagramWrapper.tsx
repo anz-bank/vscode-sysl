@@ -1,12 +1,10 @@
-import * as React from "react";
 import * as go from "gojs";
 import { ReactDiagram } from "gojs-react";
-
+import { isEqual } from "lodash";
+import * as React from "react";
 import "./Diagram.css";
 import DiagramTemplate from "./DiagramTemplates";
 import { DiagramData, TemplateData } from "./DiagramTypes";
-
-import _ from "lodash";
 
 export interface DiagramProps {
   nodes: Array<go.ObjectData>;
@@ -26,7 +24,7 @@ export interface DiagramProps {
 function collapseLinks(links: Array<go.ObjectData>): Array<go.ObjectData> {
   let collapsedLinks: go.ObjectData = {};
   let hiddenLinks: Array<go.ObjectData> = [];
-  _.forEach(links, (l) => {
+  links.forEach((l) => {
     let key = l.from + l.to + (l.label ?? "");
     if (key in collapsedLinks) {
       l.group && collapsedLinks[key].groups.push(l.group);
@@ -91,7 +89,7 @@ export class DiagramWrapper extends React.Component<DiagramProps, {}> {
       return;
     }
 
-    if (this.props.selectedData && !_.isEqual(prevProps.selectedData, this.props.selectedData)) {
+    if (this.props.selectedData && !isEqual(prevProps.selectedData, this.props.selectedData)) {
       diagram.startTransaction("selecting parts");
       diagram.clearHighlighteds();
       this.props.selectedData.nodes?.forEach(
@@ -103,13 +101,11 @@ export class DiagramWrapper extends React.Component<DiagramProps, {}> {
       diagram.commitTransaction("selecting parts");
     }
 
-    if (!_.isEqual(prevProps.nodes, this.props.nodes)) {
+    if (!isEqual(prevProps.nodes, this.props.nodes)) {
       diagram.startTransaction("update visibility of diagram nodes");
-      this.props.nodes?.forEach(
-        (node) => {
-          (diagram.findNodeForKey(node.key) as go.Part).visible = node.visible ?? true;
-        }
-      );
+      this.props.nodes?.forEach((node) => {
+        (diagram.findNodeForKey(node.key) as go.Part).visible = node.visible ?? true;
+      });
       diagram.commitTransaction("update visibility of diagram nodes");
     }
   }

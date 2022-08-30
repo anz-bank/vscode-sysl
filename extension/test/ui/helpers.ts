@@ -33,6 +33,11 @@ export class Input {
     return `${name}:\n    ...\n`;
   }
 
+  /** Returns the definition of an app with just an empty endpoint. */
+  static appWithEmptyEndpoing(name: string): string {
+    return `${name}:\n    Endpoint:\n        ...\n`;
+  }
+
   /** Inserts content into editor at position. Resolves to {@code true} if the edit was applied. */
   static async into(editor: TextEditor, content: string, position?: Position): Promise<boolean> {
     return await editor.edit((builder) => {

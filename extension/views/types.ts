@@ -40,8 +40,8 @@ export interface View<T extends ViewModel, D extends ViewModelDelta> extends Vie
   // /** The subset of the view model that is selected. */
   // selection: T | null;
 
-  // /** The model rendered by the view. */
-  // model?: T;
+  /** The model rendered by the view. */
+  model?: T;
 
   /**
    * Sets the content of the view model to {@code model}.
@@ -61,6 +61,7 @@ export interface View<T extends ViewModel, D extends ViewModelDelta> extends Vie
 
 /** A view that simply delegates calls to a {@link ViewSurface}. */
 export class SurfaceView<T, D> implements View<T, D> {
+  model?: T;
   selection: T | null = null;
 
   constructor(
@@ -72,6 +73,7 @@ export class SurfaceView<T, D> implements View<T, D> {
   }
 
   async setModel(model: T): Promise<boolean> {
+    this.model = model;
     return this.surface.setModel(model);
   }
 
@@ -108,13 +110,13 @@ export class FakeView implements View<any, any> {
  */
 export interface Views {
   /** Subscribes listener to view open events. */
-  onDidOpenView: (listener: (e: ViewEvent) => any) => Disposable;
+  onDidOpenView: (listener: <T extends ViewModel>(e: ViewEvent<T>) => any) => Disposable;
   /** Subscribes listener to view close events. */
-  onDidCloseView: (listener: (e: ViewEvent) => any) => Disposable;
+  onDidCloseView: (listener: <T extends ViewModel>(e: ViewEvent<T>) => any) => Disposable;
   /** Subscribes listener to view show events. */
-  onDidShowView: (listener: (e: ViewEvent) => any) => Disposable;
+  onDidShowView: (listener: <T extends ViewModel>(e: ViewEvent<T>) => any) => Disposable;
   /** Subscribes listener to view hide events. */
-  onDidHideView: (listener: (e: ViewEvent) => any) => Disposable;
+  onDidHideView: (listener: <T extends ViewModel>(e: ViewEvent<T>) => any) => Disposable;
   /** Subscribes listener to view model change events. */
   onDidChangeView: (
     listener: <T extends ViewModel, D extends ViewModelDelta>(e: ViewModelChangeEvent<T, D>) => any

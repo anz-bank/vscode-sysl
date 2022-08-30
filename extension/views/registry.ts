@@ -21,15 +21,16 @@ export class ViewRegistry implements Views {
   /** Map of view URI to all rendered instances. */
   private readonly views: { [key: string]: View<any, any>[] } = {};
   private readonly multiviews: { [key: string]: MultiView[] } = {};
+  private readonly pendingMultiviews: { [key: string]: Promise<MultiView>[] } = {};
 
   // TODO: Find a more elegant way to inject this.
   private _multiviewFactory: MultiViewFactory | undefined;
   private _docFinder: DocumentFinder | undefined;
 
-  onDidOpenViewListeners: ((e: ViewEvent) => any)[] = [];
-  onDidCloseViewListeners: ((e: ViewEvent) => any)[] = [];
-  onDidShowViewListeners: ((e: ViewEvent) => any)[] = [];
-  onDidHideViewListeners: ((e: ViewEvent) => any)[] = [];
+  onDidOpenViewListeners: (<T extends ViewModel>(e: ViewEvent<T>) => any)[] = [];
+  onDidCloseViewListeners: (<T extends ViewModel>(e: ViewEvent<T>) => any)[] = [];
+  onDidShowViewListeners: (<T extends ViewModel>(e: ViewEvent<T>) => any)[] = [];
+  onDidHideViewListeners: (<T extends ViewModel>(e: ViewEvent<T>) => any)[] = [];
   onDidChangeViewListeners: (<T, D>(e: ViewModelChangeEvent<T, D>) => any)[] = [];
 
   getAllViews(): View<any, any>[] {
@@ -53,7 +54,9 @@ export class ViewRegistry implements Views {
     return this.multiviews[docUri.toString()];
   }
 
-  private async buildEvent(view): Promise<ViewEvent> {
+  private async buildEvent<T extends ViewModel, D extends ViewModelDelta>(
+    view: View<T, D>
+  ): Promise<ViewEvent<T>> {
     const { key } = view;
     let document: Document | undefined;
     if (key.docUri) {
@@ -64,9 +67,10 @@ export class ViewRegistry implements Views {
 
   /** Invoked by a view when it is opened. */
   async acceptOpenView<T, D>(view: View<T, D>): Promise<void> {
-    const { key } = view;
+    const { key, model } = view;
     (this.views[viewKeyToString(key)] ??= []).push(view);
     const event = await this.buildEvent(view);
+    event.model = model;
     this.onDidOpenViewListeners.forEach(async (f) => f(event));
   }
 
@@ -117,22 +121,22 @@ export class ViewRegistry implements Views {
     }
   }
 
-  onDidOpenView(listener: (e: ViewEvent) => any): Disposable {
+  onDidOpenView(listener: <T extends ViewModel>(e: ViewEvent<T>) => any): Disposable {
     this.onDidOpenViewListeners.push(listener);
     return { dispose: () => pull(this.onDidOpenViewListeners, listener) };
   }
 
-  onDidCloseView(listener: (e: ViewEvent) => any): Disposable {
+  onDidCloseView(listener: <T extends ViewModel>(e: ViewEvent<T>) => any): Disposable {
     this.onDidCloseViewListeners.push(listener);
     return { dispose: () => pull(this.onDidCloseViewListeners, listener) };
   }
 
-  onDidShowView(listener: (e: ViewEvent) => any): Disposable {
+  onDidShowView(listener: <T extends ViewModel>(e: ViewEvent<T>) => any): Disposable {
     this.onDidShowViewListeners.push(listener);
     return { dispose: () => pull(this.onDidShowViewListeners, listener) };
   }
 
-  onDidHideView(listener: (e: ViewEvent) => any): Disposable {
+  onDidHideView(listener: <T extends ViewModel>(e: ViewEvent<T>) => any): Disposable {
     this.onDidHideViewListeners.push(listener);
     return { dispose: () => pull(this.onDidHideViewListeners, listener) };
   }
@@ -156,7 +160,20 @@ export class ViewRegistry implements Views {
     if (!this._multiviewFactory) {
       throw new Error("no factory set to create new multiview instance");
     }
-    multiviews ??= [await this._multiviewFactory!.create(docUri)];
+
+    // Multiview creation is async. If there are no existing multiviews for the doc, there may be
+    // one pending creation. If so, wait for and use that.
+    if (!multiviews) {
+      const uriString = docUri.toString();
+      const pending = this.pendingMultiviews[uriString] ?? [];
+      if (!pending.length) {
+        const multiview = this._multiviewFactory!.create(docUri);
+        pending.push(multiview);
+        this.pendingMultiviews[uriString] = pending;
+        multiview.then(() => delete this.pendingMultiviews[uriString]);
+      }
+      multiviews = await Promise.all(pending);
+    }
     // Add the child view to each multi view that doesn't already have it.
     return multiviews.filter((m) => !m.hasChild(key)).map((m) => m.addChild(key, model));
   }

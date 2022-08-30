@@ -1,5 +1,4 @@
 import { Application, AppName, Call, Endpoint, Model, Statement } from "@anz-bank/sysl/model";
-import { expect } from "chai";
 import { buildModel } from "./diagram";
 
 const model = new Model({
@@ -19,32 +18,27 @@ const model = new Model({
     }),
     new Application({
       name: new AppName(["Bar"]),
+      endpoints: [new Endpoint({ name: "B" })],
     }),
   ],
 });
 
-describe("ERD plugin", () => {
-  test("build diagram", async () => {
-    expect(await buildModel(model)).to.deep.equal({
+describe("Integration diagram plugin", () => {
+  test("build diagram", () => {
+    expect(buildModel(model)).resolves.toMatchObject({
       nodes: [
         {
           key: "Foo",
           label: "Foo",
-          group: undefined,
           isGroup: false,
         },
         {
           key: "Bar",
           label: "Bar",
-          group: undefined,
           isGroup: false,
         },
       ],
       edges: [{ key: "Foo->Bar", from: "Foo", to: "Bar" }],
-      templates: {
-        diagramLabel: "Integration",
-        diagramLayout: "ForceDirectedLayout",
-      },
     });
   });
 });

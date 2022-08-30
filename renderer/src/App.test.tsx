@@ -83,7 +83,7 @@ describe("App test", () => {
                 kind: "diagram",
                 label: "Test Diagram",
               },
-              type: { willRender: true }
+              type: { willRender: true },
             },
           })
         );
@@ -191,7 +191,7 @@ describe("App test", () => {
     it("Icon with Visibility On is hidden by default", async () => {
       const elem = screen.queryByTestId("a-vis-on-icon")!;
       expect(elem.getAttribute("visibility")).toEqual("hidden");
-    })
+    });
 
     it("Icon with Visibility On is shown on mouse hover", async () => {
       const elem = screen.queryByTestId("a-vis-on-icon")!;
@@ -217,11 +217,13 @@ describe("App test", () => {
       });
       const elem = screen.queryByTestId("a-vis")!;
       Simulate.click(elem);
-      expect(vscode.postMessage).toHaveBeenCalledWith(expect.objectContaining({
-        type: "view/visibilityChanged",
-        current: expect.arrayContaining([{ key: "a", label: "a", visible: false }]),
-        previous: expect.arrayContaining([{ key: "a", label: "a"}]),
-      }));
+      expect(vscode.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "view/visibilityChanged",
+          current: expect.arrayContaining([{ key: "a", label: "a", visible: false }]),
+          previous: expect.arrayContaining([{ key: "a", label: "a" }]),
+        })
+      );
     });
   });
 
@@ -237,16 +239,18 @@ describe("App test", () => {
     });
 
     it("postMessage to extension on selection", async () => {
-      expect(vscode.postMessage).toHaveBeenCalledWith(expect.objectContaining({
-        type: "select",
-        selectedData: {
-          current: expect.objectContaining({
-            nodes: [expect.objectContaining({ key: "a", label: "a", })],
-            edges: [{ key: "a->b", from: "a", to: "b", groups: [], visible: true, }],
-          }),
-          previous: null,
-        },
-      }));
+      expect(vscode.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "select",
+          selectedData: {
+            current: expect.objectContaining({
+              nodes: [expect.objectContaining({ key: "a", label: "a" })],
+              edges: [{ key: "a->b", from: "a", to: "b", groups: [], visible: true }],
+            }),
+            previous: null,
+          },
+        })
+      );
     });
 
     it("selection details visible on right panel", async () => {
@@ -348,9 +352,8 @@ function modelEvent(model: any, error?: any) {
   });
 }
 
-
 /** Returns true if element or any of its ancestors contains the given class name. */
-function ancestorHasClass(element: HTMLElement|null, targetClassName: string) : Boolean {
+function ancestorHasClass(element: HTMLElement | null, targetClassName: string): Boolean {
   if (!element) {
     return false;
   }

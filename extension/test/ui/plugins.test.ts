@@ -59,7 +59,7 @@ suite("plugins", function () {
       await sleep(5000);
       await diagram.selectTab("Integration");
 
-      await Input.into(editor, Input.emptyApp("Foo"));
+      await Input.into(editor, Input.appWithEmptyEndpoing("Foo"));
       await commands.executeCommand("workbench.action.files.save");
 
       await diagram.maximize();

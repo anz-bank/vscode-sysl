@@ -2,6 +2,7 @@ import { Disposable } from "@anz-bank/vscode-sysl-model";
 import {
   ViewEditNotification,
   ViewEditParams,
+  ViewModel,
   ViewOpenNotification,
   ViewOpenParams,
 } from "@anz-bank/vscode-sysl-plugin";
@@ -40,21 +41,23 @@ export class LspPluginClientRouter implements Disposable {
     });
 
     disposables.push(
-      views.onDidOpenView(({ key }: ViewEvent) => notifier.sendViewDidOpen({ view: { key } }))
-    );
-    disposables.push(
-      views.onDidCloseView((e: ViewEvent) => notifier.sendViewDidClose({ key: e.key }))
-    );
-    disposables.push(
-      views.onDidShowView((e: ViewEvent) => notifier.sendViewDidShow({ key: e.key }))
-    );
-    disposables.push(
-      views.onDidHideView((e: ViewEvent) => notifier.sendViewDidHide({ key: e.key }))
+      views.onDidOpenView(({ key, model }: ViewEvent<ViewModel>) =>
+        notifier.sendViewDidOpen({ view: { key, model } })
+      )
     );
     disposables.push(
       views.onDidChangeView(<T, D>(e: ViewModelChangeEvent<T, D>) =>
         notifier.sendViewDidChange({ key: e.key, modelChanges: [e.change] })
       )
+    );
+    disposables.push(
+      views.onDidCloseView(({ key }: ViewEvent<ViewModel>) => notifier.sendViewDidClose({ key }))
+    );
+    disposables.push(
+      views.onDidShowView(({ key }: ViewEvent<ViewModel>) => notifier.sendViewDidShow({ key }))
+    );
+    disposables.push(
+      views.onDidHideView(({ key }: ViewEvent<ViewModel>) => notifier.sendViewDidHide({ key }))
     );
 
     // Notify the server about all views that are already open (race condition).

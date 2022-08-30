@@ -67,7 +67,7 @@ export class ViewEdits {
 }
 
 /** The kind of view to use to render a model. */
-export type ViewKind = "html" | "diagram";
+export type ViewKind = "html" | "diagram" | "table";
 
 /**
  * The data used to render a view. The specific schema of the model depends on the view rendering

@@ -1,6 +1,5 @@
 import * as go from "gojs";
-import _ from "lodash";
-
+import { each, isString } from "lodash";
 import {
   TemplateData,
   TemplateEdgeData,
@@ -28,7 +27,7 @@ export default function DiagramTemplate(props?: TemplateData) {
 
   // Set layout if provided, else default to no layout.
   if (props?.diagramLayout) {
-    if (_.isString(props.diagramLayout)) {
+    if (isString(props.diagramLayout)) {
       const layouts: { [key: string]: typeof go.Layout } = {
         GridLayout: go.GridLayout,
         TreeLayout: go.TreeLayout,
@@ -129,17 +128,17 @@ export default function DiagramTemplate(props?: TemplateData) {
   );
 
   diagram.nodeTemplateMap = new go.Map<string, go.Node>([{ key: "", value: nodeTemplate }]);
-  _.each(props?.nodes, (value, key) =>
+  each(props?.nodes, (value, key) =>
     diagram.nodeTemplateMap.add(key, getCustomNodeTemplate(value))
   );
 
   diagram.groupTemplateMap = new go.Map<string, go.Group>([{ key: "", value: groupTemplate }]);
-  _.each(props?.groups, (value, key) =>
+  each(props?.groups, (value, key) =>
     diagram.groupTemplateMap.add(key, getCustomGroupTemplate(value))
   );
 
   diagram.linkTemplateMap = new go.Map<string, go.Link>([{ key: "", value: linkTemplate }]);
-  _.each(props?.edges, (value, key) =>
+  each(props?.edges, (value, key) =>
     diagram.linkTemplateMap.add(key, getCustomLinkTemplate(value))
   );
 

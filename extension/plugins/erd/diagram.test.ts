@@ -8,7 +8,6 @@ import {
   Type,
   TypePrimitive,
 } from "@anz-bank/sysl/model";
-import { expect } from "chai";
 import { buildModel } from "./diagram";
 
 const mod: Model = new Model({
@@ -37,8 +36,8 @@ const mod: Model = new Model({
 });
 
 describe("ERD plugin", () => {
-  test("build diagram", async () => {
-    expect(await buildModel(mod)).to.deep.equal({
+  test("build diagram", () => {
+    expect(buildModel(mod)).resolves.toMatchObject({
       nodes: [
         {
           key: "App.Foo",

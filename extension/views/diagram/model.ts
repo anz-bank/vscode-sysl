@@ -10,7 +10,7 @@ export interface DiagramModel<N = DiagramObjectData, E = DiagramObjectData> exte
   nodes: N[];
   edges: E[];
   templates?: {
-    diagramLabel: string;
+    diagramLabel?: string;
     diagramLayout?: any;
     nodes?: { [key: string]: any };
     groups?: { [key: string]: any };

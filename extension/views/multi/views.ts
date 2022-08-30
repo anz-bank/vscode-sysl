@@ -30,7 +30,6 @@ export abstract class AbstractMultiView implements MultiView {
   public getChild<T extends ViewModel, D extends ViewModelDelta>(
     key: ViewKey
   ): View<T, D> | undefined {
-    console.trace("GET CHILD", key);
     return this._children[viewKeyToString(key)];
   }
 
@@ -40,9 +39,7 @@ export abstract class AbstractMultiView implements MultiView {
   ): View<T, D>;
 
   /** Removes and returns the child view with the given key if it exists, or undefined otherwise. */
-  public removeChild<T extends ViewModel, D extends ViewModelDelta>(
-    key: ViewKey
-  ): View<T, D> | undefined {
+  public removeChild(key: ViewKey): View<any, any> | undefined {
     const view = this.getChild(key);
     if (view) {
       view.dispose();

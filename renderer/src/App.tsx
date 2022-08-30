@@ -1,20 +1,21 @@
-import * as React from "react";
-import * as go from "gojs";
-import _, { sortBy, pick } from "lodash";
-import { produce } from "immer";
-
-import { withStyles } from "@material-ui/styles";
-import { TabContext } from "@material-ui/lab";
+import { uriToViewKey } from "@anz-bank/vscode-sysl-model";
 import { Snackbar } from "@material-ui/core";
+import { TabContext } from "@material-ui/lab";
 import MuiAlert, { AlertProps } from "@material-ui/lab/Alert";
-
-import { vscode } from "./components/vscode/VsCode";
-import { DiagramData, Edge, Node } from "./components/diagram/DiagramTypes";
+import { withStyles } from "@material-ui/styles";
+import * as go from "gojs";
+import { produce } from "immer";
+import { at, each, intersection, isEmpty, keyBy, pick, sortBy } from "lodash";
+import * as React from "react";
+import { URI } from "vscode-uri";
 import { GoJSIndex, shouldNotifyChange, updateState } from "./components/diagram/DiagramState";
-
+import { DiagramData, Edge, Node } from "./components/diagram/DiagramTypes";
+import { HtmlModel } from "./components/html/HtmlModel";
+import { TabLabelType } from "./components/layout/LayoutTypes";
 import LayoutWrapper from "./components/layout/LayoutWrapper";
 import MainContainer from "./components/layout/MainContainer";
-import { HtmlModel } from "./components/html/HtmlModel";
+import { tabLabelIcon } from "./components/layout/TopBar";
+import { Change, TableModel } from "./components/table/TableModel";
 import {
   stringToViewKey,
   ViewItem,
@@ -22,15 +23,13 @@ import {
   viewKeyToString,
   ViewModel,
 } from "./components/views/types";
-import { TabLabelType } from "./components/layout/LayoutTypes";
-import { tabLabelIcon } from "./components/layout/TopBar";
-import { uriToViewKey } from "@anz-bank/vscode-sysl-model";
-import { URI } from "vscode-uri";
+import { vscode } from "./components/vscode/VsCode";
 
 type AppState = {
   viewData: {
     diagrams: { [key: string]: DiagramData };
     htmlDocs: { [key: string]: HtmlModel };
+    tables: { [key: string]: TableModel };
   };
   selectedData: { [key: string]: DiagramData | null };
   activeChild: string;
@@ -46,6 +45,7 @@ const initialState: AppState = {
   viewData: {
     diagrams: {},
     htmlDocs: {},
+    tables: {},
   },
   error: {
     openSnackBar: false,
@@ -61,6 +61,7 @@ const styles: StyleObject = () => ({
   root: {
     flexGrow: 1,
     display: "flex",
+    maxWidth: "100vw",
   },
   alert: {
     whiteSpace: "pre-wrap",
@@ -109,14 +110,18 @@ function Alert(props: AlertProps) {
   return <MuiAlert elevation={6} {...props} />;
 }
 
-function isDiagramData(model: any) {
+function isDiagramData(model: any): model is DiagramData {
   const hasNodesOrEdges = (obj: any) => "nodes" in obj && obj.nodes;
   return hasNodesOrEdges(model);
 }
 
-function isHtmlModel(model: any) {
+function isHtmlModel(model: any): model is HtmlModel {
   const hasContent = (obj: any) => "content" in obj;
   return hasContent(model);
+}
+
+function isTableModel(model: any): model is TableModel {
+  return "data" in model;
 }
 
 /**
@@ -135,8 +140,8 @@ function getDiagramData(data: go.Part[], diagram: DiagramData): DiagramData | nu
   });
 
   const diagramData: DiagramData = {
-    nodes: _(diagram.nodes).keyBy("key").at(nodes).value(),
-    edges: _(diagram.edges).keyBy("key").at(edges).value(),
+    nodes: at(keyBy(diagram.nodes, "key"), nodes),
+    edges: at(keyBy(diagram.edges, "key"), edges),
   };
 
   return diagramData;
@@ -149,13 +154,14 @@ class App extends React.PureComponent<AppProps, AppState> {
     super(props);
 
     this.state = vscode.getState() || initialState;
-    _.each(this.state.viewData.diagrams, ({ nodes, edges }, k) => {
+    each(this.state.viewData.diagrams, ({ nodes, edges }, k) => {
       this.gojsIndexes[k] = new GoJSIndex({ nodes, edges });
     });
 
     // bind handler methods
     this.handleDiagramEvent = this.handleDiagramEvent.bind(this);
     this.handleModelChange = this.handleModelChange.bind(this);
+    this.handleTableModelChange = this.handleTableModelChange.bind(this);
     this.handleParentMessage = this.handleParentMessage.bind(this);
     this.handleTabChange = this.handleTabChange.bind(this);
     this.handleCloseError = this.handleCloseError.bind(this);
@@ -181,10 +187,10 @@ class App extends React.PureComponent<AppProps, AppState> {
     const selectedEdges: Edge[] = [];
     selection?.edges?.forEach((edge: Edge) => {
       // select all edges in a link group
-      if (!_.isEmpty(edge.groups)) {
+      if (!isEmpty(edge.groups)) {
         const edgesInGroup: Edge[] = this.state.viewData.diagrams[
           this.state.activeChild
-        ].edges.filter((e) => _.intersection(e.groups, edge.groups).length > 0);
+        ].edges.filter((e) => intersection(e.groups, edge.groups).length > 0);
         selectedEdges.push(...edgesInGroup);
       } else {
         selectedEdges.push(edge);
@@ -198,7 +204,6 @@ class App extends React.PureComponent<AppProps, AppState> {
       }),
       () => {
         vscode.setState(this.state);
-        console.log("new state", this.state);
       }
     );
   }
@@ -301,13 +306,39 @@ class App extends React.PureComponent<AppProps, AppState> {
                       (this.gojsIndexes[k] = new GoJSIndex({ nodes, edges }))
                   );
                   if (!draft.activeChild) {
-                    // setting the active tab to the first diagram by default
                     draft.activeChild = keyString;
                   }
                 }),
                 () => {
                   vscode.setState(this.state);
-                  console.log("new state", this.state);
+                  vscode.postMessage({
+                    type: "view/didOpen",
+                    key: meta.key,
+                    model,
+                  });
+                }
+              );
+            }
+          } else if (meta.kind === "table") {
+            if (!isTableModel(model)) {
+              const errorMsg = "data object is missing rows";
+              this.showError({ errorMsg }, type, meta.kind);
+            } else {
+              this.setState(
+                produce((draft: AppState) => {
+                  draft.error = { openSnackBar: false, errorMessage: null };
+                  draft.viewData.tables[keyString] = { ...model };
+                  if (!draft.activeChild) {
+                    draft.activeChild = keyString;
+                  }
+                }),
+                () => {
+                  vscode.setState(this.state);
+                  vscode.postMessage({
+                    type: "view/didOpen",
+                    key: meta.key,
+                    model,
+                  });
                 }
               );
             }
@@ -319,21 +350,23 @@ class App extends React.PureComponent<AppProps, AppState> {
                 produce((draft: AppState) => {
                   draft.error = { openSnackBar: false, errorMessage: null };
                   draft.viewData.htmlDocs[keyString] = model;
-                  // setting the active tab to the first tab by default if no diagrams yet
                   if (!draft.activeChild) {
                     draft.activeChild = keyString;
                   }
                 }),
                 () => {
                   vscode.setState(this.state);
-                  console.log("new state", this.state);
+                  vscode.postMessage({
+                    type: "view/didOpen",
+                    key: meta.key,
+                    model,
+                  });
                 }
               );
             }
           }
           break;
         case "update":
-          console.log("received update message", event.data);
           if (meta.kind === "diagram") {
             if (!isDiagramData(model)) {
               const errorMsg = "data object is missing nodes and/or edges";
@@ -341,14 +374,22 @@ class App extends React.PureComponent<AppProps, AppState> {
             } else {
               console.log("no errors, need to update diagram model now");
             }
-          } else {
-            if (!model.content) {
-              this.showError({ errorMsg: "data object is missing content" }, type, meta.kind);
+            if (meta.kind === "table") {
+              if (!isTableModel(model)) {
+                const errorMsg = "data object is missing rows";
+                this.showError({ errorMsg }, type, meta.kind);
+              } else {
+                console.log("no errors, need to update table model now");
+              }
             } else {
-              console.log("no errors, need to update html");
+              if (!model.content) {
+                this.showError({ errorMsg: "data object is missing content" }, type, meta.kind);
+              } else {
+                console.log("no errors, need to update html now");
+              }
             }
+            break;
           }
-          break;
       }
     } catch (e) {
       this.showError({ errorMsg: e }, type, meta.kind);
@@ -390,7 +431,6 @@ class App extends React.PureComponent<AppProps, AppState> {
   public handleModelChange(delta: go.IncrementalData) {
     const index = this.gojsIndexes[this.state.activeChild];
     const notify = shouldNotifyChange(index, delta);
-    console.log(`setting state (notify: ${notify})`, delta);
 
     this.setState(
       produce((draft: AppState) => {
@@ -407,6 +447,35 @@ class App extends React.PureComponent<AppProps, AppState> {
             delta,
             model: pick(data, "nodes", "edges"),
             viewId: data.type?.id,
+          });
+        }
+      }
+    );
+  }
+
+  /**
+   * Handle table model changes, which output an object of data changes.
+   * This method iterates over those changes and updates state to keep in sync with the table model.
+   * @param delta a JSON-formatted string
+   */
+  public handleTableModelChange(delta: Change[]) {
+    const viewId = this.state.activeChild;
+    const notify = true; // TODO: Determine if any change events are not user-initiated.
+
+    this.setState(
+      produce((draft: AppState) => {
+        const model = draft.viewData.tables[viewId];
+        delta.forEach(({ row, prop, newValue }) => {
+          model.data[row][Number(prop)] = newValue;
+        });
+      }),
+      () => {
+        vscode.setState(this.state);
+        if (notify) {
+          vscode.postMessage({
+            type: "view/didChange",
+            key: stringToViewKey(viewId),
+            delta,
           });
         }
       }
@@ -457,18 +526,20 @@ class App extends React.PureComponent<AppProps, AppState> {
       </>
     );
 
+    const getLabel = (model: ViewModel, defaultLabel: string) =>
+      (isDiagramData(model) && model.templates?.diagramLabel) || model.meta?.label || defaultLabel;
+
+    const getFlag = (model: ViewModel) => {
+      if (isDiagramData(model) && model.type?.willRender) {
+        return tabLabelIcon.loading;
+      }
+      return this.state.error?.openSnackBar ? tabLabelIcon.failed : tabLabelIcon.none;
+    };
+
     let tabLabels: TabLabelType[] = [];
-    this.forEachViewDataModel(({ key, model, index }) =>
-      tabLabels.push({
-        key: key,
-        label: model.templates?.diagramLabel ?? model.meta?.label ?? `View ${index}`,
-        flag: model.type?.willRender
-          ? tabLabelIcon.loading
-          : this.state.error?.openSnackBar
-          ? tabLabelIcon.failed
-          : tabLabelIcon.none,
-      })
-    );
+    this.forEachViewDataModel(({ key, model, index }) => {
+      tabLabels.push({ key, label: getLabel(model, `View ${index}`), flag: getFlag(model) });
+    });
     tabLabels = sortBy(tabLabels, "[1]");
 
     return (
@@ -491,6 +562,7 @@ class App extends React.PureComponent<AppProps, AppState> {
                 activeChild={this.state.activeChild}
                 handleDiagramEvent={this.handleDiagramEvent}
                 handleModelChange={this.handleModelChange}
+                handleTableModelChange={this.handleTableModelChange}
               />
             }
           </div>
@@ -500,11 +572,9 @@ class App extends React.PureComponent<AppProps, AppState> {
   }
 
   private forEachViewDataModel(
-    f: (viewData: { key: string; model: DiagramData | HtmlModel; index: number }) => void
+    f: (viewData: { key: string; model: ViewModel; index: number }) => void
   ) {
-    let i = 1;
-    _.each(this.state.viewData.diagrams, (model, key) => f({ key, model, index: i++ }));
-    _.each(this.state.viewData.htmlDocs, (model, key) => f({ key, model, index: i++ }));
+    this.forEachView(({ keyUri, model, index }) => f({ key: keyUri, model, index }));
   }
 
   // TODO: Replace the viewData map with something more iterable.
@@ -512,11 +582,8 @@ class App extends React.PureComponent<AppProps, AppState> {
     f: (view: { key: ViewKey; keyUri: string; model: ViewModel; index: number }) => void
   ) {
     let i = 1;
-    _.each(this.state.viewData.diagrams, (model, key) => {
-      f({ keyUri: key, key: stringToViewKey(key), model, index: i++ });
-    });
-    _.each(this.state.viewData.htmlDocs, (model, key) => {
-      f({ keyUri: key, key: stringToViewKey(key), model, index: i++ });
+    each(this.state.viewData, (v) => {
+      each(v, (model, key) => f({ keyUri: key, key: stringToViewKey(key), model, index: i++ }));
     });
   }
 

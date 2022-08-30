@@ -8,6 +8,14 @@ A::B1:
   Ep2:
     A::B2 <- Ep2
 A::B2:
+  !table T1:
+    f<: T2
+  !table T2:
+    f<: int
+  !table T3:
+    f<: T2
+  !table T4:
+    f<: T3
   Ep1:
     ...
   Ep2:

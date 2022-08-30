@@ -96,6 +96,13 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 
 ## Release Notes
 
+## 0.52.0
+
+- Add renderer support for "table" views based on [opentable](https://github.com/swsvindland/opentable), an OSS fork of [Handsontable](https://handsontable.com/).
+- Send view models to LSP plugins on open.
+- Exclude `~ignore` tagged elements from integration diagram.
+- Use `LayeredDigraphLayout` for integration and ERD diagrams.
+
 ## 0.50.0
 
 - Show progress notification while fetching network plugins, and error message for plugins that fail to start.

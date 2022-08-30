@@ -10,13 +10,15 @@ import {
   ViewDidOpenParams,
   ViewDidShowNotification,
   ViewDidShowParams,
+  ViewModel,
 } from "@anz-bank/vscode-sysl-plugin";
 import { ProtocolNotificationType } from "vscode-languageserver/node";
 import { Document } from "../plugins/types";
 
 /** An event that occurred in or around a view. */
-export interface ViewEvent {
+export interface ViewEvent<T extends ViewModel> {
   key: ViewKey;
+  model?: T;
   document?: Document;
 }
 
@@ -25,8 +27,7 @@ export interface ViewEvent {
  *
  * This is not emitted following changes to the model from outside sources.
  */
-export interface ViewModelChangeEvent<T, D> extends ViewEvent {
-  model?: T;
+export interface ViewModelChangeEvent<T, D> extends ViewEvent<T> {
   change: D;
 }
 

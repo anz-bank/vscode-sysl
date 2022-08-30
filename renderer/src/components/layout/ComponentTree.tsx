@@ -6,8 +6,8 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { ChevronLeft, ChevronRight, ExpandMore } from "@mui/icons-material";
 import TreeView from "@mui/lab/TreeView";
 import { CustomTreeItem } from "./CustomTreeItem";
-import _ from "lodash";
-import VisibleIcon from './VisibleIcon';
+import VisibleIcon from "./VisibleIcon";
+import { at, each, filter, groupBy, keyBy, map, omit, sortBy } from "lodash";
 
 const DrawerHeader = styled("div")(() => ({
   display: "flex",
@@ -50,12 +50,12 @@ export default function ComponentTree(props: any) {
 
   const [onHoverNodeName, setOnHoverNodeName] = useState("");
   const [nodes, setNodes] = useState(props.activeNodes);
-  const [expanded, setExpanded] = useState(_.map(_.filter(props.activeNodes, "isGroup"), "key"));
+  const [expanded, setExpanded] = useState(map(filter(props.activeNodes, "isGroup"), "key"));
   const classes = useStyles();
 
   useEffect(() => {
     setNodes(props.activeNodes);
-    setExpanded(_.map(_.filter(props.activeNodes, "isGroup"), "key"));
+    setExpanded(map(filter(props.activeNodes, "isGroup"), "key"));
   }, [props.activeNodes]);
 
   const treeNode = (node: any) => (
@@ -66,7 +66,12 @@ export default function ComponentTree(props: any) {
       label={
         <Tooltip title={node.label} placement="right">
           <div
-            style={{display: "flex", flex: 1, justifyContent: "space-between", alignItems: "center"}}
+            style={{
+              display: "flex",
+              flex: 1,
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
             onMouseOver={() => {
               setOnHoverNodeName(node.label);
             }}
@@ -75,7 +80,7 @@ export default function ComponentTree(props: any) {
             }}
           >
             <Typography
-              style={{overflow: "hidden", textOverflow: "ellipsis", width: "100%"}}
+              style={{ overflow: "hidden", textOverflow: "ellipsis", width: "100%" }}
               color={node.visible ? "text.primary" : "text.disabled"}
               variant="caption"
               data-testid={node.key}
@@ -84,10 +89,14 @@ export default function ComponentTree(props: any) {
               {node.label}
             </Typography>
 
-            <IconButton size="small" data-testid={node.label + "-vis"} onClick={() => {
-              // Toggle visibility of selected node
-              props.setVisibility(node);
-            }}>
+            <IconButton
+              size="small"
+              data-testid={node.label + "-vis"}
+              onClick={() => {
+                // Toggle visibility of selected node
+                props.setVisibility(node);
+              }}
+            >
               <VisibleIcon
                 nodeName={node.label}
                 visibilityIconOn={node.visible ?? true}
@@ -108,17 +117,17 @@ export default function ComponentTree(props: any) {
    * @returns hierarchical list of nodes, each child listed under the parent.
    */
   const constructGrouping = (nodeList: go.ObjectData[]) => {
-    const groups = _.groupBy(nodeList, (node) => node.group || "root");
-    const nodes = _.keyBy(nodeList, "key");
-    _.each(_.omit(groups, "root"), function (children, parentId) {
-      nodes[parentId].children = _.sortBy(children, "label");
+    const groups = groupBy(nodeList, (node) => node.group || "root");
+    const nodes = keyBy(nodeList, "key");
+    each(omit(groups, "root"), (children, parentId) => {
+      nodes[parentId].children = sortBy(children, "label");
     });
 
     return {
       key: "components",
       expanded: true,
       visible: true,
-      children: _.sortBy(groups["root"], "label"),
+      children: sortBy(groups["root"], "label"),
     };
   };
 
@@ -126,7 +135,7 @@ export default function ComponentTree(props: any) {
    * Update diagram with selections made in the tree.
    */
   function selectionChange(nodeIds: Array<string>) {
-    const nodes = _(props.activeNodes).keyBy("key").at(nodeIds).value();
+    const nodes = at(keyBy(props.activeNodes, "key"), nodeIds);
     props.onSelectionChanged({ nodes: nodes, edges: [] });
   }
 

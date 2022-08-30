@@ -1,23 +1,28 @@
 import { format } from "@anz-bank/sysl/common";
-import { Call, Model } from "@anz-bank/sysl/model";
+import { Call, IElement, Model } from "@anz-bank/sysl/model";
 import { DiagramModel, DiagramObjectData } from "../../views/diagram/model";
 
-export async function buildModel(model: Model): Promise<DiagramModel> {
-  const groups: boolean = false; // Object.keys(model.apps).length > 1;
+const notIgnored = (el: IElement) => !el.tags.some((t) => t.value === "ignore");
 
-  const nodes: DiagramObjectData[] = model.apps.map((app) => {
+export async function buildModel(model: Model): Promise<DiagramModel> {
+  const apps = model.apps
+    .filter((app) => app.types.length || app.endpoints.some((e) => e.name !== "..."))
+    .filter(notIgnored);
+
+  const nodes: DiagramObjectData[] = apps.map((app) => {
     const appName = format.joinedAppName(app.name.parts);
     return {
       key: appName,
       label: appName,
-      group: groups ? appName : undefined,
       isGroup: false,
     };
   });
-  const edges: DiagramObjectData[] = model.apps.flatMap((app) =>
-    app.endpoints.flatMap((ep) =>
+
+  const edges: DiagramObjectData[] = apps.flatMap((app) =>
+    app.endpoints.filter(notIgnored).flatMap((ep) =>
       ep.statements
         .filter((s) => s.value?.constructor.name === Call.name)
+        .filter(notIgnored)
         .map((s) => s.value as Call)
         .map((call) => {
           const from = format.joinedAppName(call.originApp);
@@ -30,9 +35,6 @@ export async function buildModel(model: Model): Promise<DiagramModel> {
   return {
     nodes,
     edges,
-    templates: {
-      diagramLabel: "Integration",
-      diagramLayout: "ForceDirectedLayout",
-    },
+    templates: { diagramLayout: "LayeredDigraphLayout" },
   };
 }

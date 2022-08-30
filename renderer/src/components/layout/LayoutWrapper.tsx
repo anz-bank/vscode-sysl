@@ -32,12 +32,8 @@ export default function LayoutWrapper(props: PropType) {
   const classes = useStyles();
 
   const [state, setState] = useState({
-    leftPanel: {
-      open: false,
-    },
-    rightPanel: {
-      open: false,
-    },
+    leftPanel: { open: false },
+    rightPanel: { open: false },
   });
 
   /**

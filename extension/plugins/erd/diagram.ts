@@ -1,15 +1,17 @@
-import { Model, Reference, Type, TypeDecorator, TypeValue } from "@anz-bank/sysl/model";
+import { IElement, Model, Reference, Type, TypeDecorator, TypeValue } from "@anz-bank/sysl/model";
 import { DiagramModel, DiagramObjectData } from "../../views/diagram/model";
+
+const notIgnored = (el: IElement) => !el.tags.some((t) => t.value === "ignore");
 
 export async function buildModel(model: Model): Promise<DiagramModel> {
   const nodes: DiagramObjectData[] = [];
   const edges: DiagramObjectData[] = [];
   const groups: boolean = Object.keys(model.apps).length > 1;
 
-  model.apps.forEach((app) => {
+  model.apps.filter(notIgnored).forEach((app) => {
     let includeApp = false;
     const appName = app.name.toSysl();
-    app.types.forEach((type) => {
+    app.types.filter(notIgnored).forEach((type) => {
       const key = `${appName}.${type.name}`;
 
       nodes.push({
@@ -30,12 +32,13 @@ export async function buildModel(model: Model): Promise<DiagramModel> {
     }
   });
 
-  return { nodes, edges };
+  return { nodes, edges, templates: { diagramLayout: "LayeredDigraphLayout" } };
 }
 
 function getChildReferences(type: Type): Reference[] {
   return type
     .children()
+    .filter(notIgnored)
     .map((f) => f.value)
     .map(getReference)
     .filter(isReference);

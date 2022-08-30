@@ -37,6 +37,8 @@
     "gojs": "^2.1",
     "gojs-react": "^1.0.10",
     "lodash": "^4.17.21",
+    "opentable": "^6",
+    "opentable-react": "^6",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "^4"
