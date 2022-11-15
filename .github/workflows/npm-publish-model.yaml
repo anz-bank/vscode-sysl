@@ -7,11 +7,14 @@ on:
     paths:
       - ".github/**"
       - "docs/**"
-      - "model/**"
+      - "packages/model/**"
 
 jobs:
   publish-to-npm:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/model
 
     steps:
       - uses: actions/checkout@v2
@@ -22,11 +25,9 @@ jobs:
 
       - name: Install Project
         run: yarn install --frozen-lockfile
-        working-directory: model
 
       - name: Publish Package
         run: npm publish
         if: ${{ github.repository_owner == 'anz-bank' }}
-        working-directory: model
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,0 +1,32 @@
+{
+  "name": "@anz-bank/vscode-sysl-model",
+  "version": "0.4.0",
+  "license": "Apache-2.0",
+  "description": "Common code for developing vscode-sysl components (e.g. renderer and plugins).",
+  "files": [
+    "README.md",
+    "dist"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "scripts": {
+    "prepublish": "yarn build",
+    "build": "tsc",
+    "build:watch": "tsc -w",
+    "test": "jest",
+    "test:watch": "jest -w"
+  },
+  "dependencies": {
+    "vscode-uri": "^3"
+  },
+  "devDependencies": {
+    "@types/jest": "^26",
+    "jest": "^26",
+    "jest-extended": "^2",
+    "prettier": "^2",
+    "ts-jest": "^26",
+    "ts-node": "^10",
+    "typescript": "^4"
+  }
+}

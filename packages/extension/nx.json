@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/nx/schemas/nx-schema.json",
+  "targetDefaults": {
+    "test": {
+      "dependsOn": ["compile", "plugins"]
+    },
+    "build": {
+      "dependsOn": ["^build"]
+    }
+  }
+}

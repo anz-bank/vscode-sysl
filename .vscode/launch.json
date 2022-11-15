@@ -5,14 +5,15 @@
 			"name": "Run Extension",
 			"type": "extensionHost",
 			"request": "launch",
+			"cwd": "${workspaceFolder}/packages/extension",
 			"runtimeExecutable": "${execPath}",
 			"args": [
 				"--disable-extensions",
-				"--extensionDevelopmentPath=${workspaceFolder}"
+				"--extensionDevelopmentPath=${workspaceFolder}/packages/extension"
 			],
 			"outFiles": [
-				"${workspaceFolder}/out/**/*.js",
-				"${workspaceFolder}/renderer/build/**",
+				"${workspaceFolder}/packages/extension/out/**/*.js",
+				"${workspaceFolder}/packages/renderer/build/**",
 			],
 		},
 		{
@@ -21,15 +22,15 @@
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
-				"${workspaceFolder}/extension/test/fixtures/",
+				"${workspaceFolder}/packages/extension/test/fixtures/",
 				"--disable-extensions",
-				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionTestsPath=${workspaceFolder}/out/test/ui/index",
+				"--extensionDevelopmentPath=${workspaceFolder}/packages/extension",
+				"--extensionTestsPath=${workspaceFolder}/packages/extension/out/test/ui/index",
 				"--user-data-dir=${workspaceFolder}/.vscode-test/user-data"
 			],
 			"outFiles": [
-				"${workspaceFolder}/out/test/**/*.js",
-				"${workspaceFolder}/renderer/build/**"
+				"${workspaceFolder}/packages/extension/out/test/**/*.js",
+				"${workspaceFolder}/packages/renderer/build/**"
 			]
 		},
 		{
@@ -37,9 +38,9 @@
 			"type": "node",
 			"request": "launch",
 			"program": "${workspaceFolder}/node_modules/.bin/ts-node",
-			"cwd": "${workspaceFolder}",
+			"cwd": "${workspaceFolder}/packages/extension",
 			"args": [
-				"extension/test/runUnitTest"
+				"test/runUnitTest"
 			]
 		},
 		{

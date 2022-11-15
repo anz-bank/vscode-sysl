@@ -3,8 +3,6 @@
     "module": "commonjs",
     "target": "es2019",
     "lib": ["ES2019", "ES2020.Promise", "dom"],
-    "rootDir": "extension",
-    "outDir": "out",
     "esModuleInterop": true,
     "noImplicitAny": false,
     "sourceMap": true,
@@ -12,6 +10,11 @@
     "alwaysStrict": true,
     "skipLibCheck": true
   },
-  "include": ["extension"],
-  "exclude": ["test-resources", ".vscode-test"]
+  "references": [
+    { "path": "./packages/extension" },
+    { "path": "./packages/model" },
+    { "path": "./packages/plugin" }
+  ],
+  "include": ["scripts"],
+  "exclude": ["**/node_modules", "test-resources", ".vscode-test"]
 }

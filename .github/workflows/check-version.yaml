@@ -7,8 +7,8 @@ on:
     paths-ignore:
       - ".github/**"
       - "docs/**"
-      - "model/**"
-      - "plugin/**"
+      - "packages/model/**"
+      - "packages/plugin/**"
 
 jobs:
   check-version:
@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v2
         with:
-          node-version: "14"
+          node-version: "16"
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0

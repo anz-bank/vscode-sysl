@@ -1,0 +1,231 @@
+{
+  "name": "vscode-sysl",
+  "displayName": "Sysl",
+  "description": "Write Sysl specs easily with instant visual feedback.",
+  "author": "ANZ Bank",
+  "publisher": "anz-bank",
+  "version": "0.53.0",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anz-bank/vscode-sysl"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "icon": "docs/icon.png",
+  "keywords": [
+    "specification",
+    "diagrams"
+  ],
+  "engines": {
+    "vscode": "^1.52.0"
+  },
+  "activationEvents": [
+    "onLanguage:sysl",
+    "onLanguage:sysld",
+    "onCustomEditor:sysl.multiView",
+    "onCustomEditor:sysld.multiView",
+    "workspaceContains:**/*.sysl"
+  ],
+  "main": "./out/main.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "sysl.renderDiagram",
+        "title": "Render Diagram",
+        "category": "Sysl",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "sysl.diagram.snapshot",
+        "title": "Save Diagram Snapshot",
+        "category": "Sysl",
+        "icon": "$(device-camera)"
+      },
+      {
+        "command": "sysl.action.list",
+        "title": "List Actions",
+        "category": "Sysl",
+        "icon": "$(run)"
+      },
+      {
+        "command": "sysl.import",
+        "title": "Import",
+        "category": "Sysl",
+        "icon": "$(sign-in)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "when": "resourceExtname == .sysl && activeCustomEditorId != 'sysl.multiView'",
+          "command": "sysl.renderDiagram",
+          "group": "navigation@1"
+        },
+        {
+          "when": "resourceExtname == .sysl && activeCustomEditorId != 'sysl.multiView'",
+          "command": "sysl.action.list",
+          "group": "navigation@1"
+        },
+        {
+          "when": "activeCustomEditorId == 'sysl.multiView' || activeCustomEditorId == 'sysld.multiView",
+          "command": "sysl.diagram.snapshot",
+          "group": "navigation@2"
+        }
+      ]
+    },
+    "languages": [
+      {
+        "id": "sysl",
+        "aliases": [
+          "Sysl",
+          "sysl"
+        ],
+        "extensions": [
+          ".sysl"
+        ],
+        "configuration": "./src/syntax/language-configuration.json"
+      },
+      {
+        "id": "sysld",
+        "aliases": [
+          "SyslD",
+          "Sysld",
+          "sysld",
+          "Sysl Diagram"
+        ],
+        "extensions": [
+          ".sysld"
+        ]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "sysl",
+        "scopeName": "source.sysl",
+        "path": "./src/syntax/sysl.tmLanguage.json"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Sysl",
+      "properties": {
+        "sysl.tool.binaryPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the Sysl binary to use for Sysl operations. If empty, the Sysl extension will download and manage its own Sysl binary.\n\nSee https://sysl.io/docs/installation for installation instructions."
+        },
+        "sysl.tool.autoupdate": {
+          "type": "boolean",
+          "default": true,
+          "description": "Allow the extension to update the Sysl binary automatically."
+        },
+        "sysl.plugins.fetchFromNetwork": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to fetch plugins for the Sysl extension from the network on activation (from http://go/vscode-sysl-plugins)."
+        }
+      }
+    },
+    "customEditors": [
+      {
+        "viewType": "sysl.multiView",
+        "displayName": "Sysl Diagram",
+        "selector": [
+          {
+            "filenamePattern": "*.sysl"
+          }
+        ],
+        "priority": "option"
+      },
+      {
+        "viewType": "sysld.multiView",
+        "displayName": "Sysl Diagram",
+        "selector": [
+          {
+            "filenamePattern": "*.sysld"
+          }
+        ],
+        "priority": "default"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn build && yarn build:renderer",
+    "esbuild-base": "esbuild ./src/main.ts --bundle --outfile=out/main.js --external:vscode --external:electron --format=cjs --platform=node",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-prod": "npm run esbuild-base -- --minify",
+    "prebuild": "yarn install --network-timeout 300000",
+    "build": "yarn compile && yarn schema && yarn plugins && yarn build:renderer && yarn esbuild-prod",
+    "build:renderer": "yarn --cwd ../renderer build --network-timeout 300000 && cp -R ../renderer/build/. out/renderer",
+    "compile": "tsc",
+    "esbuild-erd": "esbuild ./src/plugins/erd/index.ts --bundle --outfile=out/plugins/erd/index.js --external:vscode --external:electron --format=cjs --platform=node",
+    "esbuild-integration": "esbuild ./src/plugins/integration/index.ts --bundle --outfile=out/plugins/integration/index.js --external:vscode --external:electron --format=cjs --platform=node",
+    "esbuild-sysld": "esbuild ./src/plugins/sysld/index.ts --bundle --outfile=out/plugins/sysld/index.js --external:vscode --external:electron --format=cjs --platform=node",
+    "plugins": "yarn esbuild-erd && yarn esbuild-integration && yarn esbuild-sysld",
+    "schema": "yarn schema-ts && yarn schema-go",
+    "schema-ts": "json2ts ./src/protocol/plugin.schema.json --output ./src/protocol/plugin.d.ts && yarn prettier --write ./src/protocol/plugin.d.ts",
+    "schema-go": "go run github.com/atombender/go-jsonschema/cmd/gojsonschema -p protocol ./src/protocol/plugin.schema.json --output ./src/protocol/plugin_schema.go",
+    "watch": "tsc -w",
+    "package": "vsce package",
+    "tidy": "prettier --write .",
+    "lint": "eslint . --ext .ts,.tsx",
+    "test": "yarn test-unit",
+    "test-ui": "node out/test/runTest",
+    "test-unit": "yarn jest",
+    "test-watch": "nodemon --watch './**' --ext 'ts,json,sysl' --exec 'ts-node ./src/test/runUnitTest'"
+  },
+  "dependencies": {
+    "@anz-bank/sysl": "^0",
+    "@anz-bank/vscode-sysl-model": "*",
+    "@anz-bank/vscode-sysl-plugin": "*",
+    "lodash": "^4",
+    "memoizee": "^0",
+    "semver": "^7",
+    "vscode-languageclient": "8.0.2",
+    "vscode-languageserver": "8.0.2",
+    "vscode-languageserver-protocol": "3.17.2",
+    "vscode-languageserver-textdocument": "^1"
+  },
+  "devDependencies": {
+    "@types/chai": "^4",
+    "@types/download": "^8",
+    "@types/glob": "^7",
+    "@types/jest": "^26",
+    "@types/memoizee": "^0",
+    "@types/mocha": "^9",
+    "@types/mock-fs": "^4",
+    "@types/node": "^18",
+    "@types/semver": "^7",
+    "@types/sinon-chai": "^3",
+    "@types/vscode": "^1",
+    "@typescript-eslint/eslint-plugin": "^2",
+    "@typescript-eslint/parser": "^2",
+    "@vscode/test-electron": "^2",
+    "chai": "^4",
+    "download": "^8",
+    "esbuild": "^0.15.13",
+    "eslint": "^7",
+    "glob": "^7",
+    "got": "^11",
+    "jest": "^26",
+    "jest-extended": "^3.0.2",
+    "json-schema-to-typescript": "^10",
+    "mocha": "^9",
+    "mock-fs": "^5",
+    "nodemon": "^2",
+    "p-retry": "^4",
+    "prettier": "^2",
+    "replace": "^1",
+    "sinon": "^11",
+    "sinon-chai": "^3",
+    "ts-jest": "^26",
+    "ts-mocha": "^10",
+    "ts-node": "^10",
+    "ts-protoc-gen": "^0",
+    "typescript": "^4",
+    "vsce": "^1",
+    "vscode-uri": "^3"
+  }
+}

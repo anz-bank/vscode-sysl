@@ -1,12 +1,12 @@
 # Dependencies
 node_modules
-/extension/test/fixtures
-/extension/test/screenshots
+/packages/extension/src/test/fixtures
+/packages/extension/src/test/screenshots
 
 # Production
 out/
 dist/
-/renderer/build
+/packages/renderer/build
 main.js*
 
 # Misc

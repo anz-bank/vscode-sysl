@@ -4,8 +4,9 @@ on: [pull_request]
 
 jobs:
   build-and-test:
-    name: Build and test
+    name: Build and test plugins
     runs-on: ubuntu-latest
+
     steps:
       - name: Set up Go
         uses: actions/setup-go@v2
@@ -20,13 +21,12 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - run: yarn install
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
 
-      - name: Build protocol artifacts
-        run: yarn schema
+      - name: Build protocol and plugins
+        run: yarn lerna run build --scope=vscode-sysl
 
-      - name: Build plugins
-        run: yarn plugins
-
-      - name: Check clean
-        run: git --no-pager diff HEAD && test -z "$(git status --porcelain)"
+      # TODO: Fix or delete once non-LSP plugins are retired.
+      # - name: Check clean
+      #   run: git --no-pager diff HEAD && test -z "$(git status --porcelain)"

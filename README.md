@@ -11,6 +11,8 @@ Accelerate your Sysl spec development with rich language features and interactiv
 ```
 .
 ├── package.json        # Manifest for the complete extension
+├── model               # Library for logic shared between other components
+├── plugin              # Library for TypeScript LSP plugins to the extension
 ├── extension           # VS Code integration points
 │   ├── editor          # Custom editor binding for the renderer
 │   ├── lsp             # Code relating to the Language Server Protocol
@@ -28,7 +30,6 @@ Accelerate your Sysl spec development with rich language features and interactiv
 │   ├── tools           # Logic for working with external programs (especially Sysl)
 │   ├── constants.ts    # Names used by the extension declared in package.json
 │   └── main.ts         # Extension entry point
-│
 └── renderer            # React app to render custom views for the extension
     ├── build           # Build output (the extension loads runtime JS/CSS from here)
     ├── src             # React app source code
@@ -78,6 +79,8 @@ Just [Visual Studio Code](https://code.visualstudio.com/). The extension will fe
 
 ## Development
 
+This project has multiple components arranged using Yarn workspaces and managed with [Lerna](https://lerna.js.org/).
+
 ### Building
 
 - `yarn install`: Installs all JS dependencies.
@@ -95,6 +98,19 @@ To run automated tests, including end-to-end UI tests, run `yarn test` or launch
 ---
 
 ## Release Notes
+
+## 0.53.0
+
+- Activate the extension more aggressively (if the workspace has any Sysl specs).
+- Add new configuration settings to toggle Sysl binary autoupdating and network plugin fetching.
+- Add new command to import a Sysl spec from the current file (or its directory in some cases).
+- Notify plugins of user events in a broader range of file types (including all possible import sources and `plaintext`).
+- Use Yarn workspaces and Lerna to better modularise the extension, renderer, and model and plugin libs.
+- Register a command `action:<action.id>` for each registered action to allow plugins to simular action invocations.
+- Add support for plugins to provide (and resolve) CodeLenses.
+- Add NPM publish job for the renderer (`@anz-bank/vscode-sysl-renderer`).
+- Improve resilience against plugins errors.
+- Update deps, refactor, and tidy.
 
 ## 0.52.0
 

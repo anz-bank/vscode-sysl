@@ -3,8 +3,8 @@ name: Test
 on: [pull_request]
 
 jobs:
-  test_model:
-    name: Run model tests
+  unit-test:
+    name: Run unit tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -12,54 +12,10 @@ jobs:
         with:
           node-version: "16"
       - run: yarn install --frozen-lockfile
-        working-directory: model
+      - name: Run unit tests
+        run: yarn lerna run test
 
-      - name: Run test
-        working-directory: model
-        run: yarn test
-
-  test_plugin:
-    name: Run plugin tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-node@v2
-        with:
-          node-version: "16"
-      - run: yarn install --frozen-lockfile
-        working-directory: plugin
-
-      - name: Run test
-        working-directory: plugin
-        run: yarn test
-
-  test_renderer:
-    name: Run renderer tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-node@v2
-        with:
-          node-version: "16"
-      - run: yarn install --frozen-lockfile
-        working-directory: renderer
-
-      - name: Run test
-        working-directory: renderer
-        run: yarn test
-
-  test_extension:
-    name: Run extension tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-node@v2
-        with:
-          node-version: "16"
-      - run: yarn install --frozen-lockfile
-      - run: yarn test-unit
-
-  test_integration:
+  integration-test:
     name: Run integration tests
     strategy:
       matrix:
@@ -70,14 +26,14 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: "16"
-      - run: yarn install --frozen-lockfile
-      - run: yarn build
       - run: yarn config set network-timeout 300000
+      - run: yarn install --frozen-lockfile
+      - run: yarn lerna run build --scope=vscode-sysl
 
       - name: Run test
         if: runner.os == 'Linux'
-        run: xvfb-run -a yarn test-ui
+        run: xvfb-run -a yarn lerna run test-ui --scope=vscode-sysl
 
       - name: Run test
         if: runner.os != 'Linux'
-        run: yarn test-ui
+        run: yarn lerna run test-ui --scope=vscode-sysl

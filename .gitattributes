@@ -1,4 +1,4 @@
-extension/test/screenshots/** linguist-generated=true
+extension/src/test/screenshots/** linguist-generated=true
 **/*.arraiz linguist-generated=true
 **/go.sum linguist-generated=true
 **/yarn.lock linguist-generated=true
