@@ -23,10 +23,10 @@ describe("plugins", () => {
       const plugins = await PluginLocator.builtin(sysl, "root");
 
       expect((plugins[0] as LspPluginConfig).lsp.scriptPath).to.equal(
-        path.normalize("root/out/plugins/integration/index.js")
+        path.normalize("root/dist/plugins/integration/index.js")
       );
       expect((plugins[1] as LspPluginConfig).lsp.scriptPath).to.equal(
-        path.normalize("root/out/plugins/erd/index.js")
+        path.normalize("root/dist/plugins/erd/index.js")
       );
     });
 

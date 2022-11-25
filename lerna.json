@@ -1,7 +1,12 @@
 {
-  "version": "0.1.0",
+  "version": "0.54.0",
   "useWorkspaces": true,
   "npmClient": "yarn",
-  "packages": ["extension", "model", "plugin", "renderer"],
+  "packages": [
+    "extension",
+    "model",
+    "plugin",
+    "renderer"
+  ],
   "useNx": true
 }

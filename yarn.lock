@@ -15,10 +15,10 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@anz-bank/sysl@^0", "@anz-bank/sysl@^0.14.0":
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/@anz-bank/sysl/-/sysl-0.14.0.tgz#61db909b2ae83d8dfa2a23b14568adea6f104b79"
-  integrity sha1-YduQmyroPY36KiOxRWit6m8QS3k=
+"@anz-bank/sysl@^0":
+  version "0.16.0"
+  resolved "https://registry.yarnpkg.com/@anz-bank/sysl/-/sysl-0.16.0.tgz#094498881c5a631b0dc474f3b312887e6b648619"
+  integrity sha1-CUSYiBxaYxsNxHTzsxKIfmtkhhk=
   dependencies:
     promisify-child-process "^4"
     reflect-metadata "^0"

@@ -23,7 +23,6 @@ import {
 } from "@anz-bank/vscode-sysl-plugin";
 import { ProtocolNotificationType } from "vscode-languageserver-protocol";
 import { ViewRegistry } from "../views/registry";
-import { Views } from "../views/types";
 import { LanguageClientSpy, LspPluginClientRouter } from "./lsp_client_router";
 
 const key: ViewKey = {
@@ -88,7 +87,7 @@ describe("LSP plugin client router", () => {
   describe("from views", () => {
     test("did open view", () => {
       simulate(views.onDidOpenView).calledWith({ key });
-      expect(sent).to.have.been.calledWith(ViewDidOpenNotification.type, {
+      expect(sent).to.have.been.calledWithMatch(ViewDidOpenNotification.type, {
         view: { key },
       } as ViewDidOpenParams);
     });
@@ -102,7 +101,7 @@ describe("LSP plugin client router", () => {
 
     test("did show view", () => {
       simulate(views.onDidShowView).calledWith({ key });
-      expect(sent).to.have.been.calledWith(ViewDidShowNotification.type, {
+      expect(sent).to.have.been.calledWithMatch(ViewDidShowNotification.type, {
         key,
       } as ViewDidShowParams);
     });

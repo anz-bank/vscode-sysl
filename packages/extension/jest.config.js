@@ -3,7 +3,7 @@ module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
   setupFilesAfterEnv: ["jest-extended/all"],
-  modulePathIgnorePatterns: ["dist", "out", "test/ui"],
+  modulePathIgnorePatterns: ["dist", "test/ui"],
   globalSetup: "../../scripts/setup.ts",
   moduleNameMapper: {
     // Help Jest resolve Sysl's subpath package exports.

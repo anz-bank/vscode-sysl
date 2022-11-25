@@ -2,7 +2,7 @@
   "name": "@anz-bank/vscode-sysl-renderer",
   "displayName": "Sysl",
   "description": "Write Sysl specs easily with instant visual feedback.",
-  "version": "0.1.0",
+  "version": "0.54.0",
   "categories": [
     "Programming Languages"
   ],
@@ -19,10 +19,12 @@
     "start": "craco start",
     "build": "craco build && browserify -e build/static/js/main.js -o build/static/js/main.js",
     "test": "craco test",
-    "eject": "craco eject"
+    "eject": "craco eject",
+    "pack": "pack",
+    "prepack": "cp package.json README.md ../../LICENSE dist/ && sed -i'' -e 's|dist/index|index|g' dist/package.json"
   },
   "dependencies": {
-    "@anz-bank/vscode-sysl-model": "*",
+    "@anz-bank/vscode-sysl-model": "^0.54.0",
     "@craco/craco": "^6.4.5",
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
@@ -76,5 +78,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

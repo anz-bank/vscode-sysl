@@ -1,12 +1,8 @@
 {
   "name": "@anz-bank/vscode-sysl-model",
-  "version": "0.4.0",
+  "version": "0.54.0",
   "license": "Apache-2.0",
   "description": "Common code for developing vscode-sysl components (e.g. renderer and plugins).",
-  "files": [
-    "README.md",
-    "dist"
-  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "sideEffects": false,
@@ -15,7 +11,9 @@
     "build": "tsc",
     "build:watch": "tsc -w",
     "test": "jest",
-    "test:watch": "jest -w"
+    "test:watch": "jest -w",
+    "pack": "pack",
+    "prepack": "cp package.json README.md ../../LICENSE dist/ && sed -i'' -e 's|dist/index|index|g' dist/package.json"
   },
   "dependencies": {
     "vscode-uri": "^3"
@@ -28,5 +26,8 @@
     "ts-jest": "^26",
     "ts-node": "^10",
     "typescript": "^4"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

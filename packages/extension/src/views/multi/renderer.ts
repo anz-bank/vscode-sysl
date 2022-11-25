@@ -7,7 +7,7 @@ export function rendererHtml(webview: Webview, basePath: string): string {
   // Use a nonce to whitelist which scripts can be run
   const nonce = getNonce();
 
-  const base = path.join(basePath, "out", "renderer", "static");
+  const base = path.join(basePath, "dist", "renderer", "static");
   const scriptUri = webview.asWebviewUri(URI.file(path.join(base, "js", "main.js")));
   const styleMainUri = webview.asWebviewUri(URI.file(path.join(base, "css", "main.css")));
 

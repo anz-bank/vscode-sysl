@@ -125,7 +125,7 @@ export class PluginLocator {
     extensionPath: string,
     options?: PluginClientOptions
   ): Promise<PluginConfig[]> {
-    const pluginsDir = path.join(extensionPath, "out", "plugins");
+    const pluginsDir = path.join(extensionPath, "dist", "plugins");
     const intPath = path.join(pluginsDir, "integration", "index.js");
     const erdPath = path.join(pluginsDir, "erd", "index.js");
     const sysldPath = path.join(pluginsDir, "sysld", "index.js");

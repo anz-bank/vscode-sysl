@@ -52,7 +52,7 @@ class Actions {
       if (doc && doc.uri.fsPath.endsWith(syslExt)) {
         model = await compileDoc(doc, this.sysl!).catch(() => undefined);
       }
-      return commands.executeCommand(action.id, { uri: doc?.uri.toString(), model });
+      await commands.executeCommand(action.id, { uri: doc?.uri.toString(), model });
     });
   }
 
@@ -67,9 +67,9 @@ class Actions {
       actions.map((a) => [`action:${a.id}`, a]),
       ([cmd]) => existing.includes(cmd)
     ) as [[string, Action][], [string, Action][]];
-    if (conflict)
+    if (conflict.length) {
       output.appendLine(`addActions: ignoring existing commands: [${conflict.map(([c]) => c)}]`);
-
+    }
     const disposables = fresh.map(([cmd, a]) => {
       output.appendLine(`adding action ${a.id} (command ${cmd})`);
       this.actions[a.id] = a;

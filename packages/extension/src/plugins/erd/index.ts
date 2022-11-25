@@ -64,5 +64,5 @@ async function buildModelForKey(key: ViewKey): Promise<DiagramModel> {
     throw new Error("must have compiled model to render ERD diagram");
   }
 
-  return { meta: { ...partialMeta, key }, ...(await buildModel(model)) };
+  return { meta: { ...partialMeta, key }, ...(await buildModel(model, key.docUri)) };
 }

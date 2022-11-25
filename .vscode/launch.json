@@ -12,7 +12,7 @@
 				"--extensionDevelopmentPath=${workspaceFolder}/packages/extension"
 			],
 			"outFiles": [
-				"${workspaceFolder}/packages/extension/out/**/*.js",
+				"${workspaceFolder}/packages/extension/dist/**/*.js",
 				"${workspaceFolder}/packages/renderer/build/**",
 			],
 		},
@@ -25,11 +25,11 @@
 				"${workspaceFolder}/packages/extension/test/fixtures/",
 				"--disable-extensions",
 				"--extensionDevelopmentPath=${workspaceFolder}/packages/extension",
-				"--extensionTestsPath=${workspaceFolder}/packages/extension/out/test/ui/index",
+				"--extensionTestsPath=${workspaceFolder}/packages/extension/dist/test/ui/index",
 				"--user-data-dir=${workspaceFolder}/.vscode-test/user-data"
 			],
 			"outFiles": [
-				"${workspaceFolder}/packages/extension/out/test/**/*.js",
+				"${workspaceFolder}/packages/extension/dist/test/**/*.js",
 				"${workspaceFolder}/packages/renderer/build/**"
 			]
 		},

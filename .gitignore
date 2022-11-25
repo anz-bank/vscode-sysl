@@ -3,10 +3,10 @@
 .vscode-test
 
 # Build
-out
+dist/
 node_modules
 *.vsix
-*error.log
+*.log
 /main.js*
 /sysl
 *.tsbuildinfo

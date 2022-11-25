@@ -8,9 +8,12 @@ import {
 } from "@anz-bank/sysl/model";
 import { DiagramModel, DiagramObjectData } from "../../views/diagram/model";
 
-const notIgnored = (el: Element) => !el.tags.some((t) => t.value === "ignore");
+const notIgnored = (el: Element) => !el.tags.some((t) => t.name === "ignore");
 
-export async function buildModel(model: Model): Promise<DiagramModel> {
+export async function buildModel(model: Model, docUri?: string): Promise<DiagramModel> {
+  if (docUri) {
+    model = model.filterByFile(docUri);
+  }
   const nodes: DiagramObjectData[] = [];
   const edges: DiagramObjectData[] = [];
   const groups: boolean = Object.keys(model.apps).length > 1;
@@ -39,7 +42,13 @@ export async function buildModel(model: Model): Promise<DiagramModel> {
     }
   });
 
-  return { nodes, edges, templates: { diagramLayout: "LayeredDigraphLayout" } };
+  return {
+    nodes,
+    edges,
+    templates: {
+      diagramLayout: "LayeredDigraphLayout",
+    },
+  };
 }
 
 function getChildReferences(type: Type): ElementRef[] {

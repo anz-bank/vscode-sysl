@@ -1,38 +1,38 @@
 {
   "name": "@anz-bank/vscode-sysl-plugin",
-  "version": "0.9.0",
+  "version": "0.54.0",
   "license": "Apache-2.0",
   "description": "Common code for developing vscode-sysl plugins.",
-  "files": [
-    "README.md",
-    "dist"
-  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "sideEffects": false,
   "scripts": {
-    "prepublish": "yarn build",
     "build": "tsc",
     "build:watch": "tsc -w",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "pack": "pack",
+    "prepack": "cp package.json README.md ../../LICENSE dist/ && sed -i'' -e 's|dist/index|index|g' dist/package.json"
   },
   "dependencies": {
-    "@anz-bank/sysl": "^0.14.0",
-    "@anz-bank/vscode-sysl-model": "*",
+    "@anz-bank/sysl": "^0",
+    "@anz-bank/vscode-sysl-model": "^0.54.0",
     "lodash": "^4",
     "vscode-languageserver": "8.0.2",
     "vscode-languageserver-protocol": "3.17.2",
     "vscode-languageserver-textdocument": "^1"
   },
   "devDependencies": {
-    "@types/lodash": "^4",
     "@types/jest": "^26",
+    "@types/lodash": "^4",
     "jest": "^26",
     "jest-extended": "^2",
     "prettier": "^2",
     "ts-jest": "^26",
     "ts-node": "^10",
     "typescript": "^4"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

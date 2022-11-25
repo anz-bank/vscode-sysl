@@ -11,10 +11,8 @@ jobs:
   deploy:
     if: ${{ github.repository_owner == 'anz-bank' }}
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: packages/extension
     steps:
       - uses: actions/checkout@v2
       - run: yarn install --frozen-lockfile
       - run: yarn vsce publish -p ${{ secrets.VSCE_TOKEN }}
+        working-directory: packages/extension

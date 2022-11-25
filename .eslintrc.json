@@ -15,7 +15,7 @@
   },
   "plugins": ["@typescript-eslint"],
   "ignorePatterns": [
-    "out/",
+    "dist/",
     "node_modules/",
     "extension/lsp/utils.ts",
     "extension/lsp/go*.ts",

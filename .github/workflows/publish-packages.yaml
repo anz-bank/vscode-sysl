@@ -1,0 +1,32 @@
+name: Publish packages
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/**"
+      - "docs/**"
+      - "packages/**"
+
+jobs:
+  publish-to-npm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install packages deps
+        run: yarn install --frozen-lockfile
+
+      - name: Build packages
+        run: yarn lerna run build
+
+      - name: Publish packages
+        if: ${{ github.repository_owner == 'anz-bank' }}
+        run: yarn lerna publish --contents=dist
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

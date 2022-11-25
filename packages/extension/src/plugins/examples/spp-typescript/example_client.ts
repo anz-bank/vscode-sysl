@@ -6,7 +6,7 @@ import { Events } from "../../types";
 const rootPath = path.join(__dirname, "..", "..", "..", "..");
 const pluginPath = path.join(
   rootPath,
-  "out",
+  "dist",
   "plugins",
   "examples",
   "spp-typescript",
