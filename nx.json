@@ -5,10 +5,6 @@
       "runner": "nx/tasks-runners/default"
     }
   },
-  "namedInputs": {
-    "default": ["{projectRoot}/**/*"],
-    "prod": ["!{projectRoot}/**/*.test.*"]
-  },
   "targetDefaults": {
     "test": { "dependsOn": ["build"] },
     "build": { "dependsOn": ["^build"] }
