@@ -33,4 +33,4 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish packages
-        run: yarn lerna publish from-package --contents=dist
+        run: yarn lerna publish from-package --contents=dist --yes
