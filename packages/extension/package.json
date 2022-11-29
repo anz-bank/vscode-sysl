@@ -154,7 +154,7 @@
   "scripts": {
     "vscode:prepublish": "cp ../../LICENSE ./",
     "vscode:package": "yarn vsce package",
-    "vscode:publish": "yarn vsce publish && rm -f ./LICENSE",
+    "vscode:publish": "yarn vsce publish -p $VSCE_TOKEN && rm -f ./LICENSE",
     "esbuild-base": "esbuild ./src/main.ts --bundle --outfile=dist/main.js --external:vscode --external:electron --format=cjs --platform=node",
     "esbuild": "npm run esbuild-base -- --sourcemap",
     "esbuild-prod": "npm run esbuild-base -- --minify",

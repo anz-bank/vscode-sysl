@@ -25,7 +25,10 @@ jobs:
       - name: Build packages
         run: yarn lerna run build
 
-      - run: echo //registry.npmjs.org/:_authToken=${NPM_TOKEN} > .npmrc
+      - name: Configure NPM auth
+        run: |
+          echo //registry.npmjs.org/:_authToken=${NPM_TOKEN} > .npmrc
+          git update-index --assume-unchanged .npmrc
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 

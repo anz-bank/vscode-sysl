@@ -15,4 +15,6 @@ jobs:
       - uses: actions/checkout@v2
       - run: yarn install --frozen-lockfile
       - name: Publish extension
-        run: yarn lerna -- run --scope=vscode-sysl vscode:publish -- -p ${{ secrets.VSCE_TOKEN }}
+        run: yarn lerna run vscode:publish --scope=vscode-sysl
+        env:
+          VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
