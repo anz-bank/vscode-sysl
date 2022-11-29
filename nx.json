@@ -7,6 +7,7 @@
   },
   "targetDefaults": {
     "test": { "dependsOn": ["build"] },
-    "build": { "dependsOn": ["^build"] }
+    "build": { "dependsOn": ["^build"] },
+    "plugins": { "dependsOn": ["^build"] }
   }
 }

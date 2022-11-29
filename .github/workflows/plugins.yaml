@@ -24,9 +24,5 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build protocol and plugins
-        run: yarn lerna run build --scope=vscode-sysl
-
-      # TODO: Fix or delete once non-LSP plugins are retired.
-      # - name: Check clean
-      #   run: git --no-pager diff HEAD && test -z "$(git status --porcelain)"
+      - name: Build plugins
+        run: yarn lerna run plugins --scope=vscode-sysl
