@@ -1,10 +1,10 @@
-# <img width="400px" src="./docs/vscode-logo-text.png"/> + <img width="400px" src="./docs/sysl-logo-text.png"/>
+# <img width="400px" src="./packages/extension/docs/vscode-logo-text.png"/> + <img width="400px" src="./packages/extension/docs/sysl-logo-text.png"/>
 
 # Sysl extension for Visual Studio Code
 
 Accelerate your Sysl spec development with rich language features and interactive side-by-side diagrams.
 
-![Screenshot of the Sysl extension](./docs/hero-screenshot.png)
+![Screenshot of the Sysl extension](./packages/extension/docs/hero-screenshot.png)
 
 ## Structure
 

@@ -4,7 +4,7 @@ on:
       - master
     paths-ignore:
       - ".github/**"
-      - "docs/**"
+      - "packages/extension/docs/**"
 
 name: Publish extension to Marketplace
 jobs:
@@ -14,4 +14,5 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: yarn install --frozen-lockfile
-      - run: yarn lerna -- run --scope=vscode-sysl vscode:publish -- -p ${{ secrets.VSCE_TOKEN }}
+      - name: Publish extension
+        run: yarn lerna -- run --scope=vscode-sysl vscode:publish -- -p ${{ secrets.VSCE_TOKEN }}

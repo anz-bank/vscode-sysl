@@ -6,11 +6,11 @@ on:
       - master
     paths:
       - ".github/**"
-      - "docs/**"
       - "packages/**"
 
 jobs:
   publish-to-npm:
+    if: ${{ github.repository_owner == 'anz-bank' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -25,8 +25,9 @@ jobs:
       - name: Build packages
         run: yarn lerna run build
 
-      - name: Publish packages
-        if: ${{ github.repository_owner == 'anz-bank' }}
-        run: yarn lerna publish --contents=dist
+      - run: echo //registry.npmjs.org/:_authToken=${NPM_TOKEN} > .npmrc
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish packages
+        run: yarn lerna publish from-package --contents=dist

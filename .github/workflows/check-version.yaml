@@ -6,7 +6,7 @@ on:
       - master
     paths-ignore:
       - ".github/**"
-      - "docs/**"
+      - "packages/extension/docs/**"
       - "packages/model/**"
       - "packages/plugin/**"
 
