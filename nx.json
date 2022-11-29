@@ -8,6 +8,7 @@
   "targetDefaults": {
     "test": { "dependsOn": ["build"] },
     "build": { "dependsOn": ["^build"] },
-    "plugins": { "dependsOn": ["^build"] }
+    "plugins": { "dependsOn": ["^build"] },
+    "pack": { "dependsOn": ["prepack"] }
   }
 }

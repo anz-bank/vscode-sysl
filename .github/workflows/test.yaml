@@ -51,4 +51,4 @@ jobs:
       - run: yarn build
 
       - name: Package extension
-        run: yarn lerna run vscode:package --scope=vscode-sysl
+        run: yarn lerna -- run vscode:package --scope=vscode-sysl -- --yarn

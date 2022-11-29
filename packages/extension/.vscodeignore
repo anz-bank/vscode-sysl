@@ -1,22 +1,30 @@
 .**
 **/*.ts
+**/*.js
 **/*.map
 **/tsconfig.json
+**/test/
+**/testdata/
+dist/LICENSE*
+dist/README*
+!dist/main.js
+!dist/main.js.map
+!dist/plugins/*/**/index.*
+
 *.log
 go.*
 **/*.go
 **/tmp*
 tslint*.json
 sysl
+**/*.tar.gz
+**/*.tgz
+*.vsix
 
 node_modules/**
 test-resources/**
-extension/test/**
 renderer/**
 # TODO: Link and include sourcemap for main.js
-!renderer/build/static/js/main.js
-!renderer/build/static/css/main.css
-extension/plugins/**
-!extension/plugins/**/*.arraiz
-!extension/plugins/erd
-extension/protocol/plugin.schema.json
+!dist/renderer/static/js/main.js
+!dist/renderer/static/css/main.css
+**/protocol/plugin.schema.json
