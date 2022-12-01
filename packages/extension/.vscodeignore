@@ -1,30 +1,14 @@
-.**
-**/*.ts
-**/*.js
-**/*.map
-**/tsconfig.json
-**/test/
-**/testdata/
-dist/LICENSE*
-dist/README*
-!dist/main.js
-!dist/main.js.map
+# Ignore everything by default.
+**/*
+../**/*
+../../**/*
+
+# Include the files needed by the extension.
+!LICENSE*
+!README*
+!icon.png
+!package.json
+!dist/main.js*
+!dist/renderer/static/js/main.js*
+!dist/renderer/static/css/main.css*
 !dist/plugins/*/**/index.*
-
-*.log
-go.*
-**/*.go
-**/tmp*
-tslint*.json
-sysl
-**/*.tar.gz
-**/*.tgz
-*.vsix
-
-node_modules/**
-test-resources/**
-renderer/**
-# TODO: Link and include sourcemap for main.js
-!dist/renderer/static/js/main.js
-!dist/renderer/static/css/main.css
-**/protocol/plugin.schema.json

@@ -6,7 +6,8 @@
   ],
   "scripts": {
     "build": "lerna run build",
-    "test": "lerna run test"
+    "test": "lerna run test",
+    "package": "lerna run pack"
   },
   "devDependencies": {
     "lerna": "^6.0.3",
