@@ -1,0 +1,41 @@
+name: Check versions
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - packages/**
+      - .github/**
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package:
+          - extension
+          - model
+          - plugin
+          - renderer
+    steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - run: |
+          git checkout $GITHUB_BASE_REF
+          git checkout -
+      # Fails if the files in a package have changed, but the package.json version hasn't.
+      # Doesn't fail if the version has changed but files haven't.
+      - name: Ensure new version
+        run: |
+          BASE=$(git show $GITHUB_BASE_REF:packages/${{ matrix.package }}/package.json | jq -r '.version')
+          HEAD=$(git show HEAD:packages/${{ matrix.package }}/package.json | jq -r '.version')
+          CHANGED=$(git diff --quiet master -- packages/${{ matrix.package }} || echo 1)
+          if [ "$CHANGED" = "1" ] && [ "$BASE" = "$HEAD" ]; then
+            echo "Changes to '${{ matrix.package }}' without change to version ($HEAD)";
+            exit 1;
+          fi

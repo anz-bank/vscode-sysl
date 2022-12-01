@@ -19,6 +19,6 @@ jobs:
         run: yarn lerna run build --scope=vscode-sysl
 
       - name: Publish extension
-        run: yarn lerna -- run vscode:publish --scope=vscode-sysl -- --yarn
+        run: yarn lerna -- run vscode:publish --scope=vscode-sysl
         env:
           VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
