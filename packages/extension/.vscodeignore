@@ -8,6 +8,8 @@
 !README*
 !icon.png
 !package.json
+!src/syntax/sysl.tmLanguage.json
+!src/syntax/language-configuration.json
 !dist/main.js*
 !dist/renderer/static/js/main.js*
 !dist/renderer/static/css/main.css*
