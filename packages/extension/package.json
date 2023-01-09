@@ -4,7 +4,7 @@
   "description": "Write Sysl specs easily with instant visual feedback.",
   "author": "ANZ Bank",
   "publisher": "anz-bank",
-  "version": "0.58.0",
+  "version": "0.59.0",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -223,7 +223,6 @@
     "ts-jest": "^26",
     "ts-mocha": "^10",
     "ts-node": "^10",
-    "ts-protoc-gen": "^0",
     "typescript": "^4",
     "vsce": "^2",
     "vscode-uri": "^3"

@@ -13,13 +13,11 @@ This project has multiple components arranged using Yarn workspaces and managed 
     │   │   ├── actions         # Definition and binding of plugin actions to VS Code
     │   │   ├── editor          # Custom editor binding for the renderer
     │   │   ├── lsp             # Code relating to the Language Server Protocol
-    |   |   │   ├── client      # Implementation of the Sysl language client (calls `sysl lsp`)
-    |   |   │   └── server      # Template for building simple LSP servers
+    |   |   │   └── client      # Implementation of the Sysl language client (calls `sysl lsp`)
     │   │   ├── plugins         # Logic for Sysl extension plugins, binding the client to servers
     |   |   │   ├── erd         # Built-in entity-relationship diagram plugin
-    |   |   │   ├── examples    # Example plugin implementations
-    |   |   │   └── integration # Built-in integration diagram plugin
-    │   │   ├── protocol        # Schema and generated code for legacy plugin protocol (deprecated)
+    |   |   │   ├── integration # Built-in integration diagram plugin
+    |   |   │   └── sysld       # Built-in SyslD diagram plugin
     │   │   ├── syntax          # Configuration for syntax highlighting
     │   │   ├── test            # Tests for the extension
     |   |   │   ├── fixtures    # Source files for testing

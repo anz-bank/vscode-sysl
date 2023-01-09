@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.59.0] - 2022-12-05
+
+### Removed
+
+- Removed support for Command and Transform plugins. All plugins are now standardised on LSP.
+- Removed all traces of the old plugin protocol behind the Command and Transform plugins.
+- Removed support for bespoke `manifest.json` plugin packaging. All plugins must now be packaged as NPM packages.
+
+### Added
+
+- Added support for packaging LSP plugins as npm packages.
+  - `package.json` serves as the manifest.
+  - The `main` property is the entrypoint to the LSP server.
+  - Any `peerDependencies` are considered "child" plugins that should also be fetched, allowing for a tree of plugins to be loaded from a single root.
+
 ## [0.55.0] - 2022-12-01
 
 ### Changed

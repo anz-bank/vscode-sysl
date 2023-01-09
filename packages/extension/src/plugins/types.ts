@@ -1,9 +1,9 @@
+import { Disposable } from "@anz-bank/vscode-sysl-model";
 import { TextDocument } from "vscode";
+import { DocumentSelector, ServerOptions } from "vscode-languageclient/node";
 import { TextDocumentContentChangeEvent } from "vscode-languageserver-protocol";
-import { DocumentSelector } from "vscode-languageclient/node";
 import { Position } from "vscode-languageserver-types";
 import { URI } from "vscode-uri";
-import { Disposable } from "@anz-bank/vscode-sysl-model";
 import { SyslConfiguration } from "../config";
 
 /**
@@ -36,6 +36,16 @@ export type PluginClientOptions = {
   /** Minimum time (in ms) to wait between callbacks of the same kind. Default 500. */
   throttleDelay?: number;
 };
+
+export interface PluginConfig {
+  id: string;
+  name?: string;
+  language?: [string];
+  scriptPath: string;
+  clientOptions?: PluginClientOptions;
+  serverOptions?: ServerOptions;
+  forceDebug?: boolean;
+}
 
 export interface Document {
   uri: URI;
@@ -104,6 +114,13 @@ export type PluginKind =
   | "ref"
   | "api"
   | "archive";
+
+/** A file extracted from a downloaded archive. */
+export type File = {
+  data: Buffer;
+  path: string;
+  type: "directory" | "file";
+};
 
 export interface PluginManifest {
   id: string;

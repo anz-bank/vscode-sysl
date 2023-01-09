@@ -1,5 +1,4 @@
 import { Disposable } from "@anz-bank/vscode-sysl-model";
-import actions from "../actions";
 import {
   Action,
   ModelDidChangeNotification,
@@ -22,11 +21,12 @@ import {
 } from "vscode-languageclient/node";
 import { TextDocumentChangeEvent } from "vscode-languageserver";
 import { TextDocument as LspTextDocument } from "vscode-languageserver-textdocument";
+import actions from "../actions";
+import { syslExt } from "../constants";
+import { Sysl } from "../tools/sysl";
 import { views } from "../views";
 import { LspPluginClientRouter } from "./lsp_client_router";
-import { LspPluginConfig } from "./plugin_config";
-import { Document, DocumentChangeEvent, Events, PluginClient } from "./types";
-import { syslExt } from "../constants";
+import { Document, DocumentChangeEvent, Events, PluginClient, PluginConfig } from "./types";
 
 export interface LspPluginClientConfig {
   inspectPort?: number;
@@ -35,13 +35,10 @@ export interface LspPluginClientConfig {
 // TODO: Store somewhere non-global.
 (global as any).actions = [];
 
-/** Converts plugin config of type LspPluginConfig to LanguageClientOptions */
-const getLspClientOptions = (config: LspPluginConfig): LanguageClientOptions => {
-  const { workspaceFolder, debug, throttleDelay, ...configs } = config.lsp.clientOptions;
-  // We are getting rid of PluginClientOptions properties that are not accepted by LanguageClientOptions
-  // This function should be rewritten to transform these properties into acceptable configs for the Language Client constructor
-  if (!configs.documentSelector) {
-    configs.documentSelector = [
+/** Converts plugin config of type PluginConfig to LanguageClientOptions */
+const getLspClientOptions = (config: PluginConfig): LanguageClientOptions => {
+  return {
+    documentSelector: config.clientOptions?.documentSelector || [
       { scheme: "file", pattern: "*.proto" },
       { scheme: "file", language: "sysl" },
       { scheme: "file", language: "sql" },
@@ -50,9 +47,8 @@ const getLspClientOptions = (config: LspPluginConfig): LanguageClientOptions => 
       { scheme: "file", language: "xml" },
       { scheme: "file", language: "yaml" },
       { scheme: "file", language: "plaintext" },
-    ];
-  }
-  return configs;
+    ],
+  };
 };
 
 /**
@@ -125,13 +121,14 @@ export class LspPluginClient implements PluginClient, Disposable {
   private readonly router: LspPluginClientRouter;
 
   constructor(
-    private readonly pluginConfig: LspPluginConfig,
+    private readonly pluginConfig: PluginConfig,
+    private readonly sysl: Sysl,
     private readonly events: Events,
     config?: LspPluginClientConfig
   ) {
-    this.id = path.basename(path.dirname(pluginConfig.lsp.scriptPath));
+    this.id = path.basename(path.dirname(pluginConfig.scriptPath));
     const name = `Sysl Plugin: ${this.id}`;
-    const run = { module: pluginConfig.lsp.scriptPath, transport: TransportKind.ipc };
+    const run = { module: pluginConfig.scriptPath, transport: TransportKind.ipc };
     const inspectPort = config?.inspectPort ?? 6051;
     const debugOptions = { execArgv: ["--nolazy", `--inspect=${inspectPort}`] };
     const serverOptions: ServerOptions = { run, debug: { ...run, options: debugOptions } };
@@ -152,7 +149,7 @@ export class LspPluginClient implements PluginClient, Disposable {
     if (!doc.uri.fsPath.endsWith(syslExt)) {
       throw new Error("only .sysl files can be compiled");
     }
-    const sysl = this.pluginConfig.sysl;
+    const sysl = this.sysl;
     const jsonBuffer = await sysl?.protobufFromSource(doc.getText(), doc.uri.fsPath);
     if (!jsonBuffer) {
       throw new Error("no model generated");
@@ -229,6 +226,6 @@ export class LspPluginClient implements PluginClient, Disposable {
   }
 
   public get scriptPath(): string {
-    return this.pluginConfig.lsp.scriptPath;
+    return this.pluginConfig.scriptPath;
   }
 }

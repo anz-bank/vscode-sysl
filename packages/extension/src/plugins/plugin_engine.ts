@@ -3,13 +3,12 @@ import { zip } from "lodash";
 import { window } from "vscode";
 import { Sysl } from "../tools/sysl";
 import { PluginLocator } from "./locator";
-import { PluginConfig } from "./plugin_config";
-import { PluginFactory } from "./plugin_factory";
-import { Events, PluginClient, PluginClientOptions } from "./types";
+import { LspPluginClient } from "./lsp_client";
+import { Events, PluginClient, PluginClientOptions, PluginConfig } from "./types";
 
 /** Configures the plugin engine. */
 export type PluginEngineConfig = {
-  sysl?: Sysl;
+  sysl: Sysl;
   extensionPath?: string;
   workspaceDirs?: string[];
   remoteUrl?: string;
@@ -24,6 +23,7 @@ export type PluginEngineConfig = {
 export class PluginEngine {
   private _plugins: PluginClient[] = [];
   private readonly disposables: Disposable[] = [];
+  private nextInspectPort = 6051;
 
   constructor(private readonly config: PluginEngineConfig) {}
 
@@ -34,7 +34,7 @@ export class PluginEngine {
   /** Discovers, registers and enables plugins. */
   async activate(): Promise<void> {
     const configs = await this.locate();
-    configs.forEach((c) => (c.sysl = this.config.sysl));
+    configs.forEach((c) => (this.config.sysl = this.config.sysl));
     this._plugins = this.build(configs);
     const starts = await Promise.allSettled(this.plugins.map((p) => p.start()));
 
@@ -75,8 +75,13 @@ export class PluginEngine {
 
   /** Constructs plugin clients for each config. */
   build(configs: PluginConfig[]): PluginClient[] {
-    const factory = new PluginFactory(this.config.events);
-    return configs.map((config) => factory.create(config));
+    const { sysl, events } = this.config;
+    return configs.map(
+      (config) =>
+        new LspPluginClient(config, this.config.sysl, events, {
+          inspectPort: this.nextInspectPort++,
+        })
+    );
   }
 
   get pluginIds(): string[] {

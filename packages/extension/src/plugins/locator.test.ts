@@ -1,17 +1,12 @@
-import { expect } from "chai";
+import { readFile } from "fs/promises";
 import path from "path";
 import { Sysl } from "../tools/sysl";
-import { PluginLocator } from "./locator";
-import { CommandPluginConfig, LspPluginConfig } from "./plugin_config";
+import { extractPlugins, PluginLocator, resolvePlugins } from "./locator";
+import { File, PluginConfig } from "./types";
 
 const mock = require("mock-fs");
 
 const sysl = new Sysl("");
-
-/** Downcasts to specific classes for inspection. */
-function cast<T>(x: any) {
-  return x as T;
-}
 
 describe("plugins", () => {
   afterEach(() => {
@@ -20,12 +15,12 @@ describe("plugins", () => {
 
   describe("locator", () => {
     test("builtin", async () => {
-      const plugins = await PluginLocator.builtin(sysl, "root");
+      const plugins = await PluginLocator.builtin("root");
 
-      expect((plugins[0] as LspPluginConfig).lsp.scriptPath).to.equal(
+      expect((plugins[0] as PluginConfig).scriptPath).toEqual(
         path.normalize("root/dist/plugins/integration/index.js")
       );
-      expect((plugins[1] as LspPluginConfig).lsp.scriptPath).to.equal(
+      expect((plugins[1] as PluginConfig).scriptPath).toEqual(
         path.normalize("root/dist/plugins/erd/index.js")
       );
     });
@@ -35,43 +30,74 @@ describe("plugins", () => {
         mock({ "workspace/foo.arraiz": "" });
         const plugins = await PluginLocator.localPlugins(sysl, ["workspace"]);
 
-        expect(plugins).to.have.length(0);
-      });
-
-      test("single", async () => {
-        mock({ "workspace/.sysl/plugins/foo.arraiz": "" });
-        const plugins = cast<CommandPluginConfig[]>(
-          await PluginLocator.localPlugins(sysl, ["workspace"])
-        );
-
-        expect(plugins.map((p) => p.command.runOptions.command)).to.deep.equal([
-          path.normalize("workspace/.sysl/plugins/foo.arraiz"),
-        ]);
-      });
-
-      test("multiple", async () => {
-        mock({
-          "workspace/.sysl/plugins/foo.arraiz": "",
-          "workspace/.sysl/plugins/bar.arraiz": "",
-          "workspace/.sysl/plugins/baz.arraiz": "",
-        });
-        const plugins = cast<CommandPluginConfig[]>(
-          await PluginLocator.localPlugins(sysl, ["workspace"])
-        );
-
-        expect(plugins.map((p) => p.command.runOptions.command)).to.deep.equal([
-          path.normalize("workspace/.sysl/plugins/bar.arraiz"),
-          path.normalize("workspace/.sysl/plugins/baz.arraiz"),
-          path.normalize("workspace/.sysl/plugins/foo.arraiz"),
-        ]);
+        expect(plugins).toHaveLength(0);
       });
     });
 
     describe("network", () => {
-      // test("all", async () => {
-      //   mock({ storage: {} });
-      //   await PluginLocator.networkPlugins(sysl, "storage", "", {});
-      // });
+      // Real-world test of resolving root plugin.
+      test.skip("plugin", async () => {
+        mock({ storage: {} });
+        const out = await resolvePlugins(
+          "/storage",
+          "https://artifactory.gcp.anz:443/artifactory/anzx-npm/%40anzx/vscode-sysl-plugins/-/%40anzx/vscode-sysl-plugins-0.0.0.tgz"
+        );
+        expect(out).toMatchObject([
+          {
+            id: "@anzx/sysl-plus-plugin",
+            kind: "lsp.module",
+            version: /v\d+\.\d+\.\d+/,
+          },
+        ]);
+        expect((await readFile(out[0].entrypoint)).toString()).toMatch(/^\/*/);
+      });
+    });
+
+    describe("extract plugins", () => {
+      test("empty", () => {
+        expect(() => extractPlugins("storage", [])).toThrow();
+      });
+
+      test("package", () => {
+        mock({ storage: {} });
+        const pkg = {
+          name: "foo",
+          version: "0.42.0",
+          main: "index.js",
+          publishConfig: {
+            registry: "https://foo.bar/",
+          },
+          peerDependencies: {
+            bar: "1.2.3",
+          },
+        };
+        const files = [
+          {
+            data: Buffer.from(JSON.stringify(pkg)),
+            path: "package/package.json",
+            type: "file",
+          },
+          {
+            data: Buffer.from(""),
+            path: "package/dist/index.js",
+            type: "file",
+          },
+        ] as File[];
+        expect(extractPlugins("/storage", files)).toMatchObject([
+          {
+            id: "foo",
+            version: "0.42.0",
+            entrypoint: "/storage/package/index.js",
+            kind: "lsp.module",
+          },
+          {
+            id: "bar",
+            version: "1.2.3",
+            entrypoint: "https://foo.bar/bar/-/bar-1.2.3.tgz",
+            kind: "archive",
+          },
+        ]);
+      });
     });
   });
 });
