@@ -34,25 +34,6 @@ describe("plugins", () => {
       });
     });
 
-    describe("network", () => {
-      // Real-world test of resolving root plugin.
-      test.skip("plugin", async () => {
-        mock({ storage: {} });
-        const out = await resolvePlugins(
-          "/storage",
-          "https://artifactory.gcp.anz:443/artifactory/anzx-npm/%40anzx/vscode-sysl-plugins/-/%40anzx/vscode-sysl-plugins-0.0.0.tgz"
-        );
-        expect(out).toMatchObject([
-          {
-            id: "@anzx/sysl-plus-plugin",
-            kind: "lsp.module",
-            version: /v\d+\.\d+\.\d+/,
-          },
-        ]);
-        expect((await readFile(out[0].entrypoint)).toString()).toMatch(/^\/*/);
-      });
-    });
-
     describe("extract plugins", () => {
       test("empty", () => {
         expect(() => extractPlugins("storage", [])).toThrow();
