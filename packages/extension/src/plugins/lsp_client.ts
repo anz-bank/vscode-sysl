@@ -7,7 +7,6 @@ import {
   TextDocumentRenderNotification,
 } from "@anz-bank/vscode-sysl-plugin";
 import { set } from "lodash";
-import path from "path";
 import {
   ClientCapabilities,
   DocumentSelector,
@@ -126,7 +125,7 @@ export class LspPluginClient implements PluginClient, Disposable {
     private readonly events: Events,
     config?: LspPluginClientConfig
   ) {
-    this.id = path.basename(path.dirname(pluginConfig.scriptPath));
+    this.id = pluginConfig.id;
     const name = `Sysl Plugin: ${this.id}`;
     const run = { module: pluginConfig.scriptPath, transport: TransportKind.ipc };
     const inspectPort = config?.inspectPort ?? 6051;
@@ -136,10 +135,12 @@ export class LspPluginClient implements PluginClient, Disposable {
     const client = new LanguageClient(this.id, name, serverOptions, lspClientOptions);
     this.client = client;
 
-    client.registerFeature(new ActionsFeature());
-    client.registerFeature(new DiagramFeature());
-    client.registerFeature(new ViewFeature());
-    client.registerFeature(new ModelFeature());
+    client.registerFeatures([
+      new ActionsFeature(),
+      new DiagramFeature(),
+      new ViewFeature(),
+      new ModelFeature(),
+    ]);
 
     this.router = new LspPluginClientRouter(views, client);
   }

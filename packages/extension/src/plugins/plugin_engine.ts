@@ -78,7 +78,7 @@ export class PluginEngine {
     const { sysl, events } = this.config;
     return configs.map(
       (config) =>
-        new LspPluginClient(config, this.config.sysl, events, {
+        new LspPluginClient(config, sysl, events, {
           inspectPort: this.nextInspectPort++,
         })
     );

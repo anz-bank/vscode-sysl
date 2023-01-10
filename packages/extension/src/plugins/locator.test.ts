@@ -1,7 +1,9 @@
 import { readFile } from "fs/promises";
 import path from "path";
 import { Sysl } from "../tools/sysl";
+import { TestEvents } from "./events_test";
 import { extractPlugins, PluginLocator, resolvePlugins } from "./locator";
+import { LspPluginClient } from "./lsp_client";
 import { File, PluginConfig } from "./types";
 
 const mock = require("mock-fs");

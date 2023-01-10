@@ -64,7 +64,10 @@ export const window = {
   showErrorMessage: jest.fn(),
   showWarningMessage: jest.fn(),
   createTextEditorDecorationType: jest.fn(),
-  withProgress: jest.fn(),
+  withProgress: jest.fn((_, f: (progress: any) => void) => {
+    const progress = { report: () => {} };
+    return f(progress);
+  }),
 };
 
 export const workspace = {

@@ -95,7 +95,6 @@ export class PluginLocator {
       async (progress, token): Promise<PluginConfig[]> => {
         progress.report({ message: "Fetching manifest...", increment: 10 });
 
-        // return networkPluginsRaw(sysl, globalStoragePath, remoteUrl, progress, token, options);
         const manifests = await resolvePlugins(globalStoragePath, remoteUrl, options);
         return manifests.map((m) => ({
           id: m.id,
