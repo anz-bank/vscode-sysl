@@ -29,7 +29,5 @@ export type TextEditorCommandMap = { [key in TextEditorCommand]: (...args: any[]
 /** Map of diagram editor commands to handlers to ensure handling of all cases. */
 export type CustomEditorCommandMap = { [key in CustomEditorCommand]: (...args: any[]) => any };
 
-/** The remote URL from which to fetch network plugins. */
-export const remoteUrl = "http://go/vscode-sysl-plugins";
-
+/** Output channel to write extension logs to. Each plugin receives its own channel. */
 export const output = window.createOutputChannel("Sysl");

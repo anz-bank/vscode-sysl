@@ -12,7 +12,7 @@ import { LanguageClient } from "vscode-languageclient/node";
 import { URI } from "vscode-uri";
 import actions from "./actions";
 import { getSyslConfig } from "./config_vscode";
-import { output, remoteUrl, renderDiagramCommand, syslBinaryPath } from "./constants";
+import { output, renderDiagramCommand, syslBinaryPath } from "./constants";
 import { buildClient } from "./lsp/client/sysl";
 import { VsCodeEvents } from "./plugins/events_vscode";
 import { PluginEngine } from "./plugins/plugin_engine";
@@ -98,7 +98,7 @@ async function buildPluginEngine(context: ExtensionContext, sysl: Sysl): Promise
     sysl,
     extensionPath: context.extensionPath,
     workspaceDirs,
-    remoteUrl,
+    remoteUrl: getSyslConfig().plugins?.networkSource ?? "",
     globalStoragePath: context.globalStorageUri.fsPath,
     events,
     options,

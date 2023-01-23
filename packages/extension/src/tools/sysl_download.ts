@@ -1,12 +1,11 @@
-import download from "download";
-import fs from "fs";
+import fs from "fs/promises";
 import got from "got";
 import path from "path";
 import { coerce } from "semver";
-import { promisify } from "util";
 import { SyslConfiguration } from "../config";
 import { spawnBuffer } from "./spawn";
 import { Sysl } from "./sysl";
+import { downloadSysl } from "./download";
 
 /** The minimum supported version of the Sysl binary. */
 export const minVersion = "0.468.0";
@@ -83,19 +82,22 @@ export class SyslDownloader {
     console.log(`downloading sysl from ${url} into ${dir}...`);
 
     try {
-      await promisify(fs.mkdir)(dir);
+      await fs.mkdir(dir);
     } catch (e: any) {
       if (e.code === "EEXIST") {
         // Ignore error on mkdir for existing dir.
       }
     }
-    const release = (await download(url, { extract: true })) as unknown as any[];
+    const release = await downloadSysl(url);
     const sysl = release.find((i) => i.path === "sysl" || i.path === "sysl.exe");
+    if (!sysl) {
+      throw Error("failed to download sysl");
+    }
     console.log(`download complete: ${sysl.data.length / 1e6} MB`);
 
     const syslPath = path.join(dir, sysl.path);
-    await promisify(fs.writeFile)(syslPath, sysl.data);
-    await promisify(fs.chmod)(syslPath, "744");
+    await fs.writeFile(syslPath, sysl.data);
+    await fs.chmod(syslPath, "744");
 
     return new Sysl(syslPath);
   }

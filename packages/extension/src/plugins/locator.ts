@@ -1,8 +1,7 @@
-import download from "download";
-import * as fs from "fs";
-import { flatten, map } from "lodash";
+import { downloadPlugin } from "../tools/download";
+import * as fs from "fs/promises";
+import { flatten, last, map } from "lodash";
 import path from "path";
-import { promisify } from "util";
 import { ProgressLocation, window } from "vscode";
 import { output } from "../constants";
 import { Sysl } from "../tools/sysl";
@@ -22,16 +21,28 @@ export class PluginLocator {
     globalStoragePath: string,
     options?: PluginClientOptions
   ): Promise<PluginConfig[]> {
+    let networkPlugins: Promise<PluginConfig[]> = Promise.resolve([]);
+    if (!remoteUrl) {
+      output.appendLine(`Skipping fetch of network plugins because remote URL is empty`);
+    } else if (!options?.workspaceConfig?.plugins?.fetchFromNetwork) {
+      output.appendLine(
+        `Skipping fetch of network plugins because the fetchFromNetwork setting is disabled`
+      );
+    } else {
+      networkPlugins = this.networkPlugins(globalStoragePath, remoteUrl, options).catch((err) => {
+        window.showErrorMessage(
+          `Failed to fetch plugins: ${err}.\n\nCheck your "Sysl › Plugins: Network Source
+" setting, and reload this window to retry.`
+        );
+        return [];
+      });
+    }
+
     return flatten(
       await Promise.all([
         this.localPlugins(sysl, workspaceDirs, options),
         this.builtin(extensionPath, options),
-        options?.workspaceConfig?.plugins?.fetchFromNetwork
-          ? this.networkPlugins(globalStoragePath, remoteUrl, options).catch((err) => {
-              window.showErrorMessage(`Failed to fetch plugins: ${err}`);
-              return [];
-            })
-          : [],
+        networkPlugins,
       ])
     );
   }
@@ -122,8 +133,9 @@ export async function resolvePlugins(
   if (urls.includes(url)) {
     throw new Error(`Cyclical dependency between plugins: ${newUrls.join(" -> ")}`);
   }
-  const files = await downloadArchive(dir, url);
-  const plugins = extractPlugins(dir, files);
+  const dirName = path.join(dir, pluginDirName(url));
+  const files = await downloadArchive(dirName, url);
+  const plugins = extractPlugins(dirName, files);
   const children = plugins.map(
     async (p): Promise<PluginManifest[]> =>
       p.kind === "archive" ? resolvePlugins(dir, p.entrypoint, options, newUrls) : [p]
@@ -131,17 +143,20 @@ export async function resolvePlugins(
   return flatten(await Promise.all(children));
 }
 
+/**
+ * Returns an appropriate folder name for the content downloaded from `url`.
+ *
+ * The name may contain slashes, representing a path to a subdirectory.
+ */
+const pluginDirName = (url: string): string => {
+  const name = last(url.split("/"))!;
+  return decodeURIComponent(name.slice(0, -path.extname(name).length));
+};
+
 async function downloadArchive(dir: string, url: string): Promise<File[]> {
   output.appendLine(`Downloading plugin from ${url} into ${dir}...`);
   try {
-    await promisify(fs.mkdir)(dir);
-  } catch (e: any) {
-    // Ignore error on mkdir for existing dir.
-    if (e.code !== "EEXIST") throw e;
-  }
-
-  try {
-    return (await download(url, dir, { extract: true })) as File[];
+    return (await downloadPlugin(url, dir)) as File[];
   } catch (err) {
     console.error("Error downloading plugin", err);
     throw err;
@@ -184,10 +199,11 @@ export function extractPlugins(dir: string, files: File[]): PluginManifest[] {
 }
 
 async function dirsIn(dir: string): Promise<string[]> {
-  if (!(await promisify(fs.exists)(dir))) {
+  try {
+    await fs.access(dir); // Throws if the dir doesn't exists or isn't accessible.
+    const files = await fs.readdir(dir, { withFileTypes: true });
+    return files.filter((i) => i.isDirectory()).map((i) => path.join(dir, i.name));
+  } catch (err) {
     return [];
   }
-  return (await promisify(fs.readdir)(dir, { withFileTypes: true }))
-    .filter((i) => i.isDirectory())
-    .map((i) => path.join(dir, i.name));
 }

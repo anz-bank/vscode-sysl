@@ -8,5 +8,6 @@ export interface SyslConfiguration {
   };
   plugins?: {
     fetchFromNetwork?: boolean;
+    networkSource?: string;
   };
 }
