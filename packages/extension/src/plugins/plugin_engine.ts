@@ -1,6 +1,7 @@
 import { Disposable } from "@anz-bank/vscode-sysl-model";
 import { zip } from "lodash";
 import { window } from "vscode";
+import { SyslConfiguration } from "../config";
 import { Sysl } from "../tools/sysl";
 import { PluginLocator } from "./locator";
 import { LspPluginClient } from "./lsp_client";
@@ -11,7 +12,6 @@ export type PluginEngineConfig = {
   sysl: Sysl;
   extensionPath?: string;
   workspaceDirs?: string[];
-  remoteUrl?: string;
   globalStoragePath?: string;
   options?: PluginClientOptions;
   events: Events;
@@ -25,7 +25,10 @@ export class PluginEngine {
   private readonly disposables: Disposable[] = [];
   private nextInspectPort = 6051;
 
-  constructor(private readonly config: PluginEngineConfig) {}
+  constructor(
+    private readonly config: PluginEngineConfig,
+    private readonly syslConfig: SyslConfiguration
+  ) {}
 
   get plugins() {
     return this._plugins;
@@ -57,20 +60,17 @@ export class PluginEngine {
 
   /** Locates available plugins and returns a config for each. */
   async locate(): Promise<PluginConfig[]> {
-    const { sysl, extensionPath, workspaceDirs, remoteUrl, globalStoragePath, options } =
-      this.config;
+    const { sysl, extensionPath, workspaceDirs, globalStoragePath, options } = this.config;
+    const remoteUrl = this.syslConfig.plugins?.networkSource ?? "";
+    const strictSsl = this.syslConfig.network?.strictSsl ?? true;
     // TODO: Make more flexible.
     if (!sysl || !extensionPath || !workspaceDirs || !remoteUrl || !globalStoragePath || !options) {
       throw new Error("All config required for plugin location");
     }
-    return await PluginLocator.all(
-      sysl,
-      extensionPath,
-      workspaceDirs,
+    return await PluginLocator.all(sysl, extensionPath, workspaceDirs, globalStoragePath, options, {
+      strictSsl,
       remoteUrl,
-      globalStoragePath,
-      options
-    );
+    });
   }
 
   /** Constructs plugin clients for each config. */

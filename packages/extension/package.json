@@ -4,7 +4,7 @@
   "description": "Write Sysl specs easily with instant visual feedback.",
   "author": "ANZ Bank",
   "publisher": "anz-bank",
-  "version": "0.61.0",
+  "version": "0.62.0",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -124,12 +124,17 @@
         "sysl.plugins.fetchFromNetwork": {
           "type": "boolean",
           "default": true,
-          "description": "Whether to fetch plugins for the Sysl extension from the network on activation (from http://go/vscode-sysl-plugins)."
+          "description": "Whether to fetch plugins for the Sysl extension from the network on activation (from https://go/vscode-sysl-plugins)."
         },
         "sysl.plugins.networkSource": {
           "type": "string",
-          "default": "http://go/vscode-sysl-plugins",
+          "default": "https://go/vscode-sysl-plugins",
           "description": "Where to look for network plugins. This should point to the download URL of a plugin NPM package, which may reference other packages via `peerDependencies`."
+        },
+        "sysl.network.strictSsl": {
+          "type": "boolean",
+          "default": true,
+          "description": "Require all background downloads to use secure SSL connections (recommended). This may be disabled to debug or workaround network issues."
         }
       }
     },

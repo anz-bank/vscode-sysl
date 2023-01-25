@@ -88,7 +88,7 @@ export class SyslDownloader {
         // Ignore error on mkdir for existing dir.
       }
     }
-    const release = await downloadSysl(url);
+    const release = await downloadSysl(url, this.config?.network?.strictSsl);
     const sysl = release.find((i) => i.path === "sysl" || i.path === "sysl.exe");
     if (!sysl) {
       throw Error("failed to download sysl");

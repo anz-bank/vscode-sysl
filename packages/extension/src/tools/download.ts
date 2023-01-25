@@ -4,12 +4,13 @@ import * as fs from "fs/promises";
 import got, { Options, Response } from "got";
 import path from "path";
 
-const downloadOptions: Options = {
-  https: { rejectUnauthorized: process.env.npm_config_strict_ssl !== "false" },
-};
-
-export async function downloadSysl(uri: string): Promise<decompress.File[]> {
-  const opts = downloadOptions;
+export async function downloadSysl(
+  uri: string,
+  strictSsl: boolean = true
+): Promise<decompress.File[]> {
+  const opts: Options = {
+    https: { rejectUnauthorized: strictSsl },
+  };
 
   try {
     const response = (await got(uri, opts)) as Response;
@@ -22,10 +23,24 @@ export async function downloadSysl(uri: string): Promise<decompress.File[]> {
   }
 }
 
-export async function downloadPlugin(uri: string, dir: string): Promise<decompress.File[]> {
-  const opts = downloadOptions;
+export async function downloadPlugin(
+  uri: string,
+  dir: string,
+  strictSsl: boolean = true
+): Promise<decompress.File[]> {
+  strictSsl = false; // TODO: Remove this like to enable strict SSL when supported.
+
+  const opts: Options = {
+    https: { rejectUnauthorized: strictSsl },
+    // Timeouts and retries can be generous since this fetch doesn't block the user.
+    timeout: { request: 10000 },
+    retry: { limit: 5 },
+  };
 
   const response = (await got(uri, opts)) as Response;
+  if (response.statusCode >= 400) {
+    throw new Error(`Failed to download plugin: ${response.statusCode}`);
+  }
   if (!archiveType(response.rawBody)) {
     throw new Error("Downloaded plugin is not archive");
   }

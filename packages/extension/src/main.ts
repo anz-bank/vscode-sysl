@@ -87,22 +87,25 @@ async function getSysl(context: ExtensionContext): Promise<Sysl> {
 /** Creates the engine to manage plugins for the extension. */
 async function buildPluginEngine(context: ExtensionContext, sysl: Sysl): Promise<PluginEngine> {
   const workspaceDirs = workspace.workspaceFolders?.map((f) => f.uri.fsPath) ?? [];
+  const syslConfig = getSyslConfig();
   const options: PluginClientOptions = {
     debug: Sysl.isDebugEnabled(),
     workspaceFolder: workspaceDirs[0],
-    workspaceConfig: getSyslConfig(),
+    workspaceConfig: syslConfig,
   };
 
   const events = new VsCodeEvents(sysl);
-  return new PluginEngine({
-    sysl,
-    extensionPath: context.extensionPath,
-    workspaceDirs,
-    remoteUrl: getSyslConfig().plugins?.networkSource ?? "",
-    globalStoragePath: context.globalStorageUri.fsPath,
-    events,
-    options,
-  });
+  return new PluginEngine(
+    {
+      sysl,
+      extensionPath: context.extensionPath,
+      workspaceDirs,
+      globalStoragePath: context.globalStorageUri.fsPath,
+      events,
+      options,
+    },
+    syslConfig
+  );
 }
 
 /**

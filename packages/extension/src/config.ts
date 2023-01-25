@@ -10,4 +10,7 @@ export interface SyslConfiguration {
     fetchFromNetwork?: boolean;
     networkSource?: string;
   };
+  network?: {
+    strictSsl?: boolean;
+  };
 }

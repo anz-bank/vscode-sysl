@@ -10,6 +10,13 @@ import { File, PluginClientOptions, PluginConfig, PluginKind, PluginManifest } f
 /** Name of the directory that may store Sysl metadata for a project. */
 const syslMetaDir = ".sysl";
 
+export type PluginFetchOptions = {
+  /** Where to fetch plugins from. */
+  remoteUrl?: string;
+  /** Whether to require strict SSL when fetching network plugins. */
+  strictSsl?: boolean;
+};
+
 /** Discovers available plugins on the user's machine and known network locations. */
 export class PluginLocator {
   /** Returns all discoverable plugins in order of precedence. */
@@ -17,25 +24,27 @@ export class PluginLocator {
     sysl: Sysl,
     extensionPath: string,
     workspaceDirs: string[],
-    remoteUrl: string,
     globalStoragePath: string,
-    options?: PluginClientOptions
+    options?: PluginClientOptions,
+    fetchOptions?: PluginFetchOptions
   ): Promise<PluginConfig[]> {
     let networkPlugins: Promise<PluginConfig[]> = Promise.resolve([]);
-    if (!remoteUrl) {
+    if (!fetchOptions?.remoteUrl) {
       output.appendLine(`Skipping fetch of network plugins because remote URL is empty`);
     } else if (!options?.workspaceConfig?.plugins?.fetchFromNetwork) {
       output.appendLine(
         `Skipping fetch of network plugins because the fetchFromNetwork setting is disabled`
       );
     } else {
-      networkPlugins = this.networkPlugins(globalStoragePath, remoteUrl, options).catch((err) => {
-        window.showErrorMessage(
-          `Failed to fetch plugins: ${err}.\n\nCheck your "Sysl › Plugins: Network Source
+      networkPlugins = this.networkPlugins(globalStoragePath, fetchOptions, options).catch(
+        (err) => {
+          window.showErrorMessage(
+            `Failed to fetch plugins: ${err}.\n\nCheck your "Sysl › Plugins: Network Source
 " setting, and reload this window to retry.`
-        );
-        return [];
-      });
+          );
+          return [];
+        }
+      );
     }
 
     return flatten(
@@ -94,8 +103,8 @@ export class PluginLocator {
   /** Returns all plugins that can be discovered on the network. */
   static async networkPlugins(
     globalStoragePath: string,
-    remoteUrl: string,
-    options?: PluginClientOptions
+    fetchOptions: PluginFetchOptions,
+    pluginOptions?: PluginClientOptions
   ): Promise<PluginConfig[]> {
     return window.withProgress<PluginConfig[]>(
       {
@@ -106,11 +115,16 @@ export class PluginLocator {
       async (progress, token): Promise<PluginConfig[]> => {
         progress.report({ message: "Fetching manifest...", increment: 10 });
 
-        const manifests = await resolvePlugins(globalStoragePath, remoteUrl, options);
+        const manifests = await resolvePlugins(
+          globalStoragePath,
+          fetchOptions!.remoteUrl!,
+          pluginOptions,
+          fetchOptions
+        );
         return manifests.map((m) => ({
           id: m.id,
           scriptPath: m.entrypoint,
-          clientOptions: options,
+          clientOptions: pluginOptions,
         }));
       }
     );
@@ -127,6 +141,7 @@ export async function resolvePlugins(
   dir: string,
   url: string,
   options: PluginClientOptions = {},
+  fetchOptions: PluginFetchOptions = {},
   urls: string[] = []
 ): Promise<PluginManifest[]> {
   const newUrls = [...urls, url];
@@ -134,11 +149,11 @@ export async function resolvePlugins(
     throw new Error(`Cyclical dependency between plugins: ${newUrls.join(" -> ")}`);
   }
   const dirName = path.join(dir, pluginDirName(url));
-  const files = await downloadArchive(dirName, url);
+  const files = await downloadArchive(dirName, url, fetchOptions.strictSsl);
   const plugins = extractPlugins(dirName, files);
   const children = plugins.map(
     async (p): Promise<PluginManifest[]> =>
-      p.kind === "archive" ? resolvePlugins(dir, p.entrypoint, options, newUrls) : [p]
+      p.kind === "archive" ? resolvePlugins(dir, p.entrypoint, options, fetchOptions, newUrls) : [p]
   );
   return flatten(await Promise.all(children));
 }
@@ -153,10 +168,14 @@ const pluginDirName = (url: string): string => {
   return decodeURIComponent(name.slice(0, -path.extname(name).length));
 };
 
-async function downloadArchive(dir: string, url: string): Promise<File[]> {
+async function downloadArchive(
+  dir: string,
+  url: string,
+  strictSsl: boolean = true
+): Promise<File[]> {
   output.appendLine(`Downloading plugin from ${url} into ${dir}...`);
   try {
-    return (await downloadPlugin(url, dir)) as File[];
+    return (await downloadPlugin(url, dir, strictSsl)) as File[];
   } catch (err) {
     console.error("Error downloading plugin", err);
     throw err;

@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.62.0] - 2023-01-25
+
+### Changed
+
+- Changed default URL for plugin download from http://go/vscode-sysl-plugins to https://go/vscode-sysl-plugins.
+
+### Added
+
+- Added configuration property to allow toggling strict SSL for extension network requests.
+
+## [0.61.0] - 2023-01-23
+
+### Added
+
+- Added configuration property to change the URL from which plugins are downloaded.
+
 ## [0.60.0] - 2023-01-10
 
 ### Changed
