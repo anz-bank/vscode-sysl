@@ -6,14 +6,28 @@ on:
       - ".github/**"
       - "packages/extension/docs/**"
 
+env:
+  NPM_CONFIG_REGISTRY: ${{ vars.NPM_CONFIG_REGISTRY }}
+
 name: Publish extension to Marketplace
 jobs:
   deploy:
     if: ${{ github.repository_owner == 'anz-bank' }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER_UBUNTU && fromJSON(vars.RUNNER_UBUNTU) || 'ubuntu-latest' }}
     steps:
-      - uses: actions/checkout@v2
-      - run: yarn install --frozen-lockfile
+      - uses: actions/checkout@v3
+      - run: |
+          # install yarn if needed
+          npm i -g yarn
+
+          # switch registry in lock file
+          if [ -n "${{ env.NPM_CONFIG_REGISTRY }}" ]; then
+            sed -i'.bak' 's#https://registry.npmjs.org#${{ env.NPM_CONFIG_REGISTRY }}#' yarn.lock
+            sed -i'.bak' 's#https://registry.yarnpkg.com#${{ env.NPM_CONFIG_REGISTRY }}#' yarn.lock
+            rm yarn.lock.bak
+          fi
+
+          yarn install --frozen-lockfile
 
       - name: Build extension
         run: yarn lerna run build --scope=vscode-sysl

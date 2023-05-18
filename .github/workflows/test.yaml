@@ -2,52 +2,92 @@ name: Test
 
 on: [pull_request]
 
+env:
+  NPM_CONFIG_REGISTRY: ${{ vars.NPM_CONFIG_REGISTRY }}
+
 jobs:
   unit-test:
     name: Run unit tests
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER_UBUNTU && fromJSON(vars.RUNNER_UBUNTU) || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-node@v2
         with:
           node-version: "16"
-      - run: yarn install --frozen-lockfile
+      - name: Install dependencies
+        run: |
+          # install yarn if needed
+          npm i -g yarn
+
+          # switch registry in lock file
+          if [ -n "${{ env.NPM_CONFIG_REGISTRY }}" ]; then
+            sed -i'.bak' 's#https://registry.npmjs.org#${{ env.NPM_CONFIG_REGISTRY }}#' yarn.lock
+            sed -i'.bak' 's#https://registry.yarnpkg.com#${{ env.NPM_CONFIG_REGISTRY }}#' yarn.lock
+            rm yarn.lock.bak
+          fi
+
+          yarn install --frozen-lockfile
+
       - name: Run unit tests
+        if: github.repository == 'anz-bank/sysl-go'
         run: yarn lerna run test
 
   integration-test:
     name: Run integration tests
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: ${{ vars.BUILD_AND_TEST_OS_MATRIX && fromJSON(vars.BUILD_AND_TEST_OS_MATRIX) || fromJSON('[ "ubuntu-latest", "macOS-latest", "windows-latest" ]') }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-node@v2
         with:
           node-version: "16"
+      - name: Install yarn
+        run: npm install -g yarn
       - run: yarn config set network-timeout 300000
-      - run: yarn install --frozen-lockfile
+      - name: Install dependencies
+        run: |
+          # switch registry in lock file
+          if [ -n "${{ env.NPM_CONFIG_REGISTRY }}" ]; then
+            sed -i'.bak' 's#https://registry.npmjs.org#${{ env.NPM_CONFIG_REGISTRY }}#' yarn.lock
+            sed -i'.bak' 's#https://registry.yarnpkg.com#${{ env.NPM_CONFIG_REGISTRY }}#' yarn.lock
+            rm yarn.lock.bak
+          fi
+
+          yarn install --frozen-lockfile
+
       - run: yarn lerna run build --scope=vscode-sysl
 
-      - name: Run test
-        if: runner.os == 'Linux'
+      - name: Run test (Linux)
+        if: runner.os == 'Linux' && github.repository == 'anz-bank/sysl-go'
         run: xvfb-run -a yarn lerna run test-ui --scope=vscode-sysl
 
-      - name: Run test
+      - name: Run test (Non-Linux)
         if: runner.os != 'Linux'
         run: yarn lerna run test-ui --scope=vscode-sysl
 
   package-test:
     name: Test extension packaging
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER_UBUNTU && fromJSON(vars.RUNNER_UBUNTU) || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-node@v2
         with:
           node-version: "16"
+      - name: Install dependencies
+        run: |
+          # install yarn if needed
+          npm i -g yarn
 
-      - run: yarn install --frozen-lockfile
+          # switch registry in lock file
+          if [ -n "${{ env.NPM_CONFIG_REGISTRY }}" ]; then
+            sed -i'.bak' 's#https://registry.npmjs.org#${{ env.NPM_CONFIG_REGISTRY }}#' yarn.lock
+            sed -i'.bak' 's#https://registry.yarnpkg.com#${{ env.NPM_CONFIG_REGISTRY }}#' yarn.lock
+            rm yarn.lock.bak
+          fi
+
+          yarn install --frozen-lockfile
       - run: yarn build
 
       - name: Package extension

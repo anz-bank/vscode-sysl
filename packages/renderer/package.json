@@ -2,7 +2,7 @@
   "name": "@anz-bank/vscode-sysl-renderer",
   "displayName": "Sysl",
   "description": "Write Sysl specs easily with instant visual feedback.",
-  "version": "0.55.0",
+  "version": "0.56.0",
   "categories": [
     "Programming Languages"
   ],
@@ -32,7 +32,7 @@
     "@material-ui/lab": "^4.0.0-alpha.60",
     "@mui/icons-material": "^5.0.1",
     "@mui/lab": "^5.0.0-alpha.49",
-    "@mui/material": "^5.0.2",
+    "@mui/material": "5.10.12",
     "@mui/styles": "^5.0.1",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",

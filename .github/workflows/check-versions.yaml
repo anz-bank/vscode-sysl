@@ -10,7 +10,7 @@ on:
 
 jobs:
   check-version:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER_UBUNTU && fromJSON(vars.RUNNER_UBUNTU) || 'ubuntu-latest' }}
     strategy:
       matrix:
         package:
