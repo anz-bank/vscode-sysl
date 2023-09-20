@@ -3,23 +3,16 @@ import { buildModel } from "./diagram";
 
 const model = new Model({
   apps: [
-    new Application({
-      name: "Foo",
-      endpoints: [
-        new Endpoint({
-          name: "E",
+    new Application("Foo", {
+      children: [
+        new Endpoint("E", {
           statements: [
-            new Statement({
-              value: new Call({ originApp: ["Foo"], targetApp: ["Bar"], endpoint: "B" }),
-            }),
+            new Statement(new Call({ originApp: ["Foo"], targetApp: ["Bar"], endpoint: "B" })),
           ],
         }),
       ],
     }),
-    new Application({
-      name: "Bar",
-      endpoints: [new Endpoint({ name: "B" })],
-    }),
+    new Application("Bar", { children: [new Endpoint("B")] }),
   ],
 });
 

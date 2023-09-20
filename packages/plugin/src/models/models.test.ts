@@ -29,7 +29,7 @@ class FakeConnection {
 }
 
 describe("ModelManager", () => {
-  let mm: ModelManager<any>;
+  let mm: ModelManager<Model>;
   let conn: FakeConnection = new FakeConnection();
 
   beforeEach(() => {
@@ -42,7 +42,7 @@ describe("ModelManager", () => {
       const key = "foo";
       conn.acceptModelOpen({ key, model: "{}" });
 
-      expect(mm.get(key)).toEqual(new Model());
+      expect(mm.get(key)).toMatchObject({ apps: [] });
     });
 
     test("invalid", () => {
@@ -58,7 +58,7 @@ describe("ModelManager", () => {
       const key = "foo";
       conn.acceptModelChange({ key, modelChanges: ["{}"] });
 
-      expect(mm.get(key)).toEqual(new Model());
+      expect(mm.get(key)).toMatchObject({ apps: [] });
     });
 
     test("invalid", () => {

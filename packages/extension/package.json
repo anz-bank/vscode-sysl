@@ -4,7 +4,7 @@
   "description": "Write Sysl specs easily with instant visual feedback.",
   "author": "ANZ Bank",
   "publisher": "anz-bank",
-  "version": "0.62.0",
+  "version": "0.63.0",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -188,9 +188,9 @@
     "prepack": "mkdir -p dist && cp package.json ../../README.md ../../LICENSE dist/ && sed -i'' -e 's|dist/||g' dist/package.json"
   },
   "dependencies": {
-    "@anz-bank/sysl": "^0",
-    "@anz-bank/vscode-sysl-model": "^0.55.0",
-    "@anz-bank/vscode-sysl-plugin": "^0.55.0",
+    "@anz-bank/sysl": "^1",
+    "@anz-bank/vscode-sysl-model": "^0.56.0",
+    "@anz-bank/vscode-sysl-plugin": "^0.56.0",
     "archive-type": "^4",
     "decompress": "^4",
     "lodash": "^4",

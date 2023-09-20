@@ -4,7 +4,6 @@ import {
   Field,
   Model,
   Primitive,
-  Struct,
   Type,
   TypePrimitive,
 } from "@anz-bank/sysl/model";
@@ -12,8 +11,7 @@ import { buildModel } from "./diagram";
 
 const mod: Model = new Model({
   apps: [
-    new Application({
-      name: "App",
+    new Application("App", {
       children: [
         new Type("Foo", true, [new Field("f", new ElementRef([], "App", "Bar"))]),
         new Type("Bar", true, [new Field("g", new Primitive(TypePrimitive.INT))]),
