@@ -1,6 +1,6 @@
 {
   "name": "@anz-bank/vscode-sysl-plugin",
-  "version": "0.56.0",
+  "version": "0.64.0",
   "license": "Apache-2.0",
   "description": "Common code for developing vscode-sysl plugins.",
   "main": "dist/index.js",
@@ -15,8 +15,8 @@
     "prepack": "mkdir -p dist && cp package.json ../../README.md ../../LICENSE dist/ && sed -i'' -e 's|dist/||g' dist/package.json"
   },
   "dependencies": {
-    "@anz-bank/sysl": "^1",
-    "@anz-bank/vscode-sysl-model": "^0.56.0",
+    "@anz-bank/sysl": "^2",
+    "@anz-bank/vscode-sysl-model": "^0.64.0",
     "lodash": "^4",
     "vscode-languageserver": "8.0.2",
     "vscode-languageserver-protocol": "3.17.2",

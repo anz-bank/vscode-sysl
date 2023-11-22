@@ -1,4 +1,4 @@
-import { Application, Call, Endpoint, Model, Statement } from "@anz-bank/sysl/model";
+import { Application, CallStatement, ElementRef, Endpoint, Model } from "@anz-bank/sysl/model";
 import { buildModel } from "./diagram";
 
 const model = new Model({
@@ -6,8 +6,8 @@ const model = new Model({
     new Application("Foo", {
       children: [
         new Endpoint("E", {
-          statements: [
-            new Statement(new Call({ originApp: ["Foo"], targetApp: ["Bar"], endpoint: "B" })),
+          children: [
+            new CallStatement(ElementRef.parse("Bar.B"), [], ElementRef.parse("Foo")),
           ],
         }),
       ],

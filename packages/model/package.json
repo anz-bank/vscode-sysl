@@ -1,6 +1,6 @@
 {
   "name": "@anz-bank/vscode-sysl-model",
-  "version": "0.56.0",
+  "version": "0.64.0",
   "license": "Apache-2.0",
   "description": "Common code for developing vscode-sysl components (e.g. renderer and plugins).",
   "main": "dist/index.js",

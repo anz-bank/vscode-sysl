@@ -1,5 +1,4 @@
-import { format } from "@anz-bank/sysl/common";
-import { Call, Element, Model } from "@anz-bank/sysl/model";
+import { CallStatement, Element, ElementKind, Model } from "@anz-bank/sysl/model";
 import { DiagramModel, DiagramObjectData } from "../../views/diagram/model";
 
 const notIgnored = (el: Element) => !el.tags.some((t) => t.name === "ignore");
@@ -33,13 +32,13 @@ export async function buildModel(model: Model): Promise<DiagramModel> {
   const edges: DiagramObjectData[] = apps
     .flatMap((app) =>
       app.endpoints.filter(notIgnored).flatMap((ep) =>
-        ep.statements
-          .filter((s) => s.value?.constructor.name === Call.name)
+        ep.children
+          .filter((s) => s instanceof CallStatement)
           .filter(notIgnored)
-          .map((s) => s.value as Call)
+          .map((s) => s as CallStatement)
           .map((call) => {
-            const from = format.joinedAppName(call.originApp);
-            const to = format.joinedAppName(call.targetApp);
+            const from = call.sourceApp.toString();
+            const to = call.targetEndpoint.truncate(ElementKind.App).toString();
             return { key: `${from}->${to}`, from, to };
           })
       )
