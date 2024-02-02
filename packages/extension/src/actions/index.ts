@@ -36,7 +36,7 @@ class Actions {
   }
 
   /** Handles the invocation of an action. */
-  invoke(actionOrId: string | Action): void {
+  invoke(actionOrId: string | Action, args?: any[]): void {
     const action: Action | undefined = isString(actionOrId) ? this.actions[actionOrId] : actionOrId;
     if (!action) {
       output.appendLine(`error: no action with ID ${actionOrId}`);
@@ -52,7 +52,7 @@ class Actions {
       if (doc && doc.uri.fsPath.endsWith(syslExt)) {
         model = await compileDoc(doc, this.sysl!).catch(() => undefined);
       }
-      await commands.executeCommand(action.id, { uri: doc?.uri.toString(), model });
+      await commands.executeCommand(action.id, { uri: doc?.uri.toString(), model, args });
     });
   }
 
@@ -73,7 +73,7 @@ class Actions {
     const disposables = fresh.map(([cmd, a]) => {
       output.appendLine(`adding action ${a.id} (command ${cmd})`);
       this.actions[a.id] = a;
-      return commands.registerCommand(cmd, () => this.invoke(a.id));
+      return commands.registerCommand(cmd, (...args) => this.invoke(a.id, args));
     });
     return { dispose: () => disposables.forEach((d) => d.dispose()) };
   }
