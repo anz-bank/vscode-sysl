@@ -2,7 +2,7 @@
   "name": "@anz-bank/vscode-sysl-renderer",
   "displayName": "Sysl",
   "description": "Write Sysl specs easily with instant visual feedback.",
-  "version": "0.64.0",
+  "version": "0.66.0",
   "categories": [
     "Programming Languages"
   ],
@@ -24,7 +24,10 @@
     "prepack": "mkdir -p dist && cp package.json ../../README.md ../../LICENSE dist/ && sed -i'' -e 's|dist/||g' dist/package.json"
   },
   "dependencies": {
-    "@anz-bank/vscode-sysl-model": "^0.64.0",
+    "@anz-bank/vscode-sysl-model": "^0.66.0",
+    "@babel/core": "^7.0.0",
+    "@babel/plugin-syntax-flow": "^7.14.5",
+    "@babel/plugin-transform-react-jsx": "^7.14.9",
     "@craco/craco": "^7",
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
@@ -34,6 +37,7 @@
     "@mui/lab": "5.0.0-alpha.106",
     "@mui/material": "5.10.12",
     "@mui/styles": "^5.0.1",
+    "@testing-library/dom": "^7.21.4",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
@@ -42,20 +46,21 @@
     "lodash": "^4.17.21",
     "opentable": "^6",
     "opentable-react": "^6",
+    "postcss": "^8.1.0",
     "react": "^17",
     "react-dom": "^17",
     "react-scripts": "*"
   },
   "devDependencies": {
-    "@types/jest": "^26",
+    "@types/jest": "^29",
     "@types/lodash": "^4",
-    "@types/node": "^16",
+    "@types/node": "^20",
     "@types/react": "^17",
     "@types/react-dom": "^17",
     "browserify": "^17",
-    "canvas": "^2",
-    "jest": "^26",
-    "typescript": "^4"
+    "canvas": "^3",
+    "jest": "^29",
+    "typescript": "^5"
   },
   "resolutions": {
     "@types/react": "^17",

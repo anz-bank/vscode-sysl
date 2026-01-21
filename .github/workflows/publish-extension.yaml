@@ -15,7 +15,7 @@ jobs:
     if: ${{ github.repository_owner == 'anz-bank' }}
     runs-on: ${{ vars.RUNNER_UBUNTU && fromJSON(vars.RUNNER_UBUNTU) || 'ubuntu-latest' }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: |
           # install yarn if needed
           npm i -g yarn

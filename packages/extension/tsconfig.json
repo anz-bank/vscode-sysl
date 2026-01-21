@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es2019",
-    "lib": ["ES2019", "ES2020.Promise", "dom"],
+    "target": "ES2022",
+    "lib": ["ES2022", "dom"],
     "outDir": "dist",
     "rootDir": "src",
     "composite": true,

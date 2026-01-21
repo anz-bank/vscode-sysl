@@ -10,6 +10,7 @@ node_modules
 /main.js*
 /sysl
 *.tsbuildinfo
+.nx
 
 # Artifacts
 *.tar.gz
